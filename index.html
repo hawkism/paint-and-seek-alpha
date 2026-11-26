@@ -121,6 +121,13 @@ h1.logo .p1{color:#ff2fa0}h1.logo .p2{color:#ffb703}h1.logo .p3{color:#3fa7ff}
 .item.buy .ip{background:#ffb703;color:#fff}
 .item.poor{opacity:.55}
 #shopMsg{min-height:26px;font-size:18px;font-weight:700;color:#c0157a}
+#shopTabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0 2px}
+#shopTabs button{border:3px solid #e3e7ef;background:#fff;border-radius:14px;font-size:16px;font-weight:800;padding:5px 10px;color:var(--ink)}
+#shopTabs button.on{border-color:var(--paint);background:#ffe3f2}
+.item .sw.gold{box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),0 0 10px rgba(255,200,80,.9)}
+#shopCustom{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:8px auto;max-width:560px}
+#shopCustom[hidden]{display:none}
+#shopCustom button{aspect-ratio:1;border:2px solid rgba(0,0,0,.15);border-radius:8px;min-width:0;padding:0}
 .podium{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin:12px 0 8px}
 .pod{width:min(130px,28vw);border-radius:16px 16px 0 0;color:#fff;font-weight:800;padding:8px 4px;box-sizing:border-box}
 .pod .pm{font-size:34px;line-height:1.1}.pod .pn{font-size:18px}.pod .pp{font-size:15px;opacity:.95}
@@ -162,6 +169,12 @@ h1.logo .p1{color:#ff2fa0}h1.logo .p2{color:#ffb703}h1.logo .p3{color:#3fa7ff}
 #hud.lobby #meter{display:none}
 #parts{position:absolute;left:50%;bottom:calc(38px + var(--sb));transform:translateX(-50%);display:none;gap:4px;padding:5px 6px;pointer-events:auto;align-items:center}
 #parts.on{display:flex}
+#emotes{position:absolute;left:50%;bottom:calc(38px + var(--sb));transform:translateX(-50%);display:none;gap:4px;padding:5px 6px;pointer-events:auto;align-items:center;background:rgba(255,255,255,.9);border-radius:16px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+#emotes.on{display:flex}
+#emotes button{border:2px solid transparent;background:#f1f3f8;border-radius:12px;font-size:20px;line-height:1.1;padding:3px 6px;display:flex;flex-direction:column;align-items:center;color:var(--ink);min-width:44px}
+#emotes button span{font-size:11px;font-weight:800}
+body.touch #emotes{left:auto;right:calc(10px + var(--sr));top:calc(66px + var(--st));bottom:auto;transform:none;grid-template-columns:repeat(3,auto)}
+body.touch #emotes.on{display:grid}
 #parts button{border:2px solid transparent;background:#f1f3f8;border-radius:12px;font-size:20px;line-height:1.1;padding:3px 6px;display:flex;flex-direction:column;align-items:center;color:var(--ink);min-width:44px}
 #parts button span{font-size:11px;font-weight:800}
 #parts button.on{border-color:var(--paint);background:#ffe3f2}
@@ -263,6 +276,7 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
   <div id="parts" class="pill"><button data-p="all">🧍<span>All</span></button><button data-p="head">🙂<span>Head</span></button><button data-p="body">👕<span>Body</span></button><button data-p="arms">💪<span>Arms</span></button><button data-p="legs">👖<span>Legs</span></button><i class="sep"></i><button id="poseBtn">🧍<span>Stand</span></button><button id="palBtn2" class="mouseonly">🎨<span>Colors</span></button></div>
   <div id="keys"></div>
   <button id="skipBtn" class="pill">⏩ Skip to the end of the round</button>
+  <div id="emotes"></div>
   <button id="readyBtn" class="pill">✅ I'm ready!</button>
   <button id="hidBtn" class="pill">✅ I'm hidden!</button>
   <button id="pauseBtn" aria-label="Pause">⏸</button>
@@ -309,6 +323,11 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
     <div>Found players</div><div class="seg" id="optFound"><button data-v="join">Help seek</button><button data-v="bench">Sit on the bench</button></div>
     <div>Rounds</div><div class="seg" id="optRounds"><button data-v="3">3</button><button data-v="5">5</button><button data-v="7">7</button></div>
     <div>Graphics</div><div><div class="seg" id="optGfx"><button data-v="auto">Auto</button><button data-v="low">Fast</button><button data-v="high">Pretty</button></div><div class="gfxdesc">Auto = Fast while you use touch controls, Pretty with a keyboard and mouse. Auto also turns the graphics down by itself if the game keeps running slowly.</div><div class="gfxdesc" id="gfxNote" hidden>🐢 Auto has turned the graphics down on this device. Pick a Graphics choice to start over.</div></div>
+    <div>Textures</div><div><div class="seg" id="optTex"><button data-v="auto">Auto</button><button data-v="simple">Simple</button><button data-v="detailed">Detailed</button><button data-v="realistic">Realistic</button></div>
+      <div class="seg" id="optTexStyle" style="margin-top:6px"><button data-v="drawn">🎨 Drawn</button><button data-v="photo">📷 Photo</button></div>
+      <div class="gfxdesc">Simple is fastest. Detailed and Realistic add more detail and bumps, drawn by the game (🎨) or from real photos (📷, a 1.3 MB download). Auto picks what keeps the game smooth (at least 30 frames a second).</div>
+      <div class="gfxdesc" id="texNote"></div>
+      <div class="gfxdesc"><button class="small" id="benchBtn">⚡ Check my device again</button> <span id="benchNote"></span></div></div>
     <div>Control type</div><div><div class="seg" id="optTouch"><button data-v="auto">Auto</button><button data-v="on">📱 Touch</button><button data-v="off">⌨️ Keyboard + mouse</button></div><div class="gfxdesc" id="touchDesc"></div></div>
     <div>Sound</div><div class="seg" id="optSound"><button data-v="1">On</button><button data-v="0">Off</button></div>
   </div>
@@ -338,11 +357,10 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
 <div class="screen" id="shop"><div class="card wide">
   <div class="vtitle">🛒 Shop</div>
   <div style="margin:6px 0"><span class="coins" id="shopCoins">🪙 0</span></div>
-  <div class="vsub">Hats get painted too, so they never give you away!</div>
-  <div class="shoph">🎩 Hats</div>
-  <div class="shopgrid" id="shopHats"></div>
-  <div class="shoph">🎯 Paint ball colors <span style="font-size:15px;font-weight:600;opacity:.7">(when you are the seeker)</span></div>
-  <div class="shopgrid" id="shopPaints"></div>
+  <div id="shopTabs"></div>
+  <div class="vsub" id="shopSub"></div>
+  <div class="shopgrid" id="shopGrid"></div>
+  <div id="shopCustom" hidden></div>
   <div id="shopMsg"></div>
   <div class="bigrow"><button class="big green" id="shopBack">✔ Done</button></div>
 </div></div>
@@ -468,7 +486,7 @@ function seeded(s) { return () => { s = (s * 16807) % 2147483647; return (s - 1)
    mode), turns on when you touch the screen and off when you move a mouse. The graphics follow it (applyGfx). */
 const isCoarse = () => { try { return matchMedia('(pointer: coarse)').matches; } catch (e) { return false; } };
 let TOUCH = false;
-const SET = Object.assign({ diff: 'normal', bots: 4, rounds: 5, sound: 1, gfx: 'auto', found: 'join', hideIQ: 5, seekIQ: 5 }, load('ps-set', {}));
+const SET = Object.assign({ diff: 'normal', bots: 4, rounds: 5, sound: 1, gfx: 'auto', tex: 'auto', texStyle: 'drawn', found: 'join', hideIQ: 5, seekIQ: 5 }, load('ps-set', {}));
 // Graphics became Auto / Fast / Pretty (2026-11-22). Older saves always held 'high' (it was the default), so they move to
 // Auto; a 'low' someone picked stays Fast.
 if (!SET.gfxV) { if (SET.gfx !== 'low') SET.gfx = 'auto'; SET.gfxV = 2; }
@@ -482,7 +500,7 @@ const PS_TRACK = 'alpha';
 const trackKey = k => PS_TRACK === 'stable' ? k : k + '@' + PS_TRACK;
 const TRACK_NAME = { stable: '', beta: '🧪 Beta: the next version, almost ready', alpha: '🧪 Alpha: the newest features, still being tested' };
 const BEST = Object.assign({ seek: {}, hideWins: 0, matchWins: 0 }, load(trackKey('ps-best'), {}));
-const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink' }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
+const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti' }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
 const saveShop = () => save(trackKey('ps-shop'), SHOP);
 
 /* Smarts sliders (1-10) for the computer hiders and the computer seekers. Values are read off these points
@@ -654,17 +672,144 @@ function texCanvas(kind) {
   }
   return TEXC[kind] = cv;
 }
-function tex(kind, rx, ry) {
-  const key = kind + ':' + rx + ':' + ry;
-  if (TEXS[key]) return TEXS[key];
-  const t = new THREE.CanvasTexture(texCanvas(kind));
-  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = MAX_ANISO;
+/* Textures setting (0.3.1): ✏️ Simple = the 256 px drawings above (as before 0.3.1) · Detailed = 512 px with more
+   detail and bumps · Realistic = 1024 px with the most detail and deeper bumps. Detailed and Realistic are drawn in
+   code (🎨 Drawn) or come from CC0 photos in textures/ (📷 Photo, loaded only when picked). Auto picks the level from
+   the device check (section 12b) and lowers it first when a match keeps running slowly.
+   All of them are near-white patterns that the thing's color tints, so colors (and what seekers see) never change.
+   One texture per kind serves every size of thing: each material tiles it itself (uvRep in the shader). With one
+   texture per repeat (as before) a Realistic set would have needed 24+ big textures, too much memory for an iPad. */
+const TEX_LEVELS = ['simple', 'detailed', 'realistic'], TEX_SIZE = { simple: 256, detailed: 512, realistic: 1024 };
+let TEX_DROP = Math.min(2, +load('ps-texdrop', { drop: 0 }).drop || 0);   // Auto's own step-downs, remembered on this device
+let BENCH = load('ps-bench', null);   // the device check's result {v, tier 0–3, fps}; see section 12b
+const benchTier = () => BENCH && typeof BENCH.tier === 'number' ? BENCH.tier : 2;   // before the first check: the middle (as before 0.3.1)
+const autoTexIdx = () => { const t = benchTier(); return t >= 3 ? 2 : t === 2 ? 1 : 0; };
+const texLevel = () => BENCHING ? 'realistic' : TEX_LEVELS.includes(SET.tex) ? SET.tex : TEX_LEVELS[Math.max(0, autoTexIdx() - TEX_DROP)];
+function texCanvasHQ(kind, S) {
+  const key = kind + '@' + S; if (TEXC[key]) return TEXC[key];
+  const cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d'), r = seeded(kind.length * 977 + kind.charCodeAt(0) * 31 + S), k = S / 256;
+  const grey = (v, a = 1) => { v = Math.round(255 * clamp(v, 0, 1)); return a < 1 ? `rgba(${v},${v},${v},${a})` : `rgb(${v},${v},${v})`; };
+  const fill = v => { g.fillStyle = grey(v); g.fillRect(0, 0, S, S); };
+  const speck = (n, a, b, sz) => { for (let i = 0; i < n; i++) { g.fillStyle = grey(a + r() * (b - a)); g.fillRect(r() * S, r() * S, sz, sz); } };
+  // draws something at (x, y), again across an edge when it is near one, so the texture tiles without seams
+  const wrap = (x, y, m, f) => { for (const ox of [0, -S, S]) for (const oy of [0, -S, S]) { const X = x + ox, Y = y + oy; if (X > -m && X < S + m && Y > -m && Y < S + m) f(X, Y); } };
+  // soft light and dark patches: real surfaces are never one even shade
+  const mottle = (n, rad, amt) => { for (let i = 0; i < n; i++) { const rr = rad * (0.5 + r()), dark = r() < 0.5; wrap(r() * S, r() * S, rr, (x, y) => {
+    const gr = g.createRadialGradient(x, y, 0, x, y, rr); gr.addColorStop(0, dark ? `rgba(0,0,0,${amt})` : `rgba(255,255,255,${amt})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(x - rr, y - rr, rr * 2, rr * 2); }); } };
+  // many strokes, grouped by shade so each shade is drawn at once (fast even at 1024 px)
+  const strokes = (n, shade, make, w) => { const B = 8, paths = Array.from({ length: B }, () => []); for (let i = 0; i < n; i++) paths[Math.floor(r() * B)].push(make());
+    g.lineWidth = w; g.lineCap = 'round'; paths.forEach((ps, b) => { g.strokeStyle = shade(b / (B - 1)); g.beginPath(); for (const p of ps) { g.moveTo(p[0], p[1]); for (let j = 2; j < p.length; j += 2) g.lineTo(p[j], p[j + 1]); } g.stroke(); }); };
+  const bevelRect = (x, y, w, h, base, d) => { g.fillStyle = grey(base); g.fillRect(x, y, w, h); g.fillStyle = grey(1, 0.6); g.fillRect(x, y, w, d); g.fillRect(x, y, d, h); g.fillStyle = grey(base - 0.12, 0.7); g.fillRect(x, y + h - d, w, d); g.fillRect(x + w - d, y, d, h); };
+  switch (kind) {
+    case 'noise':   // painted plaster
+      fill(0.95); mottle(26, 40 * k, 0.035); speck(S * S / 9, 0.9, 1, 1); speck(S * S / 300, 0.84, 0.92, Math.max(1, k)); break;
+    case 'grass':
+      fill(0.88); mottle(22, 50 * k, 0.09); speck(S * S / 5, 0.76, 1, 1);
+      strokes(2400 * k * k, t => grey(0.64 + t * 0.38), () => { const x = r() * S, y = r() * S, l = (4 + r() * 8) * k, b = (r() - 0.5) * 4 * k; return [x, y, x + b * 0.5, y - l * 0.6, x + b, y - l]; }, 1.1 * k);
+      break;
+    case 'wood': {   // 8 boards with grain, knots, gaps and end joints
+      const H = S / 8;
+      for (let p = 0; p < 8; p++) {
+        const y0 = p * H, base = 0.82 + r() * 0.15; g.fillStyle = grey(base); g.fillRect(0, y0, S, H);
+        for (let j = 0; j < 18; j++) { const yy = y0 + 2 * k + r() * (H - 4 * k), a = r() * 6, amp = (1 + r() * 2) * k; g.strokeStyle = grey(r() < 0.75 ? base - 0.08 - r() * 0.1 : base + 0.06, 0.55); g.lineWidth = (0.6 + r() * 1.2) * k; g.beginPath(); for (let x = 0; x <= S; x += 8 * k) g.lineTo(x, yy + Math.sin(x / (40 * k) + a) * amp); g.stroke(); }
+        if (r() < 0.55) { const kx = r() * S, ky = y0 + H * (0.3 + r() * 0.4); for (let q = 4; q >= 1; q--) { g.strokeStyle = grey(base - 0.07 * q, 0.6); g.lineWidth = 1.2 * k; g.beginPath(); g.ellipse(kx, ky, q * 3.2 * k, q * 1.3 * k, 0, 0, 7); g.stroke(); } g.fillStyle = grey(base - 0.3); g.beginPath(); g.ellipse(kx, ky, 2 * k, 0.9 * k, 0, 0, 7); g.fill(); }
+        g.fillStyle = grey(0.55); g.fillRect(0, y0, S, 1.6 * k); g.fillStyle = grey(1, 0.5); g.fillRect(0, y0 + 1.6 * k, S, 1 * k);
+        const cut = r() * S; g.fillStyle = grey(0.58); g.fillRect(cut, y0, 1.6 * k, H); g.fillStyle = grey(1, 0.4); g.fillRect(cut + 1.6 * k, y0, 1 * k, H);
+      }
+      mottle(14, 40 * k, 0.03); break;
+    }
+    case 'tile': {
+      const T = S / 4; fill(0.74);
+      for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) bevelRect(x * T + 2 * k, y * T + 2 * k, T - 4 * k, T - 4 * k, 0.94 + r() * 0.05, 1.5 * k);
+      speck(S * S / 40, 0.9, 1, 1); mottle(12, 50 * k, 0.025); break;
+    }
+    case 'check': {
+      const T = S / 2; fill(0.8);
+      for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) bevelRect(x * T + 1.5 * k, y * T + 1.5 * k, T - 3 * k, T - 3 * k, (x + y) % 2 ? 0.85 : 0.99, 1.5 * k);
+      speck(S * S / 30, 0.86, 1, 1); mottle(10, 50 * k, 0.03); break;
+    }
+    case 'carpet':
+      fill(0.9); speck(S * S / 2, 0.8, 1, 1); mottle(18, 36 * k, 0.05);
+      strokes(3500 * k * k, t => grey(0.76 + t * 0.24), () => { const x = r() * S, y = r() * S, a = r() * 6.3, l = (1.5 + r() * 2.5) * k; return [x, y, x + Math.cos(a) * l, y + Math.sin(a) * l]; }, 0.9 * k);
+      break;
+    case 'panel': {   // brushed metal panels with seams, rivets and scratches
+      fill(0.93);
+      for (let i = 0; i < S * 1.2; i++) { g.fillStyle = r() < 0.5 ? grey(1, 0.08) : grey(0.7, 0.06); g.fillRect(0, r() * S, S, 1); }
+      mottle(12, 50 * k, 0.04);
+      for (const p of [0, S / 2]) { g.fillStyle = grey(0.66); g.fillRect(p, 0, 2.5 * k, S); g.fillRect(0, p, S, 2.5 * k); g.fillStyle = grey(1, 0.8); g.fillRect(p + 2.5 * k, 0, 1.5 * k, S); g.fillRect(0, p + 2.5 * k, S, 1.5 * k); }
+      for (const x of [14, 114, 142, 242]) for (const y of [14, 114, 142, 242]) { g.fillStyle = grey(0.7); g.beginPath(); g.arc(x * k, y * k, 3.4 * k, 0, 7); g.fill(); g.fillStyle = grey(1); g.beginPath(); g.arc((x - 1) * k, (y - 1) * k, 1.2 * k, 0, 7); g.fill(); }
+      strokes(60 * k, t => grey(0.8 + t * 0.2, 0.35), () => { const x = r() * S, y = r() * S, a = r() * 6.3, l = (6 + r() * 20) * k; return [x, y, x + Math.cos(a) * l, y + Math.sin(a) * l]; }, 0.7 * k);
+      break;
+    }
+    case 'frosting':
+      fill(0.95); mottle(10, 50 * k, 0.03);
+      for (let i = 0; i < 130; i++) { const rad = (8 + r() * 26) * k, a0 = r() * 6, w = (3 + r() * 5) * k; wrap(r() * S, r() * S, rad + w, (x, y) => {
+        g.lineWidth = w; g.strokeStyle = grey(0.82, 0.55); g.beginPath(); g.arc(x, y + w * 0.3, rad, a0, a0 + 2.6); g.stroke();
+        g.lineWidth = w * 0.5; g.strokeStyle = grey(1, 0.9); g.beginPath(); g.arc(x, y - w * 0.15, rad, a0, a0 + 2.6); g.stroke(); }); }
+      break;
+    case 'hay':
+      fill(0.86); mottle(14, 40 * k, 0.07);
+      strokes(1900 * k * k, t => grey(0.6 + t * 0.42), () => { const x = r() * S, y = r() * S, a = (r() - 0.5) * 0.7, l = (10 + r() * 18) * k; return [x, y, x + Math.cos(a) * l * 0.5, y + Math.sin(a) * l * 0.5 + (r() - 0.5) * k, x + Math.cos(a) * l, y + Math.sin(a) * l]; }, 1.3 * k);
+      break;
+    case 'dirt':
+      fill(0.84); mottle(36, 40 * k, 0.12); speck(S * S / 3, 0.7, 1, 1); speck(S * S / 60, 0.62, 0.86, 2 * k);
+      for (let i = 0; i < 110 * k * k; i++) { const rr = (1.5 + r() * 4) * k, v = 0.78 + r() * 0.2; wrap(r() * S, r() * S, rr * 2, (x, y) => {
+        g.fillStyle = grey(0.55, 0.5); g.beginPath(); g.ellipse(x + rr * 0.3, y + rr * 0.35, rr, rr * 0.8, 0, 0, 7); g.fill();
+        g.fillStyle = grey(v); g.beginPath(); g.ellipse(x, y, rr, rr * 0.8, 0, 0, 7); g.fill();
+        g.fillStyle = grey(1, 0.6); g.beginPath(); g.ellipse(x - rr * 0.3, y - rr * 0.3, rr * 0.35, rr * 0.25, 0, 0, 7); g.fill(); }); }
+      break;
+    default: return texCanvas(kind);
+  }
+  return TEXC[key] = cv;
+}
+/* the drawn texture of a kind at a level (one per kind and level, kept for the whole game) */
+function texFor(kind, lvl) {
+  const key = lvl + ':' + kind; if (TEXS[key]) return TEXS[key];
+  const t = new THREE.CanvasTexture(lvl === 'simple' ? texCanvas(kind) : texCanvasHQ(kind, TEX_SIZE[lvl]));
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = MAX_ANISO;
   return TEXS[key] = t;
+}
+/* 📷 Photo: textures/<kind>.jpg (the pattern) and <kind>_n.jpg (the bumps), loaded the first time they're needed */
+const PHOTO = {};
+let photoWarned = false;
+function photoFor(kind) {
+  if (PHOTO[kind]) return PHOTO[kind];
+  const P = PHOTO[kind] = { state: 'loading', n: 0 }, L = new THREE.TextureLoader();
+  const done = () => { if (++P.n === 2 && P.state === 'loading') { P.state = 'ok'; applyTex(); } };
+  const bad = () => { if (P.state === 'bad') return; P.state = 'bad'; if (!photoWarned) { photoWarned = true; toast('📷 Photo textures can\'t load here, so the drawn ones are used', 3); } refreshTexNote(); };
+  for (const [key, file] of [['map', kind + '.jpg'], ['nor', kind + '_n.jpg']]) {
+    const t = P[key] = L.load('textures/' + file, done, undefined, bad);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = MAX_ANISO; TEXS['photo:' + key + ':' + kind] = t;
+  }
+  return P;
+}
+/* give a world material the texture, bumps and tiling for the current Textures setting */
+function texSetup(m) {
+  const u = m.userData; if (!u.kind) return;
+  const lvl = texLevel(), P = lvl !== 'simple' && SET.texStyle === 'photo' && !BENCHING ? photoFor(u.kind) : null, photo = !!P && P.state === 'ok';
+  const map = photo ? P.map : texFor(u.kind, lvl), bump = lvl === 'simple' || photo ? null : map, nor = photo ? P.nor : null;
+  const changed = m.map !== map || m.bumpMap !== bump || m.normalMap !== nor;
+  m.map = map; m.bumpMap = bump; m.normalMap = nor;
+  m.bumpScale = (lvl === 'realistic' ? 0.9 : 0.5) * (BUMP_K[u.kind] || 1);
+  m.normalScale.setScalar(lvl === 'realistic' ? 1 : 0.55);
+  if (changed) m.needsUpdate = true;
+}
+function applyTex() { for (const key in MATS) texSetup(MATS[key]); refreshTexNote(); }
+/* how deep each kind's bumps are: painted things (most of the world) only a little, or plain floors look like gravel */
+const BUMP_K = { noise: 0.15, carpet: 0.4, tile: 0.6, check: 0.6, frosting: 0.6 };
+/* the tiling: vUv × uvRep (each material's own repeat). One shader serves all of them. */
+function uvRepShader(sh) {
+  sh.uniforms.uvRep = this.userData.uvRep;
+  sh.vertexShader = 'uniform vec2 uvRep;\n' + sh.vertexShader.replace('#include <uv_vertex>', '#include <uv_vertex>\n#ifdef USE_UV\n  vUv *= uvRep;\n#endif');
 }
 const MATS = {};
 function mat(hex, kind = 'noise', rx = 1, ry = 1) {
   const key = hex + '|' + kind + '|' + rx + '|' + ry;
-  return MATS[key] || (MATS[key] = new THREE.MeshStandardMaterial({ color: hex, map: kind ? tex(kind, rx, ry) : null, roughness: 0.82, metalness: 0 }));
+  if (MATS[key]) return MATS[key];
+  const m = new THREE.MeshStandardMaterial({ color: hex, roughness: 0.82, metalness: 0 });
+  if (kind) { m.userData.kind = kind; m.userData.uvRep = { value: new THREE.Vector2(rx, ry) }; m.onBeforeCompile = uvRepShader; m.customProgramCacheKey = () => 'uvrep'; texSetup(m); }
+  return MATS[key] = m;
 }
 const BOXG = new THREE.BoxGeometry(1, 1, 1);
 const SPHG = new THREE.SphereGeometry(1, 24, 16);
@@ -674,8 +819,11 @@ const TORG = new THREE.TorusGeometry(1, 0.42, 14, 30);
 const CIRG = new THREE.CircleGeometry(1, 14);
 const SHARED_GEO = new Set([BOXG, SPHG, CYLG, CONEG, TORG, CIRG]);
 const PMATS = {}, DMATS = {};
-const paintMat = hex => PMATS[hex] || (PMATS[hex] = new THREE.MeshBasicMaterial({ color: hex }));
-const decalMat = hex => DMATS[hex] || (DMATS[hex] = new THREE.MeshBasicMaterial({ color: hex, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+/* paint for balls, bits and splats: a plain color, a design (its picture) or gold (real metal). See "Paint balls" in section 5. */
+const DECAL_OFS = { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 };
+const paintMat = ink => PMATS[ink] || (PMATS[ink] = ink === 'gold' ? goldMat() : typeof ink === 'string' ? new THREE.MeshBasicMaterial({ map: inkTex(ink) }) : new THREE.MeshBasicMaterial({ color: ink }));
+const decalMat = ink => DMATS[ink] || (DMATS[ink] = ink === 'gold' ? goldMat(Object.assign({ roughness: 0.3, map: goldShine() }, DECAL_OFS)) :
+  typeof ink === 'string' ? new THREE.MeshBasicMaterial(Object.assign({ map: inkTex(ink) }, DECAL_OFS)) : new THREE.MeshBasicMaterial(Object.assign({ color: ink }, DECAL_OFS)));
 
 let world = new THREE.Group(); scene.add(world);
 const solids = [];   // meshes the eye/ray can hit (their color is what you copy)
@@ -1240,17 +1388,170 @@ const HATS = {
   top:       { name: 'Top Hat', emoji: '🎩', price: 120, build: (g, m) => { part(g, CYLG, m, 0, 1.24, 0, 0.34, 0.03, 0.34); part(g, CYLG, m, 0, 1.46, 0, 0.21, 0.42, 0.21); } },
   cowboy:    { name: 'Cowboy Hat', emoji: '🤠', price: 150, build: (g, m) => { part(g, CYLG, m, 0, 1.22, 0, 0.5, 0.03, 0.5); part(g, CYLG, m, 0, 1.36, 0, 0.23, 0.26, 0.23); part(g, SPHG, m, 0, 1.49, 0, 0.23, 0.07, 0.23); } },
   propeller: { name: 'Propeller Cap', emoji: '🧢', price: 180, build: (g, m) => { part(g, SPHG, m, 0, 1.2, 0, 0.3, 0.14, 0.3); part(g, CYLG, m, 0, 1.38, 0, 0.02, 0.14, 0.02); const b = new THREE.Group(); b.position.y = 1.46; part(b, BOXG, m, 0, 0, 0, 0.55, 0.02, 0.08); g.add(b); return b; } },
-  crown:     { name: 'Crown', emoji: '👑', price: 250, build: (g, m) => { part(g, CYLG, m, 0, 1.28, 0, 0.26, 0.16, 0.26); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; part(g, CONEG, m, Math.sin(a) * 0.22, 1.42, Math.cos(a) * 0.22, 0.06, 0.14, 0.06); } } }
+  crown:     { name: 'Crown', emoji: '👑', price: 250, build: (g, m) => { part(g, CYLG, m, 0, 1.28, 0, 0.26, 0.16, 0.26); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; part(g, CONEG, m, Math.sin(a) * 0.22, 1.42, Math.cos(a) * 0.22, 0.06, 0.14, 0.06); } } },
+  // 0.3.1: more hats (all made of simple shapes, all painted with you)
+  beanie:    { name: 'Beanie', emoji: '🧶', price: 70, build: (g, m) => { part(g, CYLG, m, 0, 1.22, 0, 0.31, 0.08, 0.31); part(g, SPHG, m, 0, 1.27, 0, 0.29, 0.2, 0.29); part(g, SPHG, m, 0, 1.5, 0, 0.08, 0.08, 0.08); } },
+  cap:       { name: 'Ball Cap', emoji: '🧢', price: 70, build: (g, m) => { part(g, SPHG, m, 0, 1.24, 0, 0.3, 0.16, 0.3); part(g, BOXG, m, 0, 1.25, 0.3, 0.34, 0.025, 0.26); part(g, SPHG, m, 0, 1.4, 0, 0.04, 0.03, 0.04); } },
+  bunny:     { name: 'Bunny Ears', emoji: '🐰', price: 90, build: (g, m) => { part(g, SPHG, m, -0.1, 1.5, 0, 0.07, 0.24, 0.04, [0, 0, 0.15]); part(g, SPHG, m, 0.1, 1.5, 0, 0.07, 0.24, 0.04, [0, 0, -0.15]); } },
+  phones:    { name: 'Headphones', emoji: '🎧', price: 110, build: (g, m) => { part(g, BOXG, m, 0, 1.3, 0, 0.5, 0.05, 0.07); for (const s of [-1, 1]) { part(g, BOXG, m, s * 0.25, 1.2, 0, 0.05, 0.2, 0.07); part(g, CYLG, m, s * 0.255, 1.04, 0, 0.1, 0.08, 0.1, [0, 0, Math.PI / 2]); } } },
+  chef:      { name: 'Chef Hat', emoji: '🧑‍🍳', price: 120, build: (g, m) => { part(g, CYLG, m, 0, 1.3, 0, 0.27, 0.14, 0.27); part(g, SPHG, m, 0, 1.5, 0, 0.34, 0.2, 0.34); part(g, SPHG, m, 0.12, 1.58, 0.08, 0.16, 0.12, 0.16); } },
+  flowers:   { name: 'Flower Crown', emoji: '🌼', price: 130, build: (g, m) => { for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; part(g, SPHG, m, Math.sin(a) * 0.28, 1.24, Math.cos(a) * 0.28, 0.075, 0.06, 0.075); part(g, SPHG, m, Math.sin(a) * 0.31, 1.25, Math.cos(a) * 0.31, 0.03, 0.03, 0.03); } } },
+  mohawk:    { name: 'Mohawk', emoji: '🦔', price: 140, build: (g, m) => { for (let k = 0; k < 5; k++) part(g, CONEG, m, 0, 1.34 - Math.abs(k - 2) * 0.02, -0.2 + k * 0.1, 0.05, 0.22, 0.08); } },
+  pirate:    { name: 'Pirate Hat', emoji: '🏴‍☠️', price: 160, build: (g, m) => { part(g, CYLG, m, 0, 1.36, 0, 0.24, 0.22, 0.24); part(g, BOXG, m, 0, 1.3, 0, 0.72, 0.14, 0.3); for (const s of [-1, 1]) part(g, BOXG, m, s * 0.34, 1.38, 0, 0.06, 0.2, 0.3, [0, 0, s * 0.4]); } },
+  grad:      { name: 'Grad Cap', emoji: '🎓', price: 170, build: (g, m) => { part(g, CYLG, m, 0, 1.28, 0, 0.25, 0.12, 0.25); part(g, BOXG, m, 0, 1.36, 0, 0.6, 0.03, 0.6, [0, Math.PI / 4, 0]); part(g, CYLG, m, 0.22, 1.27, 0.22, 0.012, 0.16, 0.012); part(g, SPHG, m, 0.22, 1.18, 0.22, 0.04, 0.05, 0.04); } },
+  viking:    { name: 'Viking Helmet', emoji: '⛑️', price: 200, build: (g, m) => { part(g, SPHG, m, 0, 1.24, 0, 0.3, 0.22, 0.3); part(g, CYLG, m, 0, 1.2, 0, 0.31, 0.05, 0.31); for (const s of [-1, 1]) { part(g, CONEG, m, s * 0.34, 1.4, 0, 0.07, 0.28, 0.07, [0, 0, -s * 0.75]); } } }
 };
+/* Paint balls (0.3.1). A paint ball's "ink" is a plain color (a number) or a design's name (a string).
+   Plain colors are free, and "Any color" lets you pick your own (SHOP.paintHex). Designs come from the shop.
+   (Blue, Green, Orange and Purple used to cost coins; the family chose no refund when they became free.)
+   hex = the color that stands for it (menus, and older code that wants one number). */
 const PAINTS = {
-  pink:   { name: 'Pink', hex: 0xff2fa0, price: 0 },
-  blue:   { name: 'Blue', hex: 0x2f8bff, price: 100 },
-  green:  { name: 'Green', hex: 0x22c55e, price: 100 },
-  orange: { name: 'Orange', hex: 0xff7a00, price: 100 },
-  purple: { name: 'Purple', hex: 0x9b4dff, price: 150 },
-  gold:   { name: 'Gold', hex: 0xffc400, price: 200 }
+  pink:    { name: 'Pink', hex: 0xff2fa0, price: 0 },
+  red:     { name: 'Red', hex: 0xe63946, price: 0 },
+  orange:  { name: 'Orange', hex: 0xff7a00, price: 0 },
+  yellow:  { name: 'Yellow', hex: 0xffd60a, price: 0 },
+  green:   { name: 'Green', hex: 0x22c55e, price: 0 },
+  blue:    { name: 'Blue', hex: 0x2f8bff, price: 0 },
+  purple:  { name: 'Purple', hex: 0x9b4dff, price: 0 },
+  white:   { name: 'White', hex: 0xffffff, price: 0 },
+  black:   { name: 'Black', hex: 0x26262e, price: 0 },
+  custom:  { name: 'Any color', hex: 0xff2fa0, price: 0, custom: true },
+  checker: { name: 'Checkers', hex: 0x888888, price: 120, design: true },
+  candy:   { name: 'Candy Cane', hex: 0xe63946, price: 140, design: true },
+  camo:    { name: 'Camo', hex: 0x5f6f3a, price: 150, design: true },
+  plaid:   { name: 'Plaid', hex: 0xc0392b, price: 150, design: true },
+  zebra:   { name: 'Zebra', hex: 0xdddddd, price: 170, design: true },
+  tiger:   { name: 'Tiger', hex: 0xff8a1f, price: 170, design: true },
+  leopard: { name: 'Leopard', hex: 0xe0b064, price: 170, design: true },
+  gold:    { name: 'Gold', hex: 0xffc35a, price: 200, design: true },
+  tiedye:  { name: 'Tie-dye', hex: 0xff5ab4, price: 250, design: true },
+  galaxy:  { name: 'Galaxy', hex: 0x3a2a8c, price: 300, design: true },
+  rainbow: { name: 'Rainbow', hex: 0xff4d6d, price: 300, design: true }
 };
-const myPaintHex = () => (PAINTS[SHOP.paint] || PAINTS.pink).hex;
+/* any ink from a save or the network, made safe: a number is a color, a design must be a real design, a plain color's
+   name (older versions sent those) becomes its color */
+function inkOf(v) {
+  if (typeof v === 'number' && isFinite(v)) return v & 0xffffff;
+  const it = typeof v === 'string' && Object.prototype.hasOwnProperty.call(PAINTS, v) ? PAINTS[v] : null;
+  return !it ? PAINT_HEX : it.design ? v : it.hex;
+}
+const myInk = () => SHOP.paint === 'custom' ? inkOf(+SHOP.paintHex || PAINT_HEX) : inkOf(SHOP.paint);
+const myPaintHex = myInk;   // the old name, used where a seeker's paint is set
+const inkHex = ink => typeof ink === 'number' ? ink : (PAINTS[ink] || PAINTS.pink).hex;
+/* the colors in a design, for the little bits that fly when a ball pops */
+const INK_BITS = { gold: [0xffd36b, 0xfff0b8, 0xc8902a], rainbow: [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x007aff, 0xaf52de],
+  camo: [0x5f6f3a, 0x8a7a4a, 0x3b3a26, 0x9aa86a], plaid: [0xc0392b, 0x1e3d2f, 0xf3e9d2], tiedye: [0xff5ab4, 0x7b61ff, 0x3fd4ff, 0xffe14d],
+  galaxy: [0x1a1446, 0x6a3fd0, 0xff7ad9, 0xffffff], zebra: [0xffffff, 0x1d1d1d], tiger: [0xff8a1f, 0x1d1d1d], leopard: [0xe0b064, 0x5a3a1a],
+  candy: [0xe63946, 0xffffff], checker: [0x1d1d1d, 0xffffff] };
+const inkBits = ink => typeof ink === 'number' ? [ink] : INK_BITS[ink] || [inkHex(ink)];
+/* each design is drawn in code once (a 128 px picture), then used on paint balls, splats, buckets and launchers */
+const INK_CV = {};
+function inkCanvas(id) {
+  if (INK_CV[id]) return INK_CV[id];
+  const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d'), r = seeded(id.length * 131 + id.charCodeAt(0) * 7);
+  const fill = c => { g.fillStyle = c; g.fillRect(0, 0, S, S); };
+  const blob = (x, y, rad, c) => { g.fillStyle = c; g.beginPath(); for (let k = 0; k <= 10; k++) { const a = k / 10 * Math.PI * 2, rr = rad * (0.7 + r() * 0.5); g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.fill(); };
+  switch (id) {
+    case 'rainbow': ['#ff3b30', '#ff9500', '#ffcc00', '#34c759', '#00c7be', '#007aff', '#af52de'].forEach((c, k) => { g.fillStyle = c; g.fillRect(0, k * S / 7, S, S / 7 + 1); }); break;
+    case 'camo': fill('#6b7a3c'); for (const c of ['#8a7a4a', '#3b3a26', '#9aa86a', '#4e5a2a']) for (let k = 0; k < 7; k++) blob(r() * S, r() * S, 10 + r() * 14, c); break;
+    case 'plaid':
+      fill('#b8322a');
+      g.globalAlpha = 0.55; g.fillStyle = '#1e3d2f'; for (let k = 0; k < S; k += 32) { g.fillRect(k, 0, 12, S); g.fillRect(0, k, S, 12); }
+      g.globalAlpha = 0.7; g.fillStyle = '#f3e9d2'; for (let k = 20; k < S; k += 32) { g.fillRect(k, 0, 2, S); g.fillRect(0, k, S, 2); }
+      g.globalAlpha = 1; break;
+    case 'tiedye': {
+      const d = g.createImageData(S, S);
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+        const dx = x - S / 2, dy = y - S / 2, h = ((Math.atan2(dy, dx) / (Math.PI * 2) + Math.hypot(dx, dy) / 40) % 1 + 1) % 1;
+        const c = new THREE.Color().setHSL(h, 0.85, 0.62), i = (y * S + x) * 4; d.data[i] = c.r * 255; d.data[i + 1] = c.g * 255; d.data[i + 2] = c.b * 255; d.data[i + 3] = 255;
+      }
+      g.putImageData(d, 0, 0); break;
+    }
+    case 'galaxy': {
+      fill('#120d33');
+      for (const [c, n] of [['rgba(106,63,208,0.55)', 5], ['rgba(255,122,217,0.35)', 4], ['rgba(63,170,255,0.3)', 3]]) for (let k = 0; k < n; k++) {
+        const x = r() * S, y = r() * S, rad = 18 + r() * 30, gr = g.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, c); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, S, S);
+      }
+      g.fillStyle = '#fff'; for (let k = 0; k < 70; k++) { const s = r() < 0.15 ? 2 : 1; g.fillRect(r() * S, r() * S, s, s); }
+      break;
+    }
+    case 'zebra': case 'tiger':
+      fill(id === 'zebra' ? '#f4f4f4' : '#ff8a1f'); g.fillStyle = '#1d1d1d';
+      for (let k = 0; k < 9; k++) { const y0 = k * S / 9 + r() * 4, w = id === 'zebra' ? 5 + r() * 4 : 3 + r() * 4, len = id === 'zebra' ? S : S * (0.4 + r() * 0.5), x0 = id === 'zebra' ? 0 : r() * S * 0.5;
+        g.beginPath(); for (let x = 0; x <= len; x += 8) g.lineTo(x0 + x, y0 + Math.sin(x / 14 + k) * 5 - w * (1 - x / len) / 2);
+        for (let x = len; x >= 0; x -= 8) g.lineTo(x0 + x, y0 + Math.sin(x / 14 + k) * 5 + w * (1 - x / len * (id === 'tiger' ? 1 : 0)) / 2 + (id === 'zebra' ? w / 2 : 0)); g.fill(); }
+      break;
+    case 'leopard':
+      fill('#e0b064');
+      for (let k = 0; k < 16; k++) { const x = r() * S, y = r() * S, rad = 6 + r() * 5; blob(x, y, rad, '#3b2410'); blob(x, y, rad * 0.55, '#b07a3a'); }
+      break;
+    case 'candy': fill('#ffffff'); g.fillStyle = '#e63946'; for (let k = -S; k < S * 2; k += 32) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 16, 0); g.lineTo(k + 16 - S, S); g.lineTo(k - S, S); g.fill(); } break;
+    case 'checker': for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? '#1d1d1d' : '#ffffff'; g.fillRect(x * 16, y * 16, 16, 16); } break;
+    case 'gold': {   // only for menus: a shiny gold ball
+      const gr = g.createRadialGradient(S * 0.35, S * 0.3, 2, S * 0.5, S * 0.5, S * 0.7);
+      gr.addColorStop(0, '#fff6d0'); gr.addColorStop(0.25, '#ffd46b'); gr.addColorStop(0.65, '#c8902a'); gr.addColorStop(1, '#7a5212'); g.fillStyle = gr; g.fillRect(0, 0, S, S); break;
+    }
+    default: fill('#ff2fa0');
+  }
+  return INK_CV[id] = cv;
+}
+const INK_TX = {};
+function inkTex(id) { if (!INK_TX[id]) { const t = INK_TX[id] = new THREE.CanvasTexture(inkCanvas(id)); t.wrapS = t.wrapT = THREE.RepeatWrapping; } return INK_TX[id]; }
+/* Real gold: metal that reflects a little studio around it (made in code: bright sky, warm lights, dark floor), so it
+   shines and changes as it moves. Without something to reflect, metal looks almost black. */
+let GOLD_ENV = null;
+function goldEnv() {
+  if (GOLD_ENV) return GOLD_ENV;
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128; const g = cv.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.18, '#c8d2e6'); gr.addColorStop(0.36, '#6f7c96'); gr.addColorStop(0.47, '#fff4d8'); gr.addColorStop(0.53, '#ffffff'); gr.addColorStop(0.6, '#5a4630'); gr.addColorStop(1, '#1e160c');   // bright and dark bands: metal shows contrast, not one flat color
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 128);
+  for (const [x, y, rad] of [[40, 30, 22], [150, 22, 16], [210, 40, 12], [100, 50, 9]]) { const l = g.createRadialGradient(x, y, 0, x, y, rad); l.addColorStop(0, '#ffffff'); l.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = l; g.fillRect(0, 0, 256, 128); }
+  const t = new THREE.CanvasTexture(cv); t.mapping = THREE.EquirectangularReflectionMapping;   // the game draws in plain (linear) colors, so no sRGB here
+  try { const pm = new THREE.PMREMGenerator(renderer); GOLD_ENV = pm.fromEquirectangular(t).texture; pm.dispose(); } catch (e) { GOLD_ENV = t; }
+  return GOLD_ENV;
+}
+const goldMat = (extra = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: 0xffb84d, emissive: 0x241600, metalness: 1, roughness: 0.18, envMap: goldEnv(), envMapIntensity: 1.6 }, extra));
+/* a flat gold splat reflects one direction only, so it gets a drawn shine: a bright middle, a light ring and dark edges */
+let GOLD_SHINE = null;
+function goldShine() {
+  if (GOLD_SHINE) return GOLD_SHINE;
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
+  const gr = g.createRadialGradient(52, 48, 2, 64, 64, 64);
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.3, '#e8e8e8'); gr.addColorStop(0.55, '#9a9a9a'); gr.addColorStop(0.75, '#d6d6d6'); gr.addColorStop(1, '#6e6e6e');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 5; g.beginPath(); g.arc(64, 64, 40, 3.6, 4.6); g.stroke();
+  return GOLD_SHINE = new THREE.CanvasTexture(cv);
+}
+/* little twinkles on gold: a star sprite that flashes */
+let SPARK_TX = null;
+function sparkTex() {
+  if (SPARK_TX) return SPARK_TX;
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 30); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.2, 'rgba(255,240,190,0.7)'); gr.addColorStop(1, 'rgba(255,220,120,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  g.fillStyle = '#fff'; g.beginPath(); g.moveTo(32, 0); g.lineTo(35, 29); g.lineTo(64, 32); g.lineTo(35, 35); g.lineTo(32, 64); g.lineTo(29, 35); g.lineTo(0, 32); g.lineTo(29, 29); g.fill();
+  return SPARK_TX = new THREE.CanvasTexture(cv);
+}
+const SPARK_MAT = () => new THREE.SpriteMaterial({ map: sparkTex(), color: 0xfff0c0, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false });
+const sparkles = [];   // {s, t, life, size}
+function sparkleAt(pos, size = 0.35, life = 0.5) {
+  const s = new THREE.Sprite(SPARK_MAT()); s.position.copy(pos); s.scale.setScalar(0.01); s.renderOrder = 5; scene.add(s);
+  sparkles.push({ s, t: 0, life, size, spin: rnd(-3, 3) });
+}
+function updateSparkles(dt) {
+  for (let i = sparkles.length - 1; i >= 0; i--) {
+    const k = sparkles[i]; k.t += dt; const f = k.t / k.life;
+    if (f >= 1) { scene.remove(k.s); k.s.material.dispose(); sparkles.splice(i, 1); continue; }
+    k.s.scale.setScalar(k.size * Math.sin(f * Math.PI)); k.s.material.rotation += k.spin * dt;
+  }
+}
+/* the shiny swatch a menu shows for an ink */
+function inkCss(ink) {
+  if (typeof ink === 'number') return hexCss(ink);
+  if (!INK_CV[ink + ':url']) INK_CV[ink + ':url'] = 'url(' + inkCanvas(ink).toDataURL() + ') center/cover';
+  return INK_CV[ink + ':url'];
+}
 function textSprite() {
   const cv = document.createElement('canvas'); cv.width = cv.height = 128;
   const tx = new THREE.CanvasTexture(cv);
@@ -1295,11 +1596,11 @@ function makeChar(o) {
     { p: armL, x: 0, y: -0.21, z: 0, w: 0.13, h: 0.42, d: 0.15 }, { p: armR, x: 0, y: -0.21, z: 0, w: 0.13, h: 0.42, d: 0.15 }];
   const hatPivot = new THREE.Group(); hatPivot.position.y = 1.28; model.add(hatPivot);   // hats sit on top of the head
   let spin = null, hatG = null;
-  if (o.role === 'seeker') addBucket(hatPivot, o.paintHex || PAINT_HEX);   // seekers wear a paint bucket hat
+  if (o.role === 'seeker') addBucket(hatPivot, o.paintHex === undefined ? PAINT_HEX : o.paintHex);   // seekers wear a paint bucket hat
   else if (o.hat && HATS[o.hat] && HATS[o.hat].build) { hatG = new THREE.Group(); hatG.scale.setScalar(0.8); hatG.position.y = -1.26 * 0.8; hatPivot.add(hatG); spin = HATS[o.hat].build(hatG, mats.head) || null; }
   const icon = textSprite(); icon.position.y = 1.95; g.add(icon);
   scene.add(g);
-  return Object.assign({
+  const c = Object.assign({
     g, model, body, mats, cols, mat: mats.body, eyes, icon, spin, hatG, hatPivot, legL, legR, armL, armR, sTargets, splatList: [], wasFound: false, origSeeker: false, pose: 'stand',
     x: 0, y: 0, z: 0, vx: 0, vz: 0, vy: 0, yaw: 0, onGround: true,
     color: cols.body, base: new THREE.Color(o.hex), splatN: 0, caught: false, eyesOpen: true, stillT: 0, moving: false,
@@ -1307,14 +1608,18 @@ function makeChar(o) {
     spot: null, braved: false, susp: new Map(), lookYaw: 0, throwCd: 0, target: null, lostT: 0, lastSeen: null, visited: [], thinkT: 0, bob: Math.random() * 6,
     foundN: 0, splatHits: 0, caughtAt: 0, paintHex: PAINT_HEX
   }, o);
+  c.cos = o.pkey !== undefined && o.pkey === ME() ? myCos() : cosOf(P(o.pkey));   // launcher, tag celebration (section 11b)
+  if (o.role === 'seeker' || o.role === 'lobby') addLauncher(c);
+  return c;
 }
 function boxPart(parent, m, x, y, z, w, h, d) {
   const b = new THREE.Mesh(BOXG, m); b.position.set(x, y, z); b.scale.set(w, h, d);
   b.castShadow = true; b.receiveShadow = true; parent.add(b); return b;
 }
 function limb(g, m, x, y, w, h, d) { const pv = new THREE.Group(); pv.position.set(x, y, 0); g.add(pv); boxPart(pv, m, 0, -h / 2, 0, w, h, d); return pv; }
-function addBucket(parent, hex) {   // parent = the spot on top of the head
-  const hat = new THREE.Mesh(CYLG, new THREE.MeshStandardMaterial({ color: hex, roughness: 0.4 }));
+function addBucket(parent, ink) {   // parent = the spot on top of the head; the bucket shows your paint ball ink
+  const m = ink === 'gold' ? goldMat() : typeof ink === 'string' ? new THREE.MeshStandardMaterial({ map: inkTex(ink), roughness: 0.4 }) : new THREE.MeshStandardMaterial({ color: ink, roughness: 0.4 });
+  const hat = new THREE.Mesh(CYLG, m);
   hat.scale.set(0.2, 0.22, 0.2); hat.position.y = 0.11; hat.castShadow = true; parent.add(hat);
 }
 /* body parts you can paint separately, and the poses a hider can take.
@@ -1388,12 +1693,20 @@ function addSplatsTo(c, n, hex) {
 function clearSplats(c) { for (const s of c.splatList) if (s.parent) s.parent.remove(s); c.splatList = []; c.splatN = 0; }
 function placeChar(c, x, z, yaw) { c.x = x; c.z = z; c.y = groundAt(x, z, 0); c.vx = c.vz = c.vy = 0; c.yaw = yaw || 0; c.lookYaw = c.yaw; c.lastX = x; c.lastZ = z; }
 
-/* physics: push out of furniture, stand on low things, fall with gravity */
+/* physics: push out of furniture, stand on top of anything a jump reaches, fall with gravity.
+   0.2.1: round things (tables, barrels, hay bales, donuts, big balls) have a top you can stand on too. Before, landing
+   on one sank you into it and the push-out shoved you off sideways, like a teleport. Thin posts and sticks (under
+   0.2 m across) still have no top. You stay up on a box until your middle is within 0.2 m of its edge (was 0.12). */
+const EDGE = 0.2, POST_R = 0.2;
 function groundAt(x, z, feet) {
   let gh = 0;
   for (const b of boxes) {
     if (feet < b.y2 - 0.3) continue;
-    if (x > b.x1 - 0.12 && x < b.x2 + 0.12 && z > b.z1 - 0.12 && z < b.z2 + 0.12 && b.y2 > gh) gh = b.y2;
+    if (x > b.x1 - EDGE && x < b.x2 + EDGE && z > b.z1 - EDGE && z < b.z2 + EDGE && b.y2 > gh) gh = b.y2;
+  }
+  for (const y of cyls) {
+    if (feet < y.y2 - 0.3 || y.r < POST_R) continue;
+    if (Math.hypot(x - y.x, z - y.z) < y.r + 0.1 && y.y2 > gh) gh = y.y2;
   }
   return gh;
 }
@@ -1412,7 +1725,7 @@ function moveChar(c, dt) {
       }
     }
     for (const y of cyls) {
-      if (c.y >= y.y2 - 0.1 || c.y + 1.2 <= y.y1) continue;
+      if (c.y >= y.y2 - (y.r < POST_R ? 0.1 : 0.3) || c.y + 1.2 <= y.y1) continue;   // on top of a round thing: no push (like boxes)
       const dx = c.x - y.x, dz = c.z - y.z, d = Math.hypot(dx, dz), need = y.r + R;
       if (d < need) { if (d < 1e-4) { c.x += need; } else { c.x += dx / d * (need - d); c.z += dz / d * (need - d); } }
     }
@@ -1429,10 +1742,16 @@ function cast(origin, dir, far) { ray.set(origin, dir); ray.far = far; const h =
 function colorDiff(a, b) { const dr = a.r - b.r, dg = a.g - b.g, db = a.b - b.b; return Math.sqrt((2 * dr * dr + 4 * dg * dg + 3 * db * db) / 9); }
 const matchOf = (a, b) => clamp(1 - colorDiff(a, b) * 2.4, 0, 1);
 
-const balls = [], decals = [], bits = [];
+const balls = [], decals = [], bits = [], goldSplats = [];
+/* gold splats left on walls and floors twinkle now and then (only the ones still in the scene) */
+function goldTwinkle(dt) {
+  if (!goldSplats.length || G.silent || Math.random() > dt * Math.min(4, goldSplats.length * 0.8)) return;
+  const m = pick(goldSplats); if (!m.parent) { goldSplats.splice(goldSplats.indexOf(m), 1); return; }
+  sparkleAt(m.position.clone().add(new V3(rnd(-0.15, 0.15), rnd(-0.15, 0.15), rnd(-0.15, 0.15))), rnd(0.25, 0.45), 0.45);
+}
 const BALLG = new THREE.SphereGeometry(0.13, 12, 8);
 function throwBall(from, owner, target) {
-  const hex = owner.paintHex || PAINT_HEX;
+  const hex = owner.paintHex === undefined ? PAINT_HEX : owner.paintHex;
   const pos = new V3(from.x + Math.sin(owner.yaw) * 0.35, from.y + 1.0, from.z + Math.cos(owner.yaw) * 0.35);
   const d = target.clone().sub(pos), dist = d.length(), spd = 19, t = dist / spd;
   const vel = d.multiplyScalar(1 / Math.max(t, 0.05)); vel.y += 0.5 * 14 * t;
@@ -1450,6 +1769,7 @@ function addDecal(p, n, hex) {
   const m = new THREE.Mesh(CIRG, dm); const s = rnd(0.28, 0.5); m.scale.set(s, s, 1);
   m.position.copy(p).addScaledVector(n, 0.015); m.lookAt(p.x + n.x, p.y + n.y, p.z + n.z); m.rotateZ(Math.random() * 6);
   scene.add(m); decals.push(m);
+  if (hex === 'gold') { goldSplats.push(m); if (goldSplats.length > 40) goldSplats.shift(); sparkleAt(m.position, 0.6, 0.45); }
   for (let k = 0; k < 3; k++) {   // little drops around the splat
     const q = new THREE.Mesh(CIRG, dm); const r2 = rnd(0.06, 0.12); q.scale.set(r2, r2, 1);
     q.position.copy(m.position); q.quaternion.copy(m.quaternion); q.translateX(rnd(-0.7, 0.7)); q.translateY(rnd(-0.7, 0.7)); q.translateZ(0.002);
@@ -1468,6 +1788,7 @@ function updateBalls(dt) {
   for (let i = balls.length - 1; i >= 0; i--) {
     const b = balls[i]; b.age += dt;
     b.prev.copy(b.pos); b.vel.y -= 14 * dt; b.pos.addScaledVector(b.vel, dt); b.m.position.copy(b.pos);
+    if (typeof b.hex === 'string') { b.m.rotation.x += dt * 9; b.m.rotation.y += dt * 6; if (b.hex === 'gold' && !G.silent && Math.random() < dt * 7) sparkleAt(b.pos, 0.32, 0.35); }   // designs spin; gold twinkles
     segD.copy(b.pos).sub(b.prev); const len = segD.length(); if (len < 1e-6) continue; segD.multiplyScalar(1 / len);
     let hitC = null, hitT = len;
     for (const c of G.chars) {
@@ -1566,6 +1887,8 @@ addEventListener('keydown', e => {
     if (e.code === 'KeyQ' || e.code === 'KeyC') { if (G.palOpen) closePalette(); else openPalette(); }
     const n = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5'].indexOf(e.code);
     if (n >= 0 && G.player && G.player.role === 'hider') { G.paintPart = ['all', ...PARTS][n]; updatePartsUi(); }
+    const en = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9'].indexOf(e.code);
+    if (en >= 0 && inLobby()) { const ids = Object.keys(EMOTES).filter(id => owns('emote', id)); if (ids[en]) playEmote(G.player, ids[en]); }
     if (e.code === 'KeyX') input.pose = true;
     if (e.code === 'KeyR' && inLobby()) lobbyReady();
     else if (e.code === 'KeyR' && G.phase === 'count') imHidden();
@@ -1957,9 +2280,19 @@ function seekerAI(s, dt) {
       if (!t || t.caught) { s.state = 'look'; s.stT = 0; s.look0 = s.yaw; s.target = null; break; }
       s.lostT += dt;
       const d = Math.hypot(t.x - s.x, t.z - s.z);
-      // they're standing up on a table or box right next to us: hop up after them (furniture is no safe place)
+      // they're up on furniture: climb after them (furniture is no safe place). 0.2.1: if it's too high for one jump,
+      // hop onto something lower first (box → higher box), and walk around walls to the first step
       s.hopT = (s.hopT || 0) - dt;
-      if (d < 3 && (t.y - s.y > 0.3 || s.hopT > 0)) {
+      const up = t.y - s.y > 0.3, st = s.hopT > 0 && s.step ? s.step : up ? (s.step = climbStep(s, t)) : (s.step = null);
+      if (st) {
+        const sd = Math.hypot(st.x - s.x, st.z - s.z);
+        if (sd < 3 || s.hopT > 0) {
+          if (s.onGround && s.hopT <= 0 && sd < 2.4 && st.y - s.y > 0.3) { s.vy = JUMP_V; s.onGround = false; s.hopT = 0.8; }
+          steer(s, st.x, st.z, spd * 1.15, dt); s.lookYaw = s.yaw; s.lostT = 0; s.lastSeen = { x: t.x, z: t.z };
+          break;
+        }
+      }
+      if (d < 3 && (t.y - s.y > 0.3 || s.hopT > 0)) {   // no step found: hop straight at them (as before)
         if (s.onGround && t.y - s.y > 0.3) { s.vy = JUMP_V; s.onGround = false; s.hopT = 0.8; }   // keep heading for them until the hop lands
         steer(s, t.x, t.z, spd * 1.15, dt); s.lookYaw = s.yaw; s.lostT = 0; s.lastSeen = { x: t.x, z: t.z };
         break;
@@ -1969,7 +2302,7 @@ function seekerAI(s, dt) {
       if (d < 3.2 && (s.y > 0.3 || clearLine(s.x, s.z, t.x, t.z))) steer(s, t.x, t.z, spd * 1.15, dt);
       else {
         s.repathT = (s.repathT || 0) - dt;
-        if (s.repathT <= 0 || !s.path) { const g = s.lastSeen || t; setGoal(s, g.x, g.z); s.repathT = 0.4; }
+        if (s.repathT <= 0 || !s.path) { const g = s.step || s.lastSeen || t; setGoal(s, g.x, g.z); s.repathT = 0.4; }   // up high: walk to the first step
         follow(s, spd * 1.15, dt);
       }
       s.lookYaw = s.yaw;
@@ -1981,6 +2314,23 @@ function seekerAI(s, dt) {
       break;
     default: s.state = 'patrol';
   }
+}
+/* where a seeker at s should jump next to reach t up high: t itself when one jump reaches, else the top (that a jump
+   reaches and that's not above t) nearest to t. A jump goes up about 1.31 m (JUMP_V² / 2·GRAV) and you may land up
+   to 0.3 m below a top, so JUMP_UP is what one hop climbs, with a little to spare. null = no way up. */
+const JUMP_UP = JUMP_V * JUMP_V / (2 * GRAV) + 0.2;
+function climbStep(s, t) {
+  if (t.y - s.y <= JUMP_UP) return { x: t.x, z: t.z, y: t.y };
+  let best = null, bs = 1e9;
+  const tryTop = (x, z, y) => {
+    if (y <= s.y + 0.3 || y > s.y + JUMP_UP || y > t.y + 0.05) return;
+    const ds = Math.hypot(x - s.x, z - s.z); if (ds > 9) return;
+    const sc = Math.hypot(x - t.x, z - t.z) + ds * 0.4 - (y - s.y) * 0.5;   // near them, near me, and as high as possible
+    if (sc < bs) { bs = sc; best = { x, z, y }; }
+  };
+  for (const b of boxes) if (b.x2 - b.x1 >= 0.5 && b.z2 - b.z1 >= 0.5) tryTop(clamp(t.x, b.x1 + 0.25, b.x2 - 0.25), clamp(t.z, b.z1 + 0.25, b.z2 - 0.25), b.y2);
+  for (const y of cyls) if (y.r >= POST_R) tryTop(y.x, y.z, y.y2);
+  return best;
 }
 function pickPatrol(s) {
   const hiders = G.chars.filter(h => h.role === 'hider' && !h.caught);
@@ -2043,7 +2393,7 @@ function newMatch(humans) {
   const n = humans.length > 1 ? Math.min(clamp(+SET.bots || 4, 2, 6), 7 - humans.length) : clamp(+SET.bots || 4, 2, 6);
   const names = shuffle(NAMES.slice()), colors = shuffle(BOT_COLORS.slice()), hatIds = Object.keys(HATS).filter(h => h !== 'none');
   const players = humans.map((h, i) => Object.assign({ hex: HUMAN_COLORS[i % HUMAN_COLORS.length], human: true, total: 0, last: 0 }, h));
-  for (let i = 0; i < n; i++) players.push({ key: 'b' + i, name: names[i], hex: colors[i], hat: Math.random() < 0.75 ? pick(hatIds) : 'none', total: 0, last: 0 });
+  for (let i = 0; i < n; i++) players.push({ key: 'b' + i, name: names[i], hex: colors[i], hat: Math.random() < 0.75 ? pick(hatIds) : 'none', cos: botCos(), total: 0, last: 0 });
   const keysList = shuffle(players.map(p => p.key)), order = [];
   for (let r = 0; r < R; r++) order.push(keysList[r % keysList.length]);
   // every person gets to seek at least once (when there are enough rounds), taking a computer player's turn
@@ -2067,7 +2417,7 @@ function drawBoard(table, showPlus) {
       `<td class="plus">${showPlus ? '+' + p.last : ''}</td><td class="num">⭐ ${p.total}</td></tr>`;
   }).join('');
 }
-function hideRoundUi() { closePalette(); toastT = 0; $('readyBtn').classList.remove('on'); $('hidBtn').classList.remove('on'); $('toast').classList.remove('on'); $('parts').classList.remove('on'); $('hud').classList.remove('on', 'lobby'); $('tbtns').classList.remove('on'); $('count').classList.remove('on'); $('skipBtn').classList.remove('on'); }
+function hideRoundUi() { closePalette(); toastT = 0; $('readyBtn').classList.remove('on'); $('hidBtn').classList.remove('on'); $('toast').classList.remove('on'); $('parts').classList.remove('on'); $('hud').classList.remove('on', 'lobby'); $('tbtns').classList.remove('on'); $('count').classList.remove('on'); $('skipBtn').classList.remove('on'); $('emotes').classList.remove('on'); clearCosFx(); }
 /* The lobby is a real room: everyone runs around until the timer ends, or you tap Ready / stand on the green pad. */
 const LOBBY_TIME = 20, CARD_TIME = 6;
 function lobbyReady() {
@@ -2109,7 +2459,7 @@ function openLobbyCard() {
   drawBoard($('board'), M.round > 0);
   lobbyCoins();
   G.lobbyCard = true; G.cardT = CARD_TIME;
-  $('hud').classList.remove('on'); $('tbtns').classList.remove('on');
+  $('hud').classList.remove('on'); $('tbtns').classList.remove('on'); $('emotes').classList.remove('on');
   showScreen('lobby');
 }
 function closeLobbyCard() {
@@ -2117,8 +2467,9 @@ function closeLobbyCard() {
   $('hud').classList.add('on', 'lobby'); $('tbtns').classList.toggle('on', TOUCH);
   $('bMain').style.background = hexCss(myPaintHex());
   $('bPal').style.display = 'none';   // no painting in the lobby (6th playtest: COLORS showed there and did nothing)
-  $('keys').textContent = TOUCH ? '' : 'WASD move · mouse look · Click/E throw paint · Space jump · R ready · P scores';
+  $('keys').textContent = TOUCH ? '' : 'WASD move · mouse look · Click/E throw paint · Space jump · 1–9 emotes · R ready · P scores';
   $('skipBtn').classList.remove('on'); $('readyBtn').classList.toggle('on', !G.ready);
+  drawEmotes(); $('emotes').classList.add('on');
   lobbyHud();
 }
 function drawLobbyBoard() {
@@ -2150,6 +2501,7 @@ function lobbyAI(c, dt) {
   if (c.state === 'walk') { if (follow(c, 3.4, dt) || c.stT < -8) { c.state = 'idle'; c.stT = rnd(0.6, 3); } return; }
   c.vx *= 0.85; c.vz *= 0.85;
   if (c.onGround && Math.random() < dt * 0.25) c.vy = JUMP_V * 0.85;
+  if (Math.random() < dt * 0.04) { const id = pick(Object.keys(EMOTES)); playEmote(c, id, true); if (NETH()) netEv(['emo', c.pkey, id]); }   // and show off a move now and then
   // sometimes throw paint at a person close by (you, or a friend in a match together)
   const p = Math.random() < dt * 0.05 ? pick(G.chars.filter(o => !o.bot && (o !== G.player || !G.lobbyCard))) : null;
   if (p && Math.hypot(p.x - c.x, p.z - c.z) < 10) {
@@ -2320,37 +2672,214 @@ function voteWinText(V) {
 }
 
 /* ---------- 11. shop ---------- */
-const owns = (kind, id) => (kind === 'hat' ? HATS : PAINTS)[id].price === 0 || SHOP.owned.includes(kind + ':' + id);
-function openShop(from) { G.shopFrom = from; G.shopOpen = true; $('shopMsg').textContent = ''; drawShop(); showScreen('shop'); }
+/* The shop has tabs (0.3.1): hats, paint balls, launchers, tag celebrations, lobby emotes. SHOP.owned holds 'kind:id'. */
+const SHOP_KINDS = {
+  hat:    { list: () => HATS, tab: '🎩 Hats', sub: 'Hats get painted too, so they never give you away!', using: 'hat' },
+  paint:  { list: () => PAINTS, tab: '🎯 Paint balls', sub: 'For when you are the seeker. Plain colors are free; designs and real gold are in the shop.', using: 'paint' },
+  launch: { list: () => LAUNCHERS, tab: '🔫 Launchers', sub: 'What you hold when you throw paint (seeking and in the lobby). Its tank shows your paint.', using: 'launcher' },
+  cel:    { list: () => CELS, tab: '🎉 Celebrations', sub: 'What happens when YOU find someone. Everyone sees it!', using: 'cel' },
+  emote:  { list: () => EMOTES, tab: '💃 Emotes', sub: 'Moves for the lobby: tap 💃 there, or press 1–9.', using: null }
+};
+const owns = (kind, id) => { const it = SHOP_KINDS[kind].list()[id]; return !!it && (it.price === 0 || SHOP.owned.includes(kind + ':' + id)); };
+function openShop(from) { G.shopFrom = from; G.shopOpen = true; $('shopMsg').textContent = ''; G.shopTab = G.shopTab || 'hat'; drawShop(); showScreen('shop'); }
 function closeShop() {
-  G.shopOpen = false; refreshMenu();
+  G.shopOpen = false; refreshMenu(); drawEmotes();   // emotes you just bought show in the lobby bar
   if (G.shopFrom === 'lobby' && G.phase === 'lobby') { refreshLobbyMe(); if (G.lobbyCard) openLobbyCard(); else { showScreen(null); lobbyHud(); } }
   else if (G.shopFrom === 'final' && G.phase === 'final') { $('finCoins').textContent = '🪙 You have ' + SHOP.coins + ' coins.'; showScreen('final'); }
   else showScreen('menu');
 }
 function drawShop() {
   $('shopCoins').textContent = '🪙 ' + SHOP.coins;
-  const card = (kind, id, it) => {
-    const own = owns(kind, id), on = (kind === 'hat' ? SHOP.hat : SHOP.paint) === id;
+  const kind = G.shopTab || 'hat', K = SHOP_KINDS[kind];
+  $('shopTabs').innerHTML = Object.entries(SHOP_KINDS).map(([k, v]) => `<button data-tab="${k}" class="${k === kind ? 'on' : ''}">${v.tab}</button>`).join('');
+  $('shopSub').textContent = K.sub;
+  const card = (id, it) => {
+    const own = owns(kind, id), on = K.using && SHOP[K.using] === id;
     const cls = on ? 'on' : own ? '' : SHOP.coins >= it.price ? 'buy' : 'poor';
-    const icon = kind === 'hat' ? it.emoji : `<span class="sw" style="background:${hexCss(it.hex)}"></span>`;
-    const label = on ? (kind === 'hat' ? '✓ Wearing' : '✓ Using') : own ? 'Use it' : '🪙 ' + it.price;
+    const icon = kind === 'paint' ? `<span class="sw${id === 'gold' ? ' gold' : ''}" style="background:${id === 'custom' ? hexCss(+SHOP.paintHex || PAINT_HEX) : it.design ? inkCss(id) : hexCss(it.hex)}"></span>` : it.emoji;
+    const label = kind === 'emote' && own ? '✓ Yours' : on ? (kind === 'hat' ? '✓ Wearing' : '✓ Using') : own ? (id === 'custom' ? '🎨 Pick' : 'Use it') : '🪙 ' + it.price;
     return `<button class="item ${cls}" data-kind="${kind}" data-id="${id}"><div class="ie">${icon}</div><div class="in">${it.name}</div><div class="ip">${label}</div></button>`;
   };
-  $('shopHats').innerHTML = Object.entries(HATS).map(([id, it]) => card('hat', id, it)).join('');
-  $('shopPaints').innerHTML = Object.entries(PAINTS).map(([id, it]) => card('paint', id, it)).join('');
+  // owned and free things first, then the rest from cheapest up, so the next thing to save for is easy to find
+  const items = Object.entries(K.list()).filter(([, it]) => !it.hidden);
+  $('shopGrid').innerHTML = items.map(([id, it]) => card(id, it)).join('');
+  $('shopCustom').hidden = !(kind === 'paint' && G.shopPick);
 }
 function shopClick(kind, id) {
-  const it = (kind === 'hat' ? HATS : PAINTS)[id]; if (!it) return;
+  const it = SHOP_KINDS[kind].list()[id]; if (!it) return;
   if (!owns(kind, id)) {
     if (SHOP.coins < it.price) { $('shopMsg').textContent = 'You need ' + (it.price - SHOP.coins) + ' more coins. Play more rounds to earn them!'; sfx.lose(); return; }
     SHOP.coins -= it.price; SHOP.owned.push(kind + ':' + id);
     $('shopMsg').textContent = '🎉 You bought the ' + it.name + '!'; sfx.coin();
   } else { $('shopMsg').textContent = ''; sfx.pop(); }
-  if (kind === 'hat') SHOP.hat = id; else SHOP.paint = id;
+  G.shopPick = kind === 'paint' && id === 'custom';   // "Any color" opens the color grid below
+  if (kind === 'emote') { $('shopMsg').textContent = it.price ? $('shopMsg').textContent : '💃 ' + it.name + ' is free. Use it in the lobby!'; }
+  else if (SHOP_KINDS[kind].using) SHOP[SHOP_KINDS[kind].using] = id;
   saveShop(); drawShop();
 }
-for (const gid of ['shopHats', 'shopPaints']) $(gid).addEventListener('click', e => { const b = e.target.closest('.item'); if (b) shopClick(b.dataset.kind, b.dataset.id); });
+$('shopGrid').addEventListener('click', e => { const b = e.target.closest('.item'); if (b) shopClick(b.dataset.kind, b.dataset.id); });
+$('shopTabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (!b) return; G.shopTab = b.dataset.tab; G.shopPick = false; $('shopMsg').textContent = ''; sfx.pop(); drawShop(); });
+$('shopCustom').innerHTML = PALETTE.map(swatch).join('');
+$('shopCustom').addEventListener('click', e => { const b = e.target.closest('button[data-hex]'); if (!b) return; SHOP.paintHex = +b.dataset.hex; SHOP.paint = 'custom'; G.shopPick = false; $('shopMsg').textContent = '🎨 Your paint balls are this color now!'; sfx.pop(); saveShop(); drawShop(); });
+
+/* ---------- 11b. launchers, tag celebrations, lobby emotes (0.3.1) ---------- */
+const LAUNCHERS = {
+  hand:    { name: 'Just throw', emoji: '✋', price: 0 },
+  blaster: { name: 'Paint Blaster', emoji: '🔫', price: 120 },
+  sling:   { name: 'Slingshot', emoji: '🪃', price: 140 },
+  bubble:  { name: 'Bubble Blaster', emoji: '🫧', price: 160 },
+  cannon:  { name: 'Paint Cannon', emoji: '💣', price: 220 },
+  rainbow: { name: 'Rainbow Blaster', emoji: '🌈', price: 350 },
+  gold:    { name: 'Gold Blaster', emoji: '🏆', price: 400 }
+};
+const CELS = {
+  confetti: { name: 'Confetti', emoji: '🎊', price: 0 },
+  stars:    { name: 'Star Burst', emoji: '🌟', price: 100 },
+  drum:     { name: 'Drum Roll', emoji: '🥁', price: 100 },
+  bubbles:  { name: 'Bubbles', emoji: '🫧', price: 120 },
+  balloons: { name: 'Balloons', emoji: '🎈', price: 160 },
+  fireworks:{ name: 'Fireworks', emoji: '🎆', price: 200 },
+  coins:    { name: 'Gold Shower', emoji: '🪙', price: 300 }
+};
+const EMOTES = {
+  wave:  { name: 'Wave', emoji: '👋', price: 0, dur: 1.6 },
+  jump:  { name: 'Jump for joy', emoji: '🙌', price: 0, dur: 1.1 },
+  spin:  { name: 'Spin', emoji: '🌀', price: 60, dur: 1.1 },
+  bow:   { name: 'Bow', emoji: '🙇', price: 60, dur: 1.4 },
+  clap:  { name: 'Clap', emoji: '👏', price: 70, dur: 1.5 },
+  flex:  { name: 'Flex', emoji: '💪', price: 80, dur: 1.6 },
+  dab:   { name: 'Dab', emoji: '🫡', price: 90, dur: 1.2 },
+  dance: { name: 'Dance', emoji: '💃', price: 120, dur: 2.6 },
+  wheel: { name: 'Cartwheel', emoji: '🤸', price: 150, dur: 1.1 }
+};
+const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti' });
+/* a player's cosmetics from the match list or the network, made safe */
+const cosOf = pl => { const c = (pl && pl.cos) || {}; return { l: Object.prototype.hasOwnProperty.call(LAUNCHERS, c.l) ? c.l : 'hand', t: Object.prototype.hasOwnProperty.call(CELS, c.t) ? c.t : 'confetti' }; };
+/* computer players show off the shop now and then */
+const botCos = () => ({ l: Math.random() < 0.5 ? pick(Object.keys(LAUNCHERS)) : 'hand', t: Math.random() < 0.6 ? pick(Object.keys(CELS)) : 'confetti' });
+
+/* the launcher sits in the right hand (it swings with the arm). Its tank shows the paint ball ink. */
+const LMATS = {};
+const lmat = (hex, o) => LMATS[hex + (o ? JSON.stringify(o) : '')] || (LMATS[hex + (o ? JSON.stringify(o) : '')] = new THREE.MeshStandardMaterial(Object.assign({ color: hex, roughness: 0.45 }, o || {})));
+function inkSolidMat(ink) { return ink === 'gold' ? goldMat() : typeof ink === 'string' ? new THREE.MeshStandardMaterial({ map: inkTex(ink), roughness: 0.35 }) : new THREE.MeshStandardMaterial({ color: ink, roughness: 0.35 }); }
+function addLauncher(c) {
+  if (c.launcher) { c.armR.remove(c.launcher); c.launcher = null; }
+  const id = c.cos && c.cos.l; if (!id || id === 'hand') return;
+  const g = new THREE.Group(); g.position.set(0, -0.4, 0.05); g.rotation.x = Math.PI / 2;   // held in the fist, pointing where the arm points
+  const ink = c.paintHex === undefined ? PAINT_HEX : c.paintHex, tank = inkSolidMat(ink);
+  const P2 = (geo, m, x, y, z, sx, sy, sz, rot) => { const p = new THREE.Mesh(geo, m); p.position.set(x, y, z); p.scale.set(sx, sy, sz); if (rot) p.rotation.set(rot[0], rot[1], rot[2]); p.castShadow = true; g.add(p); return p; };
+  const AX = [Math.PI / 2, 0, 0];   // a cylinder lying along the barrel
+  if (id === 'blaster' || id === 'rainbow' || id === 'gold') {
+    const body = id === 'gold' ? goldMat() : id === 'rainbow' ? new THREE.MeshStandardMaterial({ map: inkTex('rainbow'), roughness: 0.4 }) : lmat(0x2f8bff);
+    const trim = id === 'gold' ? goldMat({ roughness: 0.4 }) : lmat(0xffb703);
+    P2(BOXG, body, 0, 0, 0.06, 0.12, 0.13, 0.34);
+    P2(CYLG, trim, 0, 0.01, 0.3, 0.045, 0.18, 0.045, AX);
+    P2(BOXG, trim, 0, -0.1, -0.02, 0.07, 0.12, 0.07);
+    P2(SPHG, tank, 0, 0.12, 0.02, 0.07, 0.07, 0.07);
+  } else if (id === 'sling') {
+    const wood = lmat(0x9b6b3d);
+    P2(CYLG, wood, 0, 0, 0.02, 0.025, 0.16, 0.025, AX);
+    for (const s of [-1, 1]) P2(CYLG, wood, s * 0.06, 0, 0.14, 0.02, 0.14, 0.02, [Math.PI / 2, 0, s * 0.5]);
+    P2(SPHG, tank, 0, 0, 0.12, 0.05, 0.05, 0.05);
+  } else if (id === 'bubble') {
+    P2(SPHG, lmat(0x7fd8ff, { transparent: true, opacity: 0.75, roughness: 0.1 }), 0, 0, 0.06, 0.12, 0.12, 0.14);
+    P2(CYLG, lmat(0xff77aa), 0, 0, 0.24, 0.05, 0.14, 0.05, AX);
+    for (const [x, y] of [[0.05, 0.12], [-0.04, 0.16], [0.02, 0.2]]) P2(SPHG, tank, x, y, 0.02, 0.03, 0.03, 0.03);
+  } else if (id === 'cannon') {
+    P2(CYLG, lmat(0x3a3f4b, { metalness: 0.4 }), 0, 0, 0.12, 0.09, 0.42, 0.09, AX);
+    for (const z of [0.0, 0.3]) P2(CYLG, lmat(0xffb703), 0, 0, z, 0.1, 0.03, 0.1, AX);
+    P2(SPHG, tank, 0, 0.11, 0.06, 0.06, 0.06, 0.06);
+  }
+  c.armR.add(g); c.launcher = g;
+}
+
+/* tag celebrations: what happens where a seeker finds someone (every device plays it, so friends see yours) */
+const cosFx = [];   // {m, v, t, life, spin, grav, pop, delay, fn}
+function fxMesh(geo, m, pos, scale) { const o = new THREE.Mesh(geo, m); o.position.copy(pos); if (scale) o.scale.copy(scale); scene.add(o); return o; }
+function celebrate(h, s) {
+  const id = s && s.cos ? s.cos.t : 'confetti', at = new V3(h.x, h.y + 0.8, h.z);
+  if (id === 'confetti' || !CELS[id] || G.silent) { burst(at.x, at.y, at.z, BOT_COLORS, 30); sfx.pop(); return; }
+  if (id === 'stars') {
+    for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; sparkleAt(at.clone().add(new V3(Math.cos(a) * 0.9, Math.sin(a) * 0.6 + 0.3, Math.sin(a) * 0.4)), 0.7, 0.8); }
+    burst(at.x, at.y, at.z, [0xffd36b, 0xffffff, 0xfff0b8], 20); [1047, 1319, 1568, 2093].forEach((f, k) => tone(f, 0.2, 'sine', 0.12, 0, k * 0.07));
+  } else if (id === 'drum') {
+    for (let k = 0; k < 10; k++) setTimeout(() => noise(0.05, 0.25, 500), k * 45);
+    cosFx.push({ delay: 0.55, fn: () => { burst(at.x, at.y + 0.4, at.z, BOT_COLORS, 36); tone(523, 0.12, 'triangle', 0.16); tone(784, 0.35, 'triangle', 0.16, 0, 0.12); } });
+  } else if (id === 'bubbles') {
+    const m = lmat(0xbfefff, { transparent: true, opacity: 0.4, roughness: 0.05, metalness: 0.2 });
+    for (let k = 0; k < 14; k++) { const r = rnd(0.07, 0.16); cosFx.push({ m: fxMesh(SPHG, m, at.clone().add(new V3(rnd(-0.4, 0.4), rnd(-0.5, 0.3), rnd(-0.4, 0.4))), new V3(r, r, r)), v: new V3(rnd(-0.3, 0.3), rnd(0.5, 1.2), rnd(-0.3, 0.3)), t: 0, life: rnd(1.4, 2.6), wob: rnd(0, 6), pop: true }); }
+    tone(700, 0.2, 'sine', 0.12, 1400);
+  } else if (id === 'balloons') {
+    for (let k = 0; k < 6; k++) {
+      const col = BOT_COLORS[k % BOT_COLORS.length], g = new THREE.Group();
+      const b = new THREE.Mesh(SPHG, lmat(col, { roughness: 0.25 })); b.scale.set(0.2, 0.25, 0.2); g.add(b);
+      const st = new THREE.Mesh(CYLG, lmat(0xffffff)); st.scale.set(0.006, 0.5, 0.006); st.position.y = -0.48; g.add(st);
+      g.position.copy(at).add(new V3(rnd(-0.5, 0.5), rnd(-0.2, 0.3), rnd(-0.5, 0.5))); scene.add(g);
+      cosFx.push({ m: g, v: new V3(rnd(-0.2, 0.2), rnd(1.1, 1.7), rnd(-0.2, 0.2)), t: 0, life: 4, wob: rnd(0, 6) });
+    }
+    tone(400, 0.3, 'sine', 0.14, 900);
+  } else if (id === 'fireworks') {
+    for (let k = 0; k < 3; k++) {
+      const col = pick(BOT_COLORS), m = fxMesh(SPHG, paintMat(col), at.clone().add(new V3(rnd(-0.6, 0.6), 0, rnd(-0.6, 0.6))), new V3(0.08, 0.08, 0.08));
+      cosFx.push({ m, v: new V3(rnd(-0.6, 0.6), rnd(6, 8), rnd(-0.6, 0.6)), t: 0, life: 0.6 + k * 0.15, delay: k * 0.2, trail: true,
+        end: o => { burst(o.position.x, o.position.y, o.position.z, [col, 0xffffff, pick(BOT_COLORS)], 28); sparkleAt(o.position, 1.2, 0.5); noise(0.3, 0.35 * volAt(o.position), 600); } });
+    }
+    noise(0.4, 0.2, 3000);
+  } else if (id === 'coins') {
+    const m = goldMat({ roughness: 0.3 });
+    for (let k = 0; k < 16; k++) cosFx.push({ m: fxMesh(CYLG, m, at, new V3(0.09, 0.018, 0.09)), v: new V3(rnd(-2.5, 2.5), rnd(4, 7), rnd(-2.5, 2.5)), t: 0, life: 2.2, spin: rnd(6, 14), grav: 12, floor: true });
+    for (let k = 0; k < 6; k++) setTimeout(() => sfx.coin(), k * 90);
+  }
+}
+function cosTick(dt) {
+  for (let i = cosFx.length - 1; i >= 0; i--) {
+    const f = cosFx[i];
+    if (f.delay > 0) { f.delay -= dt; if (f.m) f.m.visible = false; continue; }
+    if (f.fn) { f.fn(); cosFx.splice(i, 1); continue; }
+    f.m.visible = true; f.t += dt;
+    if (f.grav) f.v.y -= f.grav * dt;
+    f.m.position.addScaledVector(f.v, dt);
+    if (f.wob !== undefined) f.m.position.x += Math.sin(f.t * 3 + f.wob) * dt * 0.3;
+    if (f.spin) { f.m.rotation.x += f.spin * dt; f.m.rotation.z += f.spin * 0.7 * dt; }
+    if (f.floor && f.m.position.y < 0.03) { f.m.position.y = 0.03; f.v.set(0, 0, 0); f.spin = 0; }
+    if (f.trail && Math.random() < dt * 30) sparkleAt(f.m.position, 0.18, 0.25);
+    if (f.t >= f.life) { if (f.end) f.end(f.m); if (f.pop) tone(1200, 0.05, 'sine', 0.05, 1800); scene.remove(f.m); cosFx.splice(i, 1); }
+  }
+}
+function clearCosFx() { for (const f of cosFx) if (f.m) scene.remove(f.m); cosFx.length = 0; }
+
+/* lobby emotes: a move that plays over the normal animation for a moment (after animChars) */
+function playEmote(c, id, fromNet) {
+  if (!c || !EMOTES[id] || G.phase !== 'lobby') return;
+  if (c === G.player && !fromNet && !owns('emote', id)) return;
+  c.emote = { id, t: 0 };
+  if (EMOTES[id] && id === 'jump' && c.onGround && !c.puppet) c.vy = JUMP_V;
+  if (c === G.player && !fromNet && NET.on) { if (NETC()) netSend(['emo', id]); else netEv(['emo', c.pkey, id]); }
+  if (c === G.player) sfx.pop();
+}
+function emoteStep(c, dt) {
+  const e = c.emote, E = EMOTES[e.id]; e.t += dt;
+  const t = e.t, f = Math.min(1, t / E.dur), s = Math.sin(f * Math.PI);   // s: 0 → 1 → 0 over the move
+  const aL = c.armL.rotation, aR = c.armR.rotation, M = c.model;
+  if (t >= E.dur) { c.emote = null; aL.z = aR.z = 0; M.rotation.y = M.rotation.z = 0; return; }
+  switch (e.id) {
+    case 'wave': aR.x = -2.9; aR.z = Math.sin(t * 12) * 0.45; break;
+    case 'jump': aL.x = aR.x = -2.9; aL.z = 0.4; aR.z = -0.4; break;
+    case 'spin': M.rotation.y = f * Math.PI * 4; aL.z = 1.2 * s; aR.z = -1.2 * s; break;
+    case 'bow': M.rotation.x = 0.7 * s; aL.x = aR.x = -0.4 * s; break;
+    case 'clap': aL.x = aR.x = -1.4; aL.z = -0.35 - Math.abs(Math.sin(t * 14)) * 0.25; aR.z = 0.35 + Math.abs(Math.sin(t * 14)) * 0.25; break;
+    case 'flex': aL.x = aR.x = -1.2 * s; aL.z = 1.5 * s; aR.z = -1.5 * s; break;
+    case 'dab': aL.x = -2.3 * s; aL.z = 0.9 * s; aR.x = -1.5 * s; aR.z = -1.1 * s; M.rotation.z = 0.15 * s; break;
+    case 'dance': { const b = Math.sin(t * 9); aL.x = -1.6 - b * 0.9; aR.x = -1.6 + b * 0.9; c.legL.rotation.x = Math.max(0, b) * 0.6; c.legR.rotation.x = Math.max(0, -b) * 0.6; M.rotation.y = Math.sin(t * 4.5) * 0.5; break; }
+    case 'wheel': M.rotation.z = f * Math.PI * 2; M.position.y = s * 0.45; aL.z = 2.8; aR.z = -2.8; aL.x = aR.x = 0; break;
+  }
+}
+/* the emote buttons in the lobby (owned ones only); keys 1–9 there too */
+function drawEmotes() {
+  const ids = Object.keys(EMOTES).filter(id => owns('emote', id));
+  $('emotes').innerHTML = ids.map((id, n) => `<button data-e="${id}" title="${EMOTES[id].name} (${n + 1})">${EMOTES[id].emoji}<span>${EMOTES[id].name.split(' ')[0]}</span></button>`).join('');
+}
+$('emotes').addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); ac(); const b = e.target.closest('button[data-e]'); if (b) playEmote(G.player, b.dataset.e); });
 
 /* ---------- 12. round flow + HUD + main loop ---------- */
 function clearRound() {
@@ -2468,7 +2997,7 @@ function becomeSeeker(c) {
   const pl = P(c.pkey);
   c.paintHex = c === G.player ? myPaintHex() : pl && playsHuman(pl) ? paintOf(pl) : PAINT_HEX; c.visited = [];
   if (c.hatG) c.hatG.visible = false;
-  addBucket(c.hatPivot, c.paintHex);
+  addBucket(c.hatPivot, c.paintHex); addLauncher(c);
   if (c === G.player) { G.ammo = G.D.ammo || 12; G.throwCd = 0.5; closePalette(); setPlayerButtons(); }
 }
 function addBotHider(b, i, n) {
@@ -2497,7 +3026,7 @@ function catchCheck() {
     if (s.role !== 'seeker' || s.state === 'count') continue;
     for (const h of G.chars) {
       if (h.role !== 'hider' || h.caught) continue;
-      if (Math.hypot(h.x - s.x, h.z - s.z) >= 1.12 || Math.abs(h.y - s.y) >= 2) continue;
+      if (Math.hypot(h.x - s.x, h.z - s.z) >= 1.12 || Math.abs(h.y - s.y) >= 1.3) continue;   // 0.2.1: about a seeker's own height (was 2 m)
       // computer seekers only tag someone they have noticed (or are chasing), not by brushing past by accident
       if (s.bot && !(s.state === 'chase' && s.target === h) && (s.susp.get(h) || 0) < 0.6) continue;
       catchHider(h, s);
@@ -2526,7 +3055,7 @@ function catchHider(h, s) {
 }
 /* what this device shows when someone is found: the pop, the colors, the message */
 function foundFx(h, s, join, left) {
-  burst(h.x, h.y + 0.8, h.z, BOT_COLORS, 30); sfx.pop();
+  celebrate(h, s);   // the seeker's tag celebration (confetti unless they bought another)
   clearSplats(h); setColor(h, h.base); h.eyesOpen = true;
   const who = s ? nameOf(P(s.pkey) || s) : G.seekName;
   if (h === G.player) {
@@ -2768,6 +3297,7 @@ function animChars(dt) {
     if (c.spin) c.spin.rotation.y += dt * (c.moving ? 18 : 4);
     c.g.position.set(c.x, c.y, c.z); c.g.rotation.y = c.yaw;
     if (c.caught) c.g.position.y = 0.5 + Math.abs(Math.sin(G.time * 4 + c.bob)) * 0.15;
+    if (c.emote) emoteStep(c, dt);   // a lobby emote plays over the normal moves
   }
 }
 let menuA = 0;
@@ -2781,6 +3311,7 @@ function update(dt) {
   G.time += dt;
   if (clouds) for (const c of clouds.children) { c.position.x += dt * 0.6; if (c.position.x > 90) c.position.x = -90; }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) $('toast').classList.remove('on'); }
+  if (!G.paused) { updateSparkles(dt); goldTwinkle(dt); cosTick(dt); }   // gold twinkles, tag celebrations, emotes (section 11b)
   if (NET.on) netTick(dt);   // playing with friends: send and check the links (updates, timeouts, who is still here)
   if (G.phase === 'menu' || G.phase === 'final' || G.phase === 'wait') { menuCam(dt); return; }
   if (G.phase === 'lobby') { lobbyTick(dt); return; }
@@ -2837,9 +3368,12 @@ function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = i
    any Graphics choice starts over. It only ever steps down, so it can't swing back and forth. */
 let GFX_DROP = Math.min(2, +load('ps-gfx', { drop: 0 }).drop || 0);
 const GFXW = { t: 0, n: 0, last: 0, slow: 0, warm: 0 };
-const gfxLevel = () => SET.gfx === 'auto' ? (TOUCH ? 'low' : 'high') : SET.gfx === 'low' ? 'low' : 'high';
+/* Auto (0.3.1) follows the device check (section 12b): tier 3 = Pretty, tier 2 = Fast with touch and Pretty with a mouse
+   (the old rule, also used before the first check), tier 0–1 = Fast (tier 0 also starts without shadows). */
+const autoGfx = () => { const t = benchTier(); return t >= 3 ? 'high' : t === 2 ? (TOUCH ? 'low' : 'high') : 'low'; };
+const gfxLevel = () => BENCHING ? 'high' : SET.gfx === 'auto' ? autoGfx() : SET.gfx === 'low' ? 'low' : 'high';
 function applyGfx() {
-  const lvl = gfxLevel(), d = SET.gfx === 'auto' ? GFX_DROP : 0, dpr = window.devicePixelRatio || 1;
+  const lvl = gfxLevel(), d = BENCHING ? 0 : SET.gfx === 'auto' ? Math.max(GFX_DROP, benchTier() === 0 ? 1 : 0) : 0, dpr = window.devicePixelRatio || 1;
   const pr = d >= 2 ? 0.75 : lvl === 'low' ? 1 : Math.min(dpr, 1.5);
   if (renderer.getPixelRatio() !== pr) renderer.setPixelRatio(pr);
   const ms = lvl === 'low' ? 1024 : 2048;
@@ -2847,20 +3381,60 @@ function applyGfx() {
   const on = d < 1;
   if (renderer.shadowMap.enabled !== on) { renderer.shadowMap.enabled = on; for (const k in MATS) MATS[k].needsUpdate = true; for (const c of G.chars) eachMat(c, m => { m.needsUpdate = true; }); }
   sun.castShadow = on;
-  const n = $('gfxNote'); if (n) n.hidden = !d;
+  const n = $('gfxNote'); if (n) n.hidden = !(SET.gfx === 'auto' && GFX_DROP);
   resize();
 }
 /* after every drawn frame: on Auto, during a match (the lobby or a round), not paused, not hidden; a frame over 250 ms
    (a hitch or a tab switch) starts the count over */
+/* 0.3.1: the goal is at least 30 frames a second. "Slow" is under 27, because iOS Low Power Mode holds web pages at
+   exactly 30 and a measured 29.x must not count as slow. Textures on Auto step down first (Realistic → Detailed →
+   Simple), then the graphics as before. */
+const FPS_MIN = 27;
 function autoGfxTick() {
   const now = performance.now(), ft = now - GFXW.last; GFXW.last = now;
-  if (SET.gfx !== 'auto' || GFX_DROP >= 2 || !(G.phase === 'lobby' || inRound()) || G.paused || G.skipping || document.hidden || ft > 250) { GFXW.t = GFXW.n = GFXW.slow = GFXW.warm = 0; return; }
+  if (BENCHING) { benchTick(ft); return; }
+  const texCan = SET.tex === 'auto' && autoTexIdx() - TEX_DROP > 0, gfxCan = SET.gfx === 'auto' && GFX_DROP < 2;
+  if (!(texCan || gfxCan) || !(G.phase === 'lobby' || inRound()) || G.paused || G.skipping || document.hidden || ft > 250) { GFXW.t = GFXW.n = GFXW.slow = GFXW.warm = 0; return; }
   GFXW.warm += ft; if (GFXW.warm < 4000) return;
   GFXW.t += ft; GFXW.n++; if (GFXW.t < 2000) return;
   const fps = GFXW.n * 1000 / GFXW.t; GFXW.t = GFXW.n = 0;
-  GFXW.slow = fps < 26 ? GFXW.slow + 1 : 0; if (GFXW.slow < 3) return;
-  GFXW.slow = 0; GFXW.warm = 0; GFX_DROP++; save('ps-gfx', { drop: GFX_DROP }); applyGfx();
+  GFXW.slow = fps < FPS_MIN ? GFXW.slow + 1 : 0; if (GFXW.slow < 3) return;
+  GFXW.slow = 0; GFXW.warm = 0;
+  if (texCan) { TEX_DROP++; save('ps-texdrop', { drop: TEX_DROP }); applyTex(); toast('🐢 Textures turned down to keep the game smooth (menu → Textures)', 3); return; }
+  GFX_DROP++; save('ps-gfx', { drop: GFX_DROP }); applyGfx();
   toast('🐢 Graphics turned down to keep the game smooth (menu → Graphics)', 3);
+}
+/* ---------- 12b. the device check (0.3.1) ----------
+   The first time the game runs on a device (and when ⚡ Check my device again is tapped) it draws the menu's map for
+   about 2.5 seconds at the best settings (Pretty, Realistic drawn textures, shadows) and counts the frames:
+   50+ a second = tier 3 (Pretty, Realistic) · 38+ = tier 2 (Detailed; Fast with touch, Pretty with a mouse) ·
+   27+ = tier 1 (Fast, Simple) · less = tier 0 (Fast, Simple, no shadows). Saved on this device (ps-bench).
+   Only Auto follows it; a setting picked by hand always wins. The first 0.6 s don't count (drawing the textures). */
+let BENCHING = null;
+function runBench() {
+  if (BENCHING) return;
+  BENCHING = { el: 0, ms: 0, n: 0 }; GFXW.last = performance.now();
+  applyGfx(); applyTex();
+}
+function benchTick(ft) {
+  const B = BENCHING;
+  if (document.hidden) { B.el = B.ms = B.n = 0; return; }   // a hidden tab draws slowly on purpose: start over when it's back
+  if (ft > 250) return;   // a hitch: wait for real frames
+  B.el += ft; if (B.el < 600) return;
+  B.ms += ft; B.n++; if (B.ms < 2000) return;
+  const fps = B.n * 1000 / B.ms, tier = fps >= 50 ? 3 : fps >= 38 ? 2 : fps >= FPS_MIN ? 1 : 0;
+  BENCH = { v: 1, tier, fps: Math.round(fps) }; save('ps-bench', BENCH); BENCHING = null;
+  GFX_DROP = 0; save('ps-gfx', { drop: 0 }); TEX_DROP = 0; save('ps-texdrop', { drop: 0 });
+  applyGfx(); applyTex(); refreshMenu();
+  if (G.phase === 'menu') toast('⚡ Picked the best graphics for this device: ' + { high: 'Pretty', low: 'Fast' }[autoGfx()] + ', ' + TEX_NAME[TEX_LEVELS[autoTexIdx()]] + ' textures', 3);
+}
+const TEX_NAME = { simple: 'Simple', detailed: 'Detailed', realistic: 'Realistic' };
+function refreshTexNote() {
+  const n = $('texNote'), b = $('benchNote'); if (!n) return;
+  const lvl = texLevel(), photoBad = SET.texStyle === 'photo' && Object.values(PHOTO).some(p => p.state === 'bad');
+  n.textContent = (SET.tex === 'auto' && !BENCHING ? 'Auto is using ' + TEX_NAME[lvl] + (TEX_DROP ? ' (🐢 turned down because the game ran slowly)' : '') + '. ' : '') +
+    (photoBad ? '📷 The photos can\'t load here (they need the website), so the drawn textures are used.' : lvl === 'simple' && SET.texStyle === 'photo' ? '📷 Photos are used on Detailed and Realistic.' : '');
+  b.textContent = BENCHING ? 'Checking…' : BENCH ? 'Last check: ' + BENCH.fps + ' frames a second at the best settings.' : '';
 }
 /* touch mode on or off: the touch buttons, the key hints, and the graphics (Auto follows it) */
 function setTouch(v) {
@@ -2897,7 +3471,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.3';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.3.1';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
@@ -2911,7 +3485,7 @@ const NET = { on: false, role: null, code: '', R: null, peers: [], hostPeer: nul
               sid: null, sceneN: 0, snapAt: 0, lastSnap: null, snapT: 0, inpT: 0, inpSeen: new Map(), rv: null, myRv: '', everHost: false, joinT: 0, hostMissT: 0, wantT: 0, uiT: 0 };
 const NETH = () => NET.on && NET.role === 'host' && !!G.match;
 const NETC = () => NET.on && NET.role === 'join' && !!G.match;
-const paintOf = pl => (PAINTS[pl && pl.paint] || PAINTS.pink).hex;
+const paintOf = pl => inkOf(pl && pl.paint);   // a friend's paint ball ink (made safe)
 const charOf = key => G.chars.find(c => c.pkey === key) || null;
 const psOf = p => p.presence.ps;
 /* how many OTHER people are playing in this match right now (0 = you're the only person: Restart works as always) */
@@ -3124,7 +3698,7 @@ function mpStatusText() {
 }
 const mpCode = () => { const A = 'BCDFGHJKLMNPQRSTVWXZ'; let s = ''; for (let i = 0; i < 4; i++) s += A[Math.random() * A.length | 0]; return s; };
 const roomName = code => 'ps-' + (PS_TRACK !== 'stable' ? PS_TRACK + '-' : '') + code.toLowerCase();   // each track has its own rooms
-const netMyPs = role => ({ pid: PID, name: NET.myName || netName(), hat: SHOP.hat, paint: SHOP.paint, ver: PS_VERSION, role });
+const netMyPs = role => ({ pid: PID, name: NET.myName || netName(), hat: SHOP.hat, paint: myInk(), cos: myCos(), ver: PS_VERSION, role });
 const netSend = e => { if (NET.R) NET.R.emit('in', e); };   // a friend's device → the host
 const netEv = e => { if (NET.R) NET.R.emit('ev', e); };     // the host → everyone
 function netShareLook() { if (NET.on && NET.R) NET.R.presence({ ps: netMyPs(NET.role === 'host' ? 'host' : 'player') }); }
@@ -3293,6 +3867,7 @@ function netOnIn(m) {
       break;
     case 'pt': if (c) clearSplats(c); break;   // they painted over their splats
     case 'hid': if (G.phase === 'count' && c && c.role === 'hider') { G.hidKeys.add(key); hiddenCheck(); } break;   // ✅ I'm hidden!
+    case 'emo': if (c && EMOTES[e[1]]) { playEmote(c, e[1], true); netEv(['emo', key, e[1]]); } break;   // a friend's lobby emote: play it and pass it on
     case 'rdy': if (G.phase === 'lobby') { G.readyKeys.add(key); if (netHumansReady()) G.lobbyT = Math.min(G.lobbyT, 3.5); } break;
     case 'vote': if (G.phase === 'vote' && G.vote && !G.vote.win && G.vote.ids.includes(e[1])) { G.vote.picks.set(key, e[1]); sfx.vote(); drawVote(); } break;
     case 'rs': if (inRound() && NET.rule === 'vote') netRestartVote(key); break;
@@ -3303,9 +3878,9 @@ function netOnIn(m) {
 /* ---- host: starting a match, scenes, updates ---- */
 function netStartMatch() {
   if (NET.role !== 'host') return;
-  const people = [{ key: MYKEY, pid: PID, name: NET.myName || netName(), hat: SHOP.hat, paint: SHOP.paint }];
+  const people = [{ key: MYKEY, pid: PID, name: NET.myName || netName(), hat: SHOP.hat, paint: myInk(), cos: myCos() }];
   for (const p of NET.peers) if (!p.isMe && netApproved(p) && !psOf(p).left && people.length < 7)
-    people.push({ key: 'u' + psOf(p).pid, pid: psOf(p).pid, name: cleanName(psOf(p).name) || 'Player', hat: psOf(p).hat, paint: psOf(p).paint });
+    people.push({ key: 'u' + psOf(p).pid, pid: psOf(p).pid, name: cleanName(psOf(p).name) || 'Player', hat: psOf(p).hat, paint: psOf(p).paint, cos: psOf(p).cos });
   if (people.length < 2) { netMsg('Wait for a friend to join, and tap ✅ Allow.'); return; }
   ac(); netMsg('');
   G.myKey = MYKEY; newMatch(people); NET.sceneN = 0; NET.rv = null;
@@ -3316,7 +3891,7 @@ function netStartMatch() {
 /* people who were let in during a match join at the next lobby (taking a computer player's place when it's full) */
 function netAddLatePlayers() {
   const M = G.match;
-  for (const p of M.players) if (p.human) { const x = NET.peers.find(q => psOf(q).pid === p.pid); if (x) { p.hat = psOf(x).hat; p.paint = psOf(x).paint; } }   // new hats and paint colors
+  for (const p of M.players) if (p.human) { const x = NET.peers.find(q => psOf(q).pid === p.pid); if (x) { p.hat = psOf(x).hat; p.paint = psOf(x).paint; p.cos = psOf(x).cos; } }   // new hats and paint colors
   for (const q of NET.peers) {
     if (q.isMe || !netApproved(q) || psOf(q).left || P('u' + psOf(q).pid)) continue;
     const key = 'u' + psOf(q).pid;
@@ -3328,7 +3903,7 @@ function netAddLatePlayers() {
       const r = M.order.findIndex((k, i) => i >= M.round && !P(k).human); if (r >= 0) M.order[r] = key;
     }
     const n = M.players.filter(p => p.human).length;
-    M.players.push({ key, pid: psOf(q).pid, name: cleanName(psOf(q).name) || 'Player', hat: psOf(q).hat, paint: psOf(q).paint, hex: HUMAN_COLORS[n % HUMAN_COLORS.length], human: true, total: 0, last: 0 });
+    M.players.push({ key, pid: psOf(q).pid, name: cleanName(psOf(q).name) || 'Player', hat: psOf(q).hat, paint: psOf(q).paint, cos: psOf(q).cos, hex: HUMAN_COLORS[n % HUMAN_COLORS.length], human: true, total: 0, last: 0 });
     netLog(cleanName(psOf(q).name) + ' joined the match');
   }
 }
@@ -3338,7 +3913,7 @@ function netResync() { if (NETH() && NET.sid) netEv(['scene', netSceneNow()]); }
 function netSceneNow() {
   const M = G.match, ph = G.phase === 'lobby' ? 'lobby' : G.phase === 'vote' ? 'vote' : G.phase === 'final' ? 'final' : 'round';
   const S = { sid: NET.sid, ph, rule: NET.rule,
-    m: { id: M.id, rounds: M.rounds, round: M.round, order: M.order, players: M.players.map(p => ({ key: p.key, pid: p.pid, name: p.name, hex: p.hex, hat: p.hat, paint: p.paint, human: p.human ? 1 : 0, away: p.away ? 1 : 0, total: p.total, last: p.last })) } };
+    m: { id: M.id, rounds: M.rounds, round: M.round, order: M.order, players: M.players.map(p => ({ key: p.key, pid: p.pid, name: p.name, hex: p.hex, hat: p.hat, paint: p.paint, cos: p.cos, human: p.human ? 1 : 0, away: p.away ? 1 : 0, total: p.total, last: p.last })) } };
   if (ph === 'vote') S.ids = G.vote.ids;
   if (ph === 'lobby' || ph === 'round') S.c = G.chars.map(c => [c.pkey, r2(c.x), r2(c.z), r2(c.yaw), c.role, c.bot ? 1 : 0, c.origSeeker ? 1 : 0, c.caught ? 1 : 0, c.wasFound ? 1 : 0, c.base.getHex(), c.foundN, c.splatHits]);
   if (ph === 'round') Object.assign(S, { map: mapId, rph: G.phase, t: r2(G.t), D: G.D, sk: G.seekKeys, seekKey: G.seekKey, hs: G.humanSeek ? 1 : 0, total: G.total, found: G.found });
@@ -3471,9 +4046,10 @@ function netOnEv(m) {
   switch (e[0]) {
     case 'b': {   // a paint ball (yours are already on your screen)
       if (e[1] === ME()) break;
-      spawnBall(new V3(e[2], e[3], e[4]), new V3(e[5], e[6], e[7]), charOf(e[1]) || { role: '', pkey: e[1] }, e[8]); break;
+      spawnBall(new V3(e[2], e[3], e[4]), new V3(e[5], e[6], e[7]), charOf(e[1]) || { role: '', pkey: e[1] }, inkOf(e[8])); break;
     }
-    case 'sp': { const c = charOf(e[1]); if (c) splatFx(c, charOf(e[2]), e[3]); break; }
+    case 'emo': if (e[1] !== ME()) playEmote(charOf(e[1]), e[2], true); break;
+    case 'sp': { const c = charOf(e[1]); if (c) splatFx(c, charOf(e[2]), inkOf(e[3])); break; }
     case 'c': {   // someone was found
       const h = charOf(e[1]), s = charOf(e[2]), join = !!e[3]; if (!h) break;
       G.found++; if (s) s.foundN++;
@@ -3610,7 +4186,7 @@ for (const b of $('optRestart').children) b.addEventListener('click', () => {
 /* menu wiring */
 const LEVEL_SEGS = [['optHideTime', 'hideTime'], ['optSeekTime', 'seekTime'], ['optHiddenTime', 'hiddenTime'], ['optHotcold', 'hotcold'], ['optSecond', 'second'], ['optAmmo', 'ammo']];
 function refreshMenu() {
-  for (const [id, key] of [['optBots', 'bots'], ['optFound', 'found'], ['optRounds', 'rounds'], ['optSound', 'sound'], ['optGfx', 'gfx'], ['optTouch', 'touch'], ...LEVEL_SEGS])
+  for (const [id, key] of [['optBots', 'bots'], ['optFound', 'found'], ['optRounds', 'rounds'], ['optSound', 'sound'], ['optGfx', 'gfx'], ['optTex', 'tex'], ['optTexStyle', 'texStyle'], ['optTouch', 'touch'], ...LEVEL_SEGS])
     for (const b of $(id).children) b.classList.toggle('on', String(SET[key]) === b.dataset.v);
   for (const [id, key, lab] of [['optHideIQ', 'hideIQ', 'hideIQv'], ['optSeekIQ', 'seekIQ', 'seekIQv']]) { $(id).value = SET[key]; $(lab).textContent = SET[key] + ' · ' + IQ_WORD(SET[key]); }
   // Difficulty: the master slider, what its stop sets, and the Custom panel
@@ -3621,7 +4197,7 @@ function refreshMenu() {
     'Hiders ' + SET.hideIQ + ' · Seekers ' + SET.seekIQ + ' · Hide ' + SET.hideTime + ' s · Find them ' + fmt(SET.seekTime) + ' · Stay hidden ' + fmt(SET.hiddenTime) + ' · Hint ' + (+SET.hotcold ? 'on' : 'off') +
     ' · 2nd seeker ' + { start: 'right away', late: 'after ' + SECOND_LATE + ' s', never: 'never' }[SET.second] + ' · ' + SET.ammo + ' paint balls. Slide to ⚙️ Custom to change them one by one.';
   $('menuCoins').textContent = '🪙 ' + SHOP.coins + ' coins';
-  syncTouchDesc();
+  syncTouchDesc(); refreshTexNote();
   const bits2 = [];
   if (BEST.matchWins) bits2.push('🏆 Matches won: ' + BEST.matchWins);
   if (BEST.seek[SET.diff]) bits2.push('Best seek time (' + levelName(SET.diff) + '): ' + fmt(BEST.seek[SET.diff]));
@@ -3629,12 +4205,14 @@ function refreshMenu() {
   $('bestLine').textContent = bits2.join('  ·  ');
   $('verLine').textContent = 'Version ' + PS_VERSION + (TRACK_NAME[PS_TRACK] ? '  ·  ' + TRACK_NAME[PS_TRACK] : '');
 }
-for (const [id, key, num] of [['optBots', 'bots', true], ['optFound', 'found', false], ['optRounds', 'rounds', true], ['optSound', 'sound', true], ['optGfx', 'gfx', false], ['optTouch', 'touch', false]])
+for (const [id, key, num] of [['optBots', 'bots', true], ['optFound', 'found', false], ['optRounds', 'rounds', true], ['optSound', 'sound', true], ['optGfx', 'gfx', false], ['optTex', 'tex', false], ['optTexStyle', 'texStyle', false], ['optTouch', 'touch', false]])
   for (const b of $(id).children) b.addEventListener('click', () => {
     SET[key] = num ? +b.dataset.v : b.dataset.v;
     save('ps-set', SET); refreshMenu();
     if (key === 'sound' && SET.sound) { ac(); sfx.pop(); }
     if (key === 'gfx') { GFX_DROP = 0; save('ps-gfx', { drop: 0 }); applyGfx(); }   // any Graphics choice starts Auto over
+    if (key === 'tex') { TEX_DROP = 0; save('ps-texdrop', { drop: 0 }); }   // the same for Textures
+    if (key === 'tex' || key === 'texStyle') { applyTex(); refreshMenu(); }
     if (key === 'touch') { setTouch(SET.touch === 'on' || (SET.touch === 'auto' && isCoarse())); syncTouchDesc(); }
   });
 // Difficulty: the master slider sets the whole set; any one setting on its own moves it to ⚙️ Custom
@@ -3643,6 +4221,7 @@ for (const [id, key] of [['optHideIQ', 'hideIQ'], ['optSeekIQ', 'seekIQ']])
   $(id).addEventListener('input', e => { setOption(key, +e.target.value); save('ps-set', SET); refreshMenu(); });
 for (const [id, key] of LEVEL_SEGS)
   for (const b of $(id).children) b.addEventListener('click', () => { setOption(key, key === 'second' ? b.dataset.v : +b.dataset.v); save('ps-set', SET); refreshMenu(); });
+$('benchBtn').onclick = () => { ac(); runBench(); refreshMenu(); };
 $('goPlay').onclick = () => { $('menuMsg').textContent = ''; startMatch(); };
 $('goTogether').onclick = () => { ac(); netOpenScreen(); };
 $('goShop').onclick = () => openShop('menu');
@@ -3666,6 +4245,7 @@ $('skipBtn').addEventListener('pointerdown', e => { e.stopPropagation(); e.preve
 loadMap(pick(Object.keys(MAPS)));
 refreshMenu();
 requestAnimationFrame(frame);
+if (!BENCH) setTimeout(runBench, 700);   // the first time on this device: the device check (section 12b)
 
 /* test hook: lets a test drive frames by hand (some preview panes pause animation frames) */
 window.PS = { G, LEVELS, MAPS, HATS, PAINTS, SHOP, spots, aimHit, camera, cast, solids, input, start: startRound, match: startMatch, vote: openVote, loadMap, skipNow,
