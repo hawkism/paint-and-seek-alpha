@@ -1706,6 +1706,14 @@ function part(g, geo, m, x, y, z, sx, sy, sz, rot) {
   if (rot) p.rotation.set(rot[0], rot[1], rot[2]);
   p.castShadow = true; g.add(p); return p;
 }
+/* a flat zigzag lightning bolt (the ⚡ hat), made once */
+let BOLTG = null;
+function boltGeo() {
+  if (BOLTG) return BOLTG;
+  const s = new THREE.Shape(), P = [[0.08, 0.24], [-0.1, -0.01], [0.0, -0.01], [-0.08, -0.24], [0.13, 0.05], [0.03, 0.05], [0.14, 0.24]];
+  s.moveTo(P[0][0], P[0][1]); for (const [x, y] of P.slice(1)) s.lineTo(x, y); s.closePath();
+  return BOLTG = new THREE.ExtrudeGeometry(s, { depth: 0.06, bevelEnabled: false });
+}
 const HATS = {
   none:      { name: 'No hat', emoji: '🙂', price: 0 },
   party:     { name: 'Party Hat', emoji: '🥳', price: 60, build: (g, m) => { part(g, CONEG, m, 0, 1.47, 0, 0.19, 0.42, 0.19); part(g, SPHG, m, 0, 1.71, 0, 0.07, 0.07, 0.07); } },
@@ -1731,6 +1739,11 @@ const HATS = {
   astro:     { name: 'Astronaut Helmet', emoji: '👨‍🚀', price: 99999, hidden: true, build: (g, m) => { part(g, SPHG, m, 0, 1.1, 0, 0.36, 0.36, 0.36); part(g, CYLG, m, 0, 0.78, 0, 0.32, 0.08, 0.32); part(g, BOXG, m, 0, 1.12, 0.3, 0.36, 0.22, 0.1); } },
   dino:      { name: 'Dino Hood', emoji: '🦖', price: 99999, hidden: true, build: (g, m) => { part(g, SPHG, m, 0, 1.22, -0.02, 0.32, 0.22, 0.34); for (let k = 0; k < 5; k++) part(g, CONEG, m, 0, 1.42 - k * 0.04, -0.2 + k * 0.1, 0.05, 0.14, 0.08); part(g, BOXG, m, 0, 1.25, 0.3, 0.3, 0.06, 0.16); } },
   cone:      { name: 'Traffic Cone', emoji: '🚧', price: 99999, hidden: true, build: (g, m) => { part(g, BOXG, m, 0, 1.25, 0, 0.5, 0.05, 0.5); part(g, CONEG, m, 0, 1.55, 0, 0.2, 0.6, 0.2); } },   // secret (a cheat code)
+  // 0.4.2: super items (Supah power and the mystery box)
+  rocket:    { name: 'Rocket Hat', emoji: '🚀', price: 99999, hidden: true, build: (g, m) => { part(g, CYLG, m, 0, 1.42, 0, 0.11, 0.36, 0.11); part(g, CONEG, m, 0, 1.7, 0, 0.11, 0.2, 0.11); for (const s of [-1, 1]) { part(g, BOXG, m, s * 0.13, 1.3, 0, 0.1, 0.14, 0.02); part(g, BOXG, m, 0, 1.3, s * 0.13, 0.02, 0.14, 0.1); } } },
+  bolt:      { name: 'Lightning Bolt', emoji: '⚡', price: 99999, hidden: true, build: (g, m) => { part(g, boltGeo(), m, 0, 1.47, -0.03, 1, 1, 1); } },
+  star:      { name: 'Superstar', emoji: '⭐', price: 99999, hidden: true, build: (g, m) => { part(g, CYLG, m, 0, 1.32, 0, 0.02, 0.2, 0.02); part(g, SPHG, m, 0, 1.55, 0, 0.08, 0.08, 0.04); for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2; part(g, CONEG, m, Math.sin(a) * 0.1, 1.55 + Math.cos(a) * 0.1, 0, 0.06, 0.16, 0.04, [0, 0, -a]); } } },
+  wings:     { name: 'Winged Helmet', emoji: '🪽', price: 99999, hidden: true, build: (g, m) => { part(g, SPHG, m, 0, 1.24, 0, 0.3, 0.2, 0.3); for (const s of [-1, 1]) { part(g, BOXG, m, s * 0.33, 1.36, -0.04, 0.03, 0.22, 0.2, [0.4, 0, -s * 0.5]); part(g, BOXG, m, s * 0.36, 1.3, -0.1, 0.03, 0.16, 0.16, [0.7, 0, -s * 0.7]); } } },
   viking:    { name: 'Viking Helmet', emoji: '⛑️', price: 200, build: (g, m) => { part(g, SPHG, m, 0, 1.24, 0, 0.3, 0.22, 0.3); part(g, CYLG, m, 0, 1.2, 0, 0.31, 0.05, 0.31); for (const s of [-1, 1]) { part(g, CONEG, m, s * 0.34, 1.4, 0, 0.07, 0.28, 0.07, [0, 0, -s * 0.75]); } } }
 };
 /* Paint balls (0.3.1). A paint ball's "ink" is a plain color (a number) or a design's name (a string).
@@ -1763,7 +1776,12 @@ const PAINTS = {
   lava:    { name: 'Lava', hex: 0xff4500, price: 99999, design: true, hidden: true },
   glow:    { name: 'Glow', hex: 0x7dff3a, price: 99999, design: true, hidden: true },
   ice:     { name: 'Ice Crystal', hex: 0x9fe8ff, price: 99999, design: true, hidden: true },
-  glitter: { name: 'Glitter', hex: 0xd88cff, price: 99999, design: true, hidden: true }
+  glitter: { name: 'Glitter', hex: 0xd88cff, price: 99999, design: true, hidden: true },
+  // 0.4.2: super paint balls (Supah power and the mystery box)
+  bolt:    { name: 'Lightning', hex: 0xffe14d, price: 99999, design: true, hidden: true },
+  stars:   { name: 'Star Field', hex: 0x1b2a6b, price: 99999, design: true, hidden: true },
+  hero:    { name: 'Hero Stripes', hex: 0xe63946, price: 99999, design: true, hidden: true },
+  plasma:  { name: 'Plasma', hex: 0x8a3fff, price: 99999, design: true, hidden: true }
 };
 /* any ink from a save or the network, made safe: a number is a color, a design must be a real design, a plain color's
    name (older versions sent those) becomes its color */
@@ -1780,7 +1798,8 @@ const INK_BITS = { gold: [0xffd36b, 0xfff0b8, 0xc8902a], rainbow: [0xff3b30, 0xf
   camo: [0x5f6f3a, 0x8a7a4a, 0x3b3a26, 0x9aa86a], plaid: [0xc0392b, 0x1e3d2f, 0xf3e9d2], tiedye: [0xff5ab4, 0x7b61ff, 0x3fd4ff, 0xffe14d],
   galaxy: [0x1a1446, 0x6a3fd0, 0xff7ad9, 0xffffff], zebra: [0xffffff, 0x1d1d1d], tiger: [0xff8a1f, 0x1d1d1d], leopard: [0xe0b064, 0x5a3a1a],
   candy: [0xe63946, 0xffffff], checker: [0x1d1d1d, 0xffffff], sprinkles: [0xffb3d9, 0x3fa7ff, 0xffd60a, 0x2ecc71, 0xffffff],
-  lava: [0xff4500, 0xffb300, 0x3b0a00], glow: [0x7dff3a, 0xd4ff9e], ice: [0x9fe8ff, 0xffffff, 0x5ab8ff], glitter: [0xd88cff, 0xff8cd8, 0xffffff, 0xffe066] };
+  lava: [0xff4500, 0xffb300, 0x3b0a00], glow: [0x7dff3a, 0xd4ff9e], ice: [0x9fe8ff, 0xffffff, 0x5ab8ff], glitter: [0xd88cff, 0xff8cd8, 0xffffff, 0xffe066],
+  bolt: [0xffe14d, 0x1b2a6b, 0xffffff], stars: [0x1b2a6b, 0xffe14d, 0xffffff], hero: [0xe63946, 0x2f5bd6, 0xffd60a], plasma: [0x8a3fff, 0x3fe0ff, 0xff5ad8] };
 const inkBits = ink => typeof ink === 'number' ? [ink] : INK_BITS[ink] || [inkHex(ink)];
 /* each design is drawn in code once (a 128 px picture), then used on paint balls, splats, buckets and launchers */
 const INK_CV = {};
@@ -1830,6 +1849,19 @@ function inkCanvas(id) {
     case 'glow': fill('#7dff3a'); for (let k = 0; k < 30; k++) blob(r() * S, r() * S, 3 + r() * 8, '#d4ff9e'); break;
     case 'ice': fill('#9fe8ff'); g.strokeStyle = '#ffffff'; g.lineWidth = 2; for (let k = 0; k < 24; k++) { const x = r() * S, y = r() * S, a = r() * 3; g.beginPath(); for (let j = 0; j < 6; j++) { g.moveTo(x, y); g.lineTo(x + Math.cos(a + j * 1.047) * 9, y + Math.sin(a + j * 1.047) * 9); } g.stroke(); } break;
     case 'glitter': fill('#b06ae0'); for (let k = 0; k < 260; k++) { g.fillStyle = ['#ffffff', '#ffe066', '#ff8cd8', '#8cf0ff'][k % 4]; g.fillRect(r() * S, r() * S, 2, 2); } break;
+    case 'bolt': fill('#1b2a6b'); g.fillStyle = '#ffe14d';
+      for (let k = 0; k < 4; k++) { const x = 8 + k * 32 + r() * 6, y = r() * 20; g.beginPath(); g.moveTo(x + 10, y); g.lineTo(x, y + 50); g.lineTo(x + 10, y + 50); g.lineTo(x + 2, y + 100); g.lineTo(x + 22, y + 40); g.lineTo(x + 12, y + 40); g.lineTo(x + 20, y); g.fill(); }
+      break;
+    case 'stars': fill('#1b2a6b'); for (let k = 0; k < 14; k++) { const x = r() * S, y = r() * S, R = 5 + r() * 7; g.fillStyle = k % 3 ? '#ffe14d' : '#ffffff'; g.beginPath(); for (let j = 0; j < 10; j++) { const a = j / 10 * Math.PI * 2 - Math.PI / 2, rr = j % 2 ? R * 0.45 : R; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.fill(); } break;
+    case 'hero': fill('#e63946'); g.fillStyle = '#2f5bd6'; for (let k = -S; k < S * 2; k += 40) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 20, 0); g.lineTo(k + 20 - S, S); g.lineTo(k - S, S); g.fill(); }
+      g.fillStyle = '#ffd60a'; for (let k = -S + 18; k < S * 2; k += 40) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 4, 0); g.lineTo(k + 4 - S, S); g.lineTo(k - S, S); g.fill(); } break;
+    case 'plasma': {
+      fill('#5a24c8');
+      for (const [c, n] of [['rgba(170,110,255,1)', 6], ['rgba(63,224,255,0.95)', 6], ['rgba(255,90,216,0.9)', 5]]) for (let k = 0; k < n; k++) {
+        const x = r() * S, y = r() * S, rad = 12 + r() * 22, gr = g.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, c); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, S, S);
+      }
+      break;
+    }
     case 'checker': for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? '#1d1d1d' : '#ffffff'; g.fillRect(x * 16, y * 16, 16, 16); } break;
     case 'gold': {   // only for menus: a shiny gold ball
       const gr = g.createRadialGradient(S * 0.35, S * 0.3, 2, S * 0.5, S * 0.5, S * 0.7);
@@ -2375,7 +2407,7 @@ function updateBalls(dt) {
     if (b.home) { b.vel.copy(homeAim(b.pos, b.home)).multiplyScalar(HOME_SPD); if (!G.silent) sparkleAt(b.pos, 0.3, 0.25); }   // supah paint ball: steer, no falling
     else b.vel.y -= 14 * dt;
     b.prev.copy(b.pos); b.pos.addScaledVector(b.vel, dt); b.m.position.copy(b.pos);
-    if (typeof b.hex === 'string') { b.m.rotation.x += dt * 9; b.m.rotation.y += dt * 6; if ((b.hex === 'gold' || b.hex === 'glitter' || b.hex === 'glow') && !G.silent && Math.random() < dt * 7) sparkleAt(b.pos, 0.32, 0.35); }   // designs spin; gold twinkles
+    if (typeof b.hex === 'string') { b.m.rotation.x += dt * 9; b.m.rotation.y += dt * 6; if ((b.hex === 'gold' || b.hex === 'glitter' || b.hex === 'glow' || b.hex === 'bolt' || b.hex === 'stars' || b.hex === 'plasma') && !G.silent && Math.random() < dt * 7) sparkleAt(b.pos, 0.32, 0.35); }   // designs spin; gold twinkles
     segD.copy(b.pos).sub(b.prev); const len = segD.length(); if (len < 1e-6) continue; segD.multiplyScalar(1 / len);
     let hitC = null, hitT = len;
     for (const c of G.chars) {
@@ -3925,7 +3957,10 @@ function cheatHash(word) {   // the same as tools/add-cheat.cjs (cyrb53 with the
 const myCheats = () => (Array.isArray(SHOP.cheats) ? SHOP.cheats : []).filter(id => CHEATS[id] && ['look', 'physics', 'power'].includes(CHEATS[id].kind));
 const WEATHER = ['rain', 'snow', 'bubbles'];
 /* the things that hide in the mystery box (secret items you don't have yet) */
-const MYSTERY = ['hat:duck', 'hat:pizza', 'hat:astro', 'hat:dino', 'hat:cone', 'paint:lava', 'paint:glow', 'paint:ice', 'paint:glitter', 'paint:sprinkles', 'launch:banana', 'launch:bottle', 'launch:chicken', 'emote:worm', 'emote:robot', 'cel:lightning', 'cel:rainbow', 'cel:mega'];
+const MYSTERY = ['hat:duck', 'hat:pizza', 'hat:astro', 'hat:dino', 'hat:cone', 'paint:lava', 'paint:glow', 'paint:ice', 'paint:glitter', 'paint:sprinkles', 'launch:banana', 'launch:bottle', 'launch:chicken', 'emote:worm', 'emote:robot', 'cel:lightning', 'cel:rainbow', 'cel:mega',
+  // 0.4.2: super items (Supah power gives them all)
+  'hat:rocket', 'hat:bolt', 'hat:star', 'hat:wings', 'paint:bolt', 'paint:stars', 'paint:hero', 'paint:plasma',
+  'launch:rocket', 'launch:zapper', 'cel:meteor', 'cel:nova', 'emote:fly'];
 /* give a secret thing and put it on (a hat, paint ball, launcher, celebration), or open a level door / the gallery */
 function giveSecret(key) {
   if (!SHOP.owned.includes(key)) SHOP.owned.push(key);
@@ -4007,7 +4042,9 @@ const LAUNCHERS = {
   gold:    { name: 'Gold Blaster', emoji: '🏆', price: 400 },
   banana:  { name: 'Banana Blaster', emoji: '🍌', price: 99999, hidden: true },
   bottle:  { name: 'Water Bottle', emoji: '🧴', price: 99999, hidden: true },
-  chicken: { name: 'Golden Rubber Chicken', emoji: '🐔', price: 99999, hidden: true }
+  chicken: { name: 'Golden Rubber Chicken', emoji: '🐔', price: 99999, hidden: true },
+  rocket:  { name: 'Rocket Blaster', emoji: '🚀', price: 99999, hidden: true },   // 0.4.2 super items
+  zapper:  { name: 'Super Zapper', emoji: '🔆', price: 99999, hidden: true }
 };
 const CELS = {
   confetti: { name: 'Confetti', emoji: '🎊', price: 0 },
@@ -4019,7 +4056,9 @@ const CELS = {
   coins:    { name: 'Gold Shower', emoji: '🪙', price: 300 },
   lightning:{ name: 'Lightning', emoji: '⚡', price: 99999, hidden: true },
   rainbow:  { name: 'Rainbow Burst', emoji: '🌈', price: 99999, hidden: true },
-  mega:     { name: 'Giant Confetti Cannon', emoji: '🎉', price: 99999, hidden: true }
+  mega:     { name: 'Giant Confetti Cannon', emoji: '🎉', price: 99999, hidden: true },
+  meteor:   { name: 'Meteor Shower', emoji: '☄️', price: 99999, hidden: true },   // 0.4.2 super items
+  nova:     { name: 'Supernova', emoji: '💥', price: 99999, hidden: true }
 };
 const EMOTES = {
   wave:  { name: 'Wave', emoji: '👋', price: 0, dur: 1.6 },
@@ -4032,7 +4071,8 @@ const EMOTES = {
   dance: { name: 'Dance', emoji: '💃', price: 120, dur: 2.6 },
   wheel: { name: 'Cartwheel', emoji: '🤸', price: 150, dur: 1.1 },
   worm:  { name: 'Worm', emoji: '🪱', price: 99999, hidden: true, dur: 2.4 },
-  robot: { name: 'Robot', emoji: '🤖', price: 99999, hidden: true, dur: 2.4 }
+  robot: { name: 'Robot', emoji: '🤖', price: 99999, hidden: true, dur: 2.4 },
+  fly:   { name: 'Super Fly', emoji: '🦸', price: 99999, hidden: true, dur: 2.4 }   // 0.4.2 super item
 };
 const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti', v: VOICES[SHOP.voice] && owns('voice', SHOP.voice) ? SHOP.voice : 'normal', j: JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza', ch: myCheats(), pet: CHEATS[SHOP.pet] && CHEATS[SHOP.pet].kind === 'pet' ? SHOP.pet : null });
 /* a player's cosmetics from the match list or the network, made safe */
@@ -4082,6 +4122,16 @@ function addLauncher(c) {
     P2(CYLG, lmat(0x3a3f4b, { metalness: 0.4 }), 0, 0, 0.12, 0.09, 0.42, 0.09, AX);
     for (const z of [0.0, 0.3]) P2(CYLG, lmat(0xffb703), 0, 0, z, 0.1, 0.03, 0.1, AX);
     P2(SPHG, tank, 0, 0.11, 0.06, 0.06, 0.06, 0.06);
+  } else if (id === 'rocket') {
+    P2(CYLG, lmat(0xe63946), 0, 0, 0.12, 0.065, 0.4, 0.065, AX); P2(CONEG, lmat(0xffffff), 0, 0, 0.36, 0.065, 0.1, 0.065, AX);
+    for (const [x, y] of [[1, 0], [-1, 0], [0, 1]]) P2(BOXG, lmat(0xffd60a), x * 0.08, y * 0.08, -0.04, x ? 0.08 : 0.015, y ? 0.08 : 0.015, 0.1);
+    P2(SPHG, tank, 0, 0.1, 0.16, 0.05, 0.05, 0.05);
+  } else if (id === 'zapper') {
+    const glow = lmat(0x3fe0ff, { emissive: 0x3fe0ff, emissiveIntensity: 0.9 });
+    P2(BOXG, lmat(0xd8dde6, { metalness: 0.6, roughness: 0.3 }), 0, 0, 0.04, 0.1, 0.12, 0.26);
+    for (const [z, r] of [[0.2, 0.08], [0.26, 0.06], [0.31, 0.04]]) P2(CYLG, glow, 0, 0, z, r, 0.02, r, AX);
+    P2(SPHG, glow, 0, 0, 0.35, 0.035, 0.035, 0.035); P2(BOXG, lmat(0x3a3f4b), 0, -0.1, -0.03, 0.06, 0.12, 0.06);
+    P2(SPHG, tank, 0, 0.1, 0.0, 0.05, 0.05, 0.05);
   }
   c.armR.add(g); c.launcher = g;
 }
@@ -4129,6 +4179,18 @@ function celebrate(h, s) {
   } else if (id === 'mega') {
     burst(at.x, at.y, at.z, BOT_COLORS, 140); noise(0.5, 0.5, 300); tone(90, 0.4, 'sine', 0.3, 40);
     for (let k = 0; k < 8; k++) cosFx.push({ delay: 0.1 * k, fn: () => sparkleAt(at.clone().add(new V3(rnd(-2, 2), rnd(0, 3), rnd(-2, 2))), 1, 0.6) });
+  } else if (id === 'meteor') {   // little meteors fall from the sky and pop around the found hider
+    for (let k = 0; k < 6; k++) {
+      const m = fxMesh(SPHG, paintMat(pick([0xff7a00, 0xffb300, 0xff4500])), at.clone().add(new V3(rnd(-1.5, 1.5) - 3, 10, rnd(-1.5, 1.5))), new V3(0.14, 0.14, 0.14));
+      cosFx.push({ m, v: new V3(4.3, -14, 0), t: 0, life: 0.7, delay: k * 0.15, trail: true,
+        end: o => { burst(o.position.x, Math.max(0.2, o.position.y), o.position.z, [0xff7a00, 0xffb300, 0xffffff], 16); noise(0.25, 0.3 * volAt(o.position), 500); } });
+    }
+    noise(0.8, 0.15, 2500);
+  } else if (id === 'nova') {   // a flash, then rings of stars going out
+    hemi.intensity *= 2.2; setTimeout(() => { hemi.intensity /= 2.2; }, 160);
+    burst(at.x, at.y, at.z, [0xffffff, 0xffd36b, 0x8cf0ff, 0xff8cd8], 70);
+    for (let ring = 0; ring < 3; ring++) cosFx.push({ delay: 0.12 * ring, fn: () => { for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2, d = 0.8 + ring * 0.8; sparkleAt(at.clone().add(new V3(Math.cos(a) * d, 0.2 + ring * 0.15, Math.sin(a) * d)), 0.6, 0.6); } } });
+    [262, 392, 523, 784, 1047].forEach((f, k) => tone(f, 0.3, 'triangle', 0.12, 0, k * 0.05)); tone(80, 0.6, 'sine', 0.25, 40);
   } else if (id === 'coins') {
     const m = goldMat({ roughness: 0.3 });
     for (let k = 0; k < 16; k++) cosFx.push({ m: fxMesh(CYLG, m, at, new V3(0.09, 0.018, 0.09)), v: new V3(rnd(-2.5, 2.5), rnd(4, 7), rnd(-2.5, 2.5)), t: 0, life: 2.2, spin: rnd(6, 14), grav: 12, floor: true });
@@ -4178,6 +4240,7 @@ function emoteStep(c, dt) {
     case 'dance': { const b = Math.sin(t * 9); aL.x = -1.6 - b * 0.9; aR.x = -1.6 + b * 0.9; c.legL.rotation.x = Math.max(0, b) * 0.6; c.legR.rotation.x = Math.max(0, -b) * 0.6; M.rotation.y = Math.sin(t * 4.5) * 0.5; break; }
     case 'wheel': M.rotation.z = f * Math.PI * 2; M.position.y = s * 0.45; aL.z = 2.8; aR.z = -2.8; aL.x = aR.x = 0; break;
     case 'worm': M.rotation.x = -Math.PI / 2 * s; M.position.y = 0.18 * s + Math.abs(Math.sin(t * 7)) * 0.25 * s; M.position.z = 0.5 * s; aL.x = aR.x = -2.8; break;
+    case 'fly': M.rotation.x = -Math.PI / 2 * s; M.position.y = 1.4 * s + Math.sin(t * 6) * 0.06 * s; aR.x = -2.9 * s; aL.x = 0; c.legL.rotation.x = c.legR.rotation.x = 0; break;   // up, up and away (one fist forward)
     case 'robot': { const st = Math.floor(t * 4) % 4; aL.x = [-1.5, 0, -1.5, -3][st]; aR.x = [0, -1.5, -3, -1.5][st]; M.rotation.y = [0, 0.4, 0, -0.4][st]; break; }
   }
 }
@@ -4914,7 +4977,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.4.1';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.4.2';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
