@@ -2316,15 +2316,35 @@ const BALLG = new THREE.SphereGeometry(0.13, 12, 8);
 function throwBall(from, owner, target) {
   const hex = owner.paintHex === undefined ? PAINT_HEX : owner.paintHex;
   const pos = new V3(from.x + Math.sin(owner.yaw) * 0.35, from.y + 1.0, from.z + Math.cos(owner.yaw) * 0.35);
+  // cheat (Supah power): a seeker's paint ball zooms to the closest hider who isn't found yet, through walls
+  const home = G.phase === 'seek' && owner.role === 'seeker' && hasCheat(owner, 'homing') ? closestHider(pos, owner) : null;
+  if (NETC() && owner === G.player) netSend(['thr', r2(target.x), r2(target.y), r2(target.z)]);   // the host throws the real one; this one is just for your screen
+  if (home) {
+    const vel = homeAim(pos, home).multiplyScalar(HOME_SPD);
+    spawnBall(pos, vel, owner, hex, home);
+    if (NETH()) netEv(['b', owner.pkey, r2(pos.x), r2(pos.y), r2(pos.z), r2(vel.x), r2(vel.y), r2(vel.z), hex, home.pkey]);
+    return;
+  }
   const d = target.clone().sub(pos), dist = d.length(), spd = 19, t = dist / spd;
   const vel = d.multiplyScalar(1 / Math.max(t, 0.05)); vel.y += 0.5 * 14 * t;
   spawnBall(pos, vel, owner, hex);
-  if (NETC() && owner === G.player) netSend(['thr', r2(target.x), r2(target.y), r2(target.z)]);   // the host throws the real one; this one is just for your screen
   if (NETH()) netEv(['b', owner.pkey, r2(pos.x), r2(pos.y), r2(pos.z), r2(vel.x), r2(vel.y), r2(vel.z), hex]);
 }
-function spawnBall(pos, vel, owner, hex) {
+/* supah paint balls: the closest hider still hiding, and which way to fly to them */
+const HOME_SPD = 70;   // m/s ("the speed of light", for a paint ball)
+function closestHider(pos, owner) {
+  let best = null, bd = Infinity;
+  for (const c of G.chars) {
+    if (c === owner || c.role !== 'hider' || c.caught) continue;
+    const d = Math.hypot(c.x - pos.x, c.z - pos.z); if (d < bd) { bd = d; best = c; }
+  }
+  return best;
+}
+const homeAim = (pos, c) => new V3(c.x, c.y + poseOf(c).mid, c.z).sub(pos).normalize();
+function spawnBall(pos, vel, owner, hex, home) {
   const m = new THREE.Mesh(BALLG, paintMat(hex)); m.position.copy(pos); m.castShadow = true; scene.add(m);
-  balls.push({ m, pos, prev: pos.clone(), vel, owner, age: 0, hex });
+  if (home) m.scale.setScalar(1.6);
+  balls.push({ m, pos, prev: pos.clone(), vel, owner, age: 0, hex, home: home || null });
   sfx.whoosh(owner === G.player ? 1 : volAt(pos));
 }
 function addDecal(p, n, hex) {
@@ -2348,9 +2368,13 @@ function burst(x, y, z, colors, n = 26) {
 }
 const tmpN = new V3(), segD = new V3(), cc = new V3();
 function updateBalls(dt) {
+  const oneShot = [];
   for (let i = balls.length - 1; i >= 0; i--) {
     const b = balls[i]; b.age += dt;
-    b.prev.copy(b.pos); b.vel.y -= 14 * dt; b.pos.addScaledVector(b.vel, dt); b.m.position.copy(b.pos);
+    if (b.home && (b.home.caught || b.home.role !== 'hider')) b.home = null;   // they were found already: fall like a normal ball
+    if (b.home) { b.vel.copy(homeAim(b.pos, b.home)).multiplyScalar(HOME_SPD); if (!G.silent) sparkleAt(b.pos, 0.3, 0.25); }   // supah paint ball: steer, no falling
+    else b.vel.y -= 14 * dt;
+    b.prev.copy(b.pos); b.pos.addScaledVector(b.vel, dt); b.m.position.copy(b.pos);
     if (typeof b.hex === 'string') { b.m.rotation.x += dt * 9; b.m.rotation.y += dt * 6; if ((b.hex === 'gold' || b.hex === 'glitter' || b.hex === 'glow') && !G.silent && Math.random() < dt * 7) sparkleAt(b.pos, 0.32, 0.35); }   // designs spin; gold twinkles
     segD.copy(b.pos).sub(b.prev); const len = segD.length(); if (len < 1e-6) continue; segD.multiplyScalar(1 / len);
     let hitC = null, hitT = len;
@@ -2360,16 +2384,18 @@ function updateBalls(dt) {
       const t = clamp(cc.dot(segD), 0, len); const dx = cc.x - segD.x * t, dy = cc.y - segD.y * t, dz = cc.z - segD.z * t;
       if (dx * dx + dy * dy * 0.6 + dz * dz < 0.36 && t < hitT) { hitT = t; hitC = c; }
     }
-    const h = cast(b.prev, segD, len);
+    const h = b.home ? null : cast(b.prev, segD, len);   // supah paint balls fly through walls
     if (h && h.distance < hitT) {
       tmpN.copy(h.face.normal).transformDirection(h.object.matrixWorld);
       addDecal(h.point, tmpN, b.hex); sfx.splat(volAt(h.point));
       scene.remove(b.m); balls.splice(i, 1); continue;
     }
     // on a friend's device a ball only pops; the host decides who got splatted and says so
+    if (hitC && b.home && !NETC() && G.phase === 'seek' && hitC.role === 'hider' && b.owner.role === 'seeker' && !hasCheat(hitC, 'immortal')) oneShot.push([hitC, b.owner]);   // a supah paint ball catches in one shot (not someone with a supah shield)
     if (hitC) { if (!NETC()) splatChar(hitC, b.owner, b.hex); burst(b.pos.x, b.pos.y, b.pos.z, [b.hex], 10); scene.remove(b.m); balls.splice(i, 1); continue; }
     if (b.age > 4 || b.pos.y < -2) { scene.remove(b.m); balls.splice(i, 1); }
   }
+  for (const [h, s] of oneShot) if (G.phase === 'seek' && h.role === 'hider' && !h.caught && !h.wasFound) catchHider(h, s);   // after the loop: catching can end the round
   for (let i = bits.length - 1; i >= 0; i--) {
     const p = bits[i]; p.t += dt; p.v.y -= 12 * dt; p.m.position.addScaledVector(p.v, dt); p.m.rotation.x += p.spin * dt; p.m.rotation.y += p.spin * dt;
     if (p.m.position.y < 0.05) { p.m.position.y = 0.05; p.v.set(0, 0, 0); }
@@ -3879,9 +3905,15 @@ const CHEATS = {
   bubbles: { name: 'Bubbles', emoji: '🫧', kind: 'look' },
   mystery: { name: 'Mystery box', emoji: '🎁', kind: 'daily' },
   rich: { name: 'Infinite coins', emoji: '💰', kind: 'power' },
-  duckday: { name: 'Duck Day', emoji: '🦆', kind: 'look' }
+  duckday: { name: 'Duck Day', emoji: '🦆', kind: 'look' },
+  // 0.4.1: all the powers in one, plus a supah shield (can't be caught) and supah paint balls (fly fast to a hider)
+  supah: { name: 'Supah power', emoji: '🦸', kind: 'power' }
 };
-const CHEAT_CODES = { '273rjxj1b2m': 'head', '29i77vic5my': 'tiny', '29w5f4hqsae': 'giant', 'mry71r7v7c': 'party', '1zzjm02yd33': 'trail', '1tlkcb9ysq0': 'disco', '1xotj64q9gi': 'bouncy', '14w0jfyghgr': 'moon', '21aqho2aojp': 'pads', '1gfm0uouxwg': 'ice', '23q1puc16lo': 'slow', '15afvv745gb': 'jump', '25ab2hly1dc': 'speed', '17g1vsiunrs': 'paint', '1c7haxr1n8c': 'xray', '1u8zfgd5cqf': 'invis', 'hfdz0kquv1': 'coins', '1a6rd3ec6ys': 'cone', '2b07youf1y5': 'sprinkles', '1w9xk50jaxj': 'gallery', 'c1b4bueald': 'lvkitchen', '485a10are6': 'lvmuseum', '1abbpjflnjv': 'lvvillage', 'b4od26c1f8': 'lvship', 'rqz6tbq1ss': 'lvall', 'j7tvafko37': 'hduck', 'hm21ftq7bc': 'hpizza', '24anlpfwpbv': 'hastro', 'oe5x2xwwzd': 'hdino', '1sy538ys4dv': 'plava', '19qcrzi0hmd': 'pglow', 'oij07sfsdf': 'pice', 'ia9inrnkib': 'pglitter', '15z6a21qix2': 'lbanana', '1gttlox8u3f': 'lbottle', '185x100zqwf': 'lchicken', 'wjxyvhxo4w': 'eworm', '1hj70wz2lh4': 'erobot', '1nm8wgfn7cn': 'cbolt', '133l2da3a1q': 'crainbow', 'i7mp5ha0ug': 'cmega', 'u5pl8t8b5z': 'pup', 'd867yfkfzu': 'kitten', 'dcgocn7k1d': 'bunny', '1s7uq0ib8zn': 'babydino', '16yjhtwdw7e': 'dragon', 'aabaxknv4v': 'axolotl', '1htsyentvyt': 'jelly', '2x2mshifoz': 'rain', '231n25eh45v': 'snow', '2e8mlhgghpz': 'bubbles', '27lwlloixr3': 'mystery', 'y8u7m4ob3x': 'rich', '1tqsdwjtcd3': 'duckday' };
+/* what Supah power turns on ('immortal' and 'homing' come only with it). Not tiny / giant (you can't be both), slippery
+   floors or slow motion (they slow you down), weather or a pet (one at a time: their own codes still work with it) */
+const SUPAH = ['jump', 'speed', 'paint', 'xray', 'invis', 'rich', 'immortal', 'homing', 'head', 'party', 'trail', 'disco', 'bouncy', 'moon', 'pads', 'duckday'];
+const cheatIn = (list, id) => list.includes(id) || (SUPAH.includes(id) && list.includes('supah'));
+const CHEAT_CODES = { '273rjxj1b2m': 'head', '29i77vic5my': 'tiny', '29w5f4hqsae': 'giant', 'mry71r7v7c': 'party', '1zzjm02yd33': 'trail', '1tlkcb9ysq0': 'disco', '1xotj64q9gi': 'bouncy', '14w0jfyghgr': 'moon', '21aqho2aojp': 'pads', '1gfm0uouxwg': 'ice', '23q1puc16lo': 'slow', '15afvv745gb': 'jump', '25ab2hly1dc': 'speed', '17g1vsiunrs': 'paint', '1c7haxr1n8c': 'xray', '1u8zfgd5cqf': 'invis', 'hfdz0kquv1': 'coins', '1a6rd3ec6ys': 'cone', '2b07youf1y5': 'sprinkles', '1w9xk50jaxj': 'gallery', 'c1b4bueald': 'lvkitchen', '485a10are6': 'lvmuseum', '1abbpjflnjv': 'lvvillage', 'b4od26c1f8': 'lvship', 'rqz6tbq1ss': 'lvall', 'j7tvafko37': 'hduck', 'hm21ftq7bc': 'hpizza', '24anlpfwpbv': 'hastro', 'oe5x2xwwzd': 'hdino', '1sy538ys4dv': 'plava', '19qcrzi0hmd': 'pglow', 'oij07sfsdf': 'pice', 'ia9inrnkib': 'pglitter', '15z6a21qix2': 'lbanana', '1gttlox8u3f': 'lbottle', '185x100zqwf': 'lchicken', 'wjxyvhxo4w': 'eworm', '1hj70wz2lh4': 'erobot', '1nm8wgfn7cn': 'cbolt', '133l2da3a1q': 'crainbow', 'i7mp5ha0ug': 'cmega', 'u5pl8t8b5z': 'pup', 'd867yfkfzu': 'kitten', 'dcgocn7k1d': 'bunny', '1s7uq0ib8zn': 'babydino', '16yjhtwdw7e': 'dragon', 'aabaxknv4v': 'axolotl', '1htsyentvyt': 'jelly', '2x2mshifoz': 'rain', '231n25eh45v': 'snow', '2e8mlhgghpz': 'bubbles', '27lwlloixr3': 'mystery', 'y8u7m4ob3x': 'rich', '1tqsdwjtcd3': 'duckday', 'z3x0niwgwv': 'supah' };
 function cheatHash(word) {   // the same as tools/add-cheat.cjs (cyrb53 with the game's seed)
   const t = String(word).toUpperCase().replace(/[^A-Z0-9]/g, ''), seed = 0x5eed;
   let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -3902,8 +3934,8 @@ function giveSecret(key) {
 }
 const SECRET_NAME = key => { const [kind, id] = key.split(':'); const K = SHOP_KINDS[kind]; const it = K && K.list()[id]; return it ? (it.emoji ? it.emoji + ' ' : '') + it.name : key; };
 /* does character c have cheat id on? (you: your own list, at once; others: what came with them, from the next round) */
-const hasCheat = (c, id) => !!c && (c === G.player ? myCheats().includes(id) : !!(c.cos && c.cos.ch && c.cos.ch.includes(id)));
-const meCheat = id => myCheats().includes(id);
+const hasCheat = (c, id) => !!c && (c === G.player ? cheatIn(myCheats(), id) : !!(c.cos && Array.isArray(c.cos.ch) && cheatIn(c.cos.ch, id)));
+const meCheat = id => cheatIn(myCheats(), id);
 function useCode(text) {
   const id = CHEAT_CODES[cheatHash(text)], C = CHEATS[id];
   if (!C) { sfx.error(); return '🤔 That\'s not a secret code. Try again!'; }
@@ -3929,6 +3961,11 @@ function useCode(text) {
   if (WEATHER.includes(id)) SHOP.cheats = myCheats().filter(x => !WEATHER.includes(x) || x === id);   // one kind of weather at a time
   const list = myCheats(), on = !list.includes(id);
   SHOP.cheats = on ? list.concat(id) : list.filter(x => x !== id); saveShop();
+  if (id === 'supah' && on) {   // every secret item, free (they stay yours when Supah power is off)
+    for (const key of MYSTERY.concat('level:kitchen', 'level:museum', 'level:village', 'level:ship', 'gallery')) if (!SHOP.owned.includes(key)) SHOP.owned.push(key);
+    saveShop(); jingle('win'); refreshLobbyMe(); if (G.phase === 'lobby') G.lobbyRebuild = true; cheatsChanged();
+    return '🦸 SUPAH POWER is ON! 🧪 Super jump, speed, endless paint, X-ray, invisible, free shopping, a supah shield (nobody can catch you), supah paint balls that zoom to a hider and catch them in one shot, and the fun cheats too: big head, party hats, rainbow trail, disco, bouncy walk, moon boots, super bounce pads and Duck Day. Every secret item is yours!';
+  }
   cheatsChanged(); sfx.pop();
   return C.emoji + ' ' + C.name + (on ? ' is ON! 🧪' : ' is off.');
 }
@@ -4300,6 +4337,11 @@ function catchCheck() {
       if (Math.hypot(h.x - s.x, h.z - s.z) >= 1.12 || Math.abs(h.y - s.y) >= 1.3) continue;   // 0.2.1: about a seeker's own height (was 2 m)
       // computer seekers only tag someone they have noticed (or are chasing), not by brushing past by accident
       if (s.bot && !(s.state === 'chase' && s.target === h) && (s.susp.get(h) || 0) < 0.6) continue;
+      if (hasCheat(h, 'immortal')) {   // cheat: the supah shield, nobody can catch you (computer seekers give up and look elsewhere)
+        if (s.bot) { s.susp.delete(h); if (s.target === h) { s.target = null; s.state = 'look'; s.stT = 0; s.look0 = s.yaw; } }
+        if ((h === G.player || s === G.player) && !(G.shieldMsgT > 0)) { G.shieldMsgT = 3; toast(h === G.player ? '🦸 Supah shield! Nobody can catch you!' : '🦸 ' + h.name + ' has a supah shield!', 2); }
+        continue;
+      }
       catchHider(h, s);
     }
   }
@@ -4731,6 +4773,7 @@ function update(dt) {
   else if (G.phase === 'count') hiddenCheck();
   else if (G.phase === 'seek' && G.t <= 0) { G.t = 0; timeUp(); return; }
   if ((G.phase === 'hide' || G.phase === 'count') && G.t < 5.5 && Math.ceil(G.t) !== G.lastBeep) { G.lastBeep = Math.ceil(G.t); sfx.beep(G.t < 1); }
+  if (G.shieldMsgT > 0) G.shieldMsgT -= dt;   // the supah shield message, not every frame
   if (G.player && G.player.role === 'seeker') { G.throwCd -= dt; if (G.phase === 'seek') G.ammo = Math.min(G.D.ammo || 12, G.ammo + dt / 2.5); }
   updatePlayer(dt);
   if (!NETC()) for (const c of G.chars) if (c.bot && !c.caught) (c.role === 'seeker' ? seekerAI : hiderAI)(c, dt);
@@ -4871,7 +4914,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.4';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.4.1';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
@@ -5448,7 +5491,7 @@ function netOnEv(m) {
   switch (e[0]) {
     case 'b': {   // a paint ball (yours are already on your screen)
       if (e[1] === ME()) break;
-      spawnBall(new V3(e[2], e[3], e[4]), new V3(e[5], e[6], e[7]), charOf(e[1]) || { role: '', pkey: e[1] }, inkOf(e[8])); break;
+      spawnBall(new V3(e[2], e[3], e[4]), new V3(e[5], e[6], e[7]), charOf(e[1]) || { role: '', pkey: e[1] }, inkOf(e[8]), e[9] ? charOf(e[9]) : null); break;
     }
     case 'skin': if (e[1] !== ME()) { const c = charOf(e[1]); if (c && e[2] && typeof e[2] === 'object') applyLook(c, e[2], true); } break;
     case 'emo': if (e[1] !== ME()) playEmote(charOf(e[1]), e[2], true); break;
