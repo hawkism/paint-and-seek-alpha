@@ -72,6 +72,9 @@ h1.logo .p1{color:#ff2fa0}h1.logo .p2{color:#ffb703}h1.logo .p3{color:#3fa7ff}
 .sl b{min-width:112px;font-size:15px;white-space:nowrap}
 .gfxdesc{font-size:13px;opacity:.7;line-height:1.25;margin-top:3px}
 .vols{display:flex;flex-wrap:wrap;gap:4px 14px}.vols label{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}.vols input{width:110px}
+.coderow{display:flex;gap:8px;justify-content:center;margin:10px 0}#codeIn{font:800 24px "Baloo 2",Arial,sans-serif;letter-spacing:3px;text-transform:uppercase;padding:6px 12px;border-radius:14px;border:3px solid #c9cfdc;width:min(60vw,320px);text-align:center}
+#codeMsg{min-height:28px;font-size:19px;font-weight:800;color:#6a3fd6;text-align:center}#codeList{text-align:center}#codeList button{margin:3px}
+.cheat{font-size:.85em}
 #credits .card{max-height:86vh;overflow:auto;text-align:left}#credits h3{margin:12px 0 4px}#credits li{margin:3px 0;font-size:15px}#credits a{color:#2f6fd6}
 .links{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .help{text-align:left;font-size:17px;line-height:1.35}
@@ -415,6 +418,14 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
   <div class="links"><button class="small" id="finMenu">🏠 Menu</button></div>
 </div></div>
 
+<div class="screen" id="codes"><div class="card">
+  <div class="vtitle">🔐 Secret codes</div>
+  <div class="vsub">Type a secret code, then ✔. Type it again to turn it off.</div>
+  <div class="coderow"><input id="codeIn" type="text" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="SECRET CODE"><button class="big green" id="codeGo">✔</button></div>
+  <div id="codeMsg"></div>
+  <div id="codeList"></div>
+  <div class="bigrow"><button class="big" id="codesBack">✔ Done</button></div>
+</div></div>
 <div class="screen" id="credits"><div class="card wide">
   <div class="vtitle">🎵 Credits</div>
   <p>Paint &amp; Seek is made by our family (with help from Claude). These people shared their work so games like this one can use it. Thank you!</p>
@@ -1234,7 +1245,7 @@ function signPlane(x, y, z, rotY, W, H, draw) {
   if (draw) s.draw(draw);
   return s;
 }
-const LOBBY_JUKE = { x: -11.4, z: -2.4 }, LOBBY_BOOTH = { x: 9.5, z: 2 }, LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
+const LOBBY_VAULT = { x: 13.5, z: -12.2 }, LOBBY_JUKE = { x: -11.4, z: -2.4 }, LOBBY_BOOTH = { x: 9.5, z: 2 }, LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
 let lobbyBoard = null;
 function buildLobby() {
   ground(0xe6dcff, 'check', 35);
@@ -1292,6 +1303,9 @@ function buildLobby() {
   for (const [x, z, c] of [[-11.5, -11.5, 0xff2fa0], [-12, -8.6, 0x2f8bff], [11.5, 11.5, 0xffc400], [-11.5, 11.5, 0x22c55e], [12, 8.6, 0x9b4dff]]) {
     addCyl(x, z, 1.1, 1.6, 0xdfe6ee); deco(CYLG, c, x, 1.62, z, 1.0, 0.04, 1.0, { tex: null }); deco(TORG, 0x9aa5b1, x, 1.8, z, 0.75, 0.75, 0.3);
   }
+  // a little door hidden behind the shop (0.3.4): walk into it to open the secret code box
+  deco(BOXG, 0x6d4c41, 13.99, 0.42, LOBBY_VAULT.z, 0.06, 0.8, 0.55, { tex: 'wood' });
+  deco(SPHG, 0xffd166, 13.94, 0.42, LOBBY_VAULT.z + 0.18, 0.04, 0.04, 0.04, { tex: null });
   // the jukebox (0.3.3): walk up to it and press SONG for the next of your songs
   addBox(LOBBY_JUKE.x - 1.2, LOBBY_JUKE.z, 0.9, 1.3, 1.7, 0xb5651d, 0, false, 'wood');
   deco(CYLG, 0xffd166, LOBBY_JUKE.x - 1.2, 1.72, LOBBY_JUKE.z, 0.65, 0.12, 0.65, { tex: null, rot: [Math.PI / 2, 0, Math.PI / 2] });
@@ -1466,6 +1480,7 @@ const HATS = {
   mohawk:    { name: 'Mohawk', emoji: '🦔', price: 140, build: (g, m) => { for (let k = 0; k < 5; k++) part(g, CONEG, m, 0, 1.34 - Math.abs(k - 2) * 0.02, -0.2 + k * 0.1, 0.05, 0.22, 0.08); } },
   pirate:    { name: 'Pirate Hat', emoji: '🏴‍☠️', price: 160, build: (g, m) => { part(g, CYLG, m, 0, 1.36, 0, 0.24, 0.22, 0.24); part(g, BOXG, m, 0, 1.3, 0, 0.72, 0.14, 0.3); for (const s of [-1, 1]) part(g, BOXG, m, s * 0.34, 1.38, 0, 0.06, 0.2, 0.3, [0, 0, s * 0.4]); } },
   grad:      { name: 'Grad Cap', emoji: '🎓', price: 170, build: (g, m) => { part(g, CYLG, m, 0, 1.28, 0, 0.25, 0.12, 0.25); part(g, BOXG, m, 0, 1.36, 0, 0.6, 0.03, 0.6, [0, Math.PI / 4, 0]); part(g, CYLG, m, 0.22, 1.27, 0.22, 0.012, 0.16, 0.012); part(g, SPHG, m, 0.22, 1.18, 0.22, 0.04, 0.05, 0.04); } },
+  cone:      { name: 'Traffic Cone', emoji: '🚧', price: 99999, hidden: true, build: (g, m) => { part(g, BOXG, m, 0, 1.25, 0, 0.5, 0.05, 0.5); part(g, CONEG, m, 0, 1.55, 0, 0.2, 0.6, 0.2); } },   // secret (a cheat code)
   viking:    { name: 'Viking Helmet', emoji: '⛑️', price: 200, build: (g, m) => { part(g, SPHG, m, 0, 1.24, 0, 0.3, 0.22, 0.3); part(g, CYLG, m, 0, 1.2, 0, 0.31, 0.05, 0.31); for (const s of [-1, 1]) { part(g, CONEG, m, s * 0.34, 1.4, 0, 0.07, 0.28, 0.07, [0, 0, -s * 0.75]); } } }
 };
 /* Paint balls (0.3.1). A paint ball's "ink" is a plain color (a number) or a design's name (a string).
@@ -1493,7 +1508,8 @@ const PAINTS = {
   gold:    { name: 'Gold', hex: 0xffc35a, price: 200, design: true },
   tiedye:  { name: 'Tie-dye', hex: 0xff5ab4, price: 250, design: true },
   galaxy:  { name: 'Galaxy', hex: 0x3a2a8c, price: 300, design: true },
-  rainbow: { name: 'Rainbow', hex: 0xff4d6d, price: 300, design: true }
+  rainbow: { name: 'Rainbow', hex: 0xff4d6d, price: 300, design: true },
+  sprinkles: { name: 'Sprinkles', hex: 0xffb3d9, price: 99999, design: true, hidden: true }   // secret (a cheat code)
 };
 /* any ink from a save or the network, made safe: a number is a color, a design must be a real design, a plain color's
    name (older versions sent those) becomes its color */
@@ -1509,7 +1525,7 @@ const inkHex = ink => typeof ink === 'number' ? ink : (PAINTS[ink] || PAINTS.pin
 const INK_BITS = { gold: [0xffd36b, 0xfff0b8, 0xc8902a], rainbow: [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x007aff, 0xaf52de],
   camo: [0x5f6f3a, 0x8a7a4a, 0x3b3a26, 0x9aa86a], plaid: [0xc0392b, 0x1e3d2f, 0xf3e9d2], tiedye: [0xff5ab4, 0x7b61ff, 0x3fd4ff, 0xffe14d],
   galaxy: [0x1a1446, 0x6a3fd0, 0xff7ad9, 0xffffff], zebra: [0xffffff, 0x1d1d1d], tiger: [0xff8a1f, 0x1d1d1d], leopard: [0xe0b064, 0x5a3a1a],
-  candy: [0xe63946, 0xffffff], checker: [0x1d1d1d, 0xffffff] };
+  candy: [0xe63946, 0xffffff], checker: [0x1d1d1d, 0xffffff], sprinkles: [0xffb3d9, 0x3fa7ff, 0xffd60a, 0x2ecc71, 0xffffff] };
 const inkBits = ink => typeof ink === 'number' ? [ink] : INK_BITS[ink] || [inkHex(ink)];
 /* each design is drawn in code once (a 128 px picture), then used on paint balls, splats, buckets and launchers */
 const INK_CV = {};
@@ -1554,6 +1570,7 @@ function inkCanvas(id) {
       for (let k = 0; k < 16; k++) { const x = r() * S, y = r() * S, rad = 6 + r() * 5; blob(x, y, rad, '#3b2410'); blob(x, y, rad * 0.55, '#b07a3a'); }
       break;
     case 'candy': fill('#ffffff'); g.fillStyle = '#e63946'; for (let k = -S; k < S * 2; k += 32) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 16, 0); g.lineTo(k + 16 - S, S); g.lineTo(k - S, S); g.fill(); } break;
+    case 'sprinkles': fill('#ffb3d9'); for (let k = 0; k < 60; k++) { g.save(); g.translate(r() * S, r() * S); g.rotate(r() * 3.2); g.fillStyle = ['#3fa7ff', '#ffd60a', '#2ecc71', '#ffffff', '#e63946', '#9b4dff'][k % 6]; g.fillRect(-5, -1.6, 10, 3.2); g.restore(); } break;
     case 'checker': for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? '#1d1d1d' : '#ffffff'; g.fillRect(x * 16, y * 16, 16, 16); } break;
     case 'gold': {   // only for menus: a shiny gold ball
       const gr = g.createRadialGradient(S * 0.35, S * 0.3, 2, S * 0.5, S * 0.5, S * 0.7);
@@ -1654,7 +1671,7 @@ function makeChar(o) {
   const legL = limb(model, skins.legs[0].mat, -0.1, 0.46, 0.17, 0.46, 0.2), legR = limb(model, skins.legs[1].mat, 0.1, 0.46, 0.17, 0.46, 0.2);
   const body = boxPart(model, mats.body, 0, 0.68, 0, 0.44, 0.46, 0.24);
   const armL = limb(model, skins.arms[0].mat, -0.3, 0.89, 0.13, 0.42, 0.15), armR = limb(model, skins.arms[1].mat, 0.3, 0.89, 0.13, 0.42, 0.15);
-  boxPart(model, mats.head, 0, 1.1, 0, 0.36, 0.36, 0.36);
+  const headM = boxPart(model, mats.head, 0, 1.1, 0, 0.36, 0.36, 0.36);
   const skinMeshes = []; model.traverse(m => { if (m.isMesh && m.material.userData.skin) skinMeshes.push(m); });
   const eyes = new THREE.Group();
   for (const sx of [-1, 1]) { boxPart(eyes, EYE_W, sx * 0.08, 1.13, 0.183, 0.085, 0.09, 0.012); boxPart(eyes, EYE_B, sx * 0.08, 1.12, 0.19, 0.045, 0.06, 0.01); }
@@ -1672,7 +1689,7 @@ function makeChar(o) {
   const icon = textSprite(); icon.position.y = 1.95; g.add(icon);
   scene.add(g);
   const c = Object.assign({
-    g, model, body, mats, cols, skins, skinMeshes, hatMat, mat: mats.body, eyes, icon, spin, hatG, hatPivot, legL, legR, armL, armR, sTargets, splatList: [], wasFound: false, origSeeker: false, pose: 'stand',
+    g, model, body, headM, mats, cols, skins, skinMeshes, hatMat, mat: mats.body, eyes, icon, spin, hatG, hatPivot, legL, legR, armL, armR, sTargets, splatList: [], wasFound: false, origSeeker: false, pose: 'stand',
     x: 0, y: 0, z: 0, vx: 0, vz: 0, vy: 0, yaw: 0, onGround: true,
     color: cols.body, base: new THREE.Color(o.hex), splatN: 0, caught: false, eyesOpen: true, stillT: 0, moving: false,
     path: null, pi: 0, goal: null, stuckT: 0, lastX: 0, lastZ: 0, paintT: 0, state: 'idle', stT: 0, peekT: 3, peekOn: 0,
@@ -2010,7 +2027,7 @@ function moveChar(c, dt) {
   }
   c.x = clamp(c.x, -23.5, 23.5); c.z = clamp(c.z, -23.5, 23.5);
   const gh = groundAt(c.x, c.z, c.y);
-  c.vy -= GRAV * dt; c.y += c.vy * dt;
+  c.vy -= GRAV * dt * (hasCheat(c, 'moon') ? 0.3 : 1); c.y += c.vy * dt;   // cheat: moon boots
   if (c.y <= gh) { c.y = gh; c.vy = 0; c.onGround = true; } else c.onGround = c.y - gh < 0.03;
 }
 
@@ -2500,8 +2517,9 @@ const keys = {};
 const input = { mx: 0, my: 0, yaw: Math.PI, pitch: 0.32, dist: 4.3, act: false, jump: false };
 let locked = false;
 const inRound = () => G.phase === 'hide' || G.phase === 'seek' || G.phase === 'count';
-const inLobby = () => G.phase === 'lobby' && !G.lobbyCard && !G.shopOpen;
+const inLobby = () => G.phase === 'lobby' && !G.lobbyCard && !G.shopOpen && !G.codesOpen;
 addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') return;   // typing a name or a code
   keys[e.code] = true; ac();
   if (G.draw) {   // paint mode: Esc/Enter done, Z undo, Q colors
     if (e.code === 'Escape' || e.code === 'Enter') { drawRefresh(); exitDraw(); }
@@ -2635,19 +2653,19 @@ function updatePlayer(dt) {
   let mx = input.mx, my = input.my;
   if (keys.KeyW || keys.ArrowUp) my = 1; if (keys.KeyS || keys.ArrowDown) my = -1;
   if (keys.KeyA || keys.ArrowLeft) mx = -1; if (keys.KeyD || keys.ArrowRight) mx = 1;
-  const frozen = (G.phase === 'count' && p.role === 'seeker') || p.paintT > 0 || !!G.draw;   // paint mode: you stand still   // the seeker counts with eyes shut; hiders can run off
+  const frozen = (G.phase === 'count' && p.role === 'seeker') || p.paintT > 0 || !!G.draw;   // the seeker counts with eyes shut; hiders can run off; paint mode: you stand still
   if (frozen) mx = my = 0;
   const m = Math.min(1, Math.hypot(mx, my));
   const fx = Math.sin(input.yaw), fz = Math.cos(input.yaw), rx = -Math.cos(input.yaw), rz = Math.sin(input.yaw);
   let wx = fx * my + rx * mx, wz = fz * my + rz * mx; const wl = Math.hypot(wx, wz);
   if (wl > 0.001) { wx /= wl; wz /= wl; }
   if (input.pose) { input.pose = false; if (p.role === 'hider' && !frozen) setPose(p, POSE_ORDER[(POSE_ORDER.indexOf(p.pose) + 1) % POSE_ORDER.length]); }
-  const sp = PLAYER_SPEED * m * poseOf(p).speed, k = 1 - Math.exp(-14 * dt);
+  const sp = PLAYER_SPEED * m * poseOf(p).speed * (meCheat('speed') ? 1.8 : 1), k = 1 - Math.exp(-(meCheat('ice') ? 1.6 : 14) * dt);   // cheats: super speed, slippery floors
   p.vx += (wx * sp - p.vx) * k; p.vz += (wz * sp - p.vz) * k;
   if (m > 0.1) p.yaw += angDiff(Math.atan2(wx, wz), p.yaw) * Math.min(1, dt * 12);
   if (input.jump && p.onGround && !frozen) {
     if (p.pose !== 'stand') setPose(p, 'stand');   // jumping always stands you up first
-    p.vy = JUMP_V; p.onGround = false;
+    p.vy = JUMP_V * (meCheat('jump') ? 1.65 : 1); p.onGround = false;   // cheat: super jump
   }
   input.jump = false;
   if (input.act && !frozen && (G.phase !== 'count' || p.role === 'hider')) {
@@ -2660,7 +2678,7 @@ function updatePlayer(dt) {
       if (aimHit.c) { p.paintT = 0.35; p.paintCol = aimHit.c.clone(); p.paintPart = G.paintPart; BR.col.copy(aimHit.c); BR.kind = aimHit.kind || 'noise'; sfx.paint(); }
       else toast('Point the dot at something close to you, then PAINT', 2);
     } else if (G.phase === 'seek') {
-      if (G.ammo >= 1 && G.throwCd <= 0) { G.ammo--; G.throwCd = 0.45; p.yaw = input.yaw; throwBall(p, p, aimHit.p); }
+      if ((G.ammo >= 1 || meCheat('paint')) && G.throwCd <= 0) { if (!meCheat('paint')) G.ammo--; G.throwCd = meCheat('paint') ? 0.2 : 0.45; p.yaw = input.yaw; throwBall(p, p, aimHit.p); }   // cheat: endless paint balls
       else if (G.ammo < 1) toast('Out of paint! It refills by itself', 1.4);
     }
   }
@@ -2843,6 +2861,7 @@ function noticeRate(s, h) {
     if (cast(eyeP, dirV, dist - 0.45)) continue;   // something in the way
     const bd = cast(bdP.copy(tgtP).addScaledVector(dirV, 0.5), dirV, 40);
     let m = matchOf(seenCol(h, smp.p, s), bd ? bd.object.userData.c : skyC);   // 0.3.2: the side of that part facing the seeker
+    if (hasCheat(h, 'invis')) m = 1 - (1 - m) * 0.12;   // cheat: invisible
     if (h.splatN) m *= 0.4;
     // far away = very hard to notice (squared falloff); a still hider with closed eyes is much harder to spot
     const near = clamp(1 - dist / G.D.sight, 0, 1);
@@ -3060,7 +3079,7 @@ function drawBoard(table, showPlus) {
     const tag = p.human && G.myKey !== 'you' ? (isMe(p) ? ' <i>(you)</i>' : p.away ? ' <i>(away 🤖)</i>' : ' 👤') : '';
     const pl = placeOf(ranked, p);
     return `<tr class="${isMe(p) ? 'me' : ''}"><td class="rk">${anyPoints ? ['🥇', '🥈', '🥉'][pl] || pl + 1 : '·'}</td>` +   // no medals before anyone has points
-      `<td><span class="dot" style="background:${hexCss(p.hex)}"></span>${esc(p.name)}${tag} ${myHat && myHat !== 'none' ? hat.emoji : ''}</td>` +
+      `<td><span class="dot" style="background:${hexCss(p.hex)}"></span>${esc(p.name)}${tag} ${myHat && myHat !== 'none' ? hat.emoji : ''}${(isMe(p) ? myCheats().length : p.cos && p.cos.ch && p.cos.ch.length) ? ' <span class="cheat" title="Cheats on">🧪</span>' : ''}</td>` +
       `<td class="plus">${showPlus ? '+' + p.last : ''}</td><td class="num">⭐ ${p.total}</td></tr>`;
   }).join('');
 }
@@ -3138,7 +3157,7 @@ function drawLobbyBoard() {
       const pl = placeOf(ranked, p);
       if (M.round) g.fillText(['🥇', '🥈', '🥉'][pl] || (pl + 1) + '.', w * 0.14, y);   // no medals before round 1
       g.fillStyle = hexCss(p.hex); g.beginPath(); g.arc(w * 0.25, y, rowH * 0.28, 0, 7); g.fill();
-      g.fillStyle = '#fff'; g.fillText(p.name, w * 0.29, y);
+      g.fillStyle = '#fff'; g.fillText(p.name + ((isMe(p) ? myCheats().length : p.cos && p.cos.ch && p.cos.ch.length) ? ' 🧪' : ''), w * 0.29, y);
       g.textAlign = 'right'; g.fillStyle = '#ffd166'; g.fillText('⭐ ' + p.total, w * 0.86, y);
     });
   });
@@ -3165,6 +3184,9 @@ function lobbyAI(c, dt) {
 }
 function lobbyTick(dt) {
   const p = G.player; if (!p) return;
+  const disco = G.chars.some(c => hasCheat(c, 'disco'));   // cheat: disco lights
+  if (disco) { hemi.color.setHSL((G.time * 0.25) % 1, 0.9, 0.6); sun.color.setHSL((G.time * 0.25 + 0.5) % 1, 0.9, 0.65); G.disco = true; }
+  else if (G.disco) { G.disco = false; hemi.color.setHex(0xffffff); sun.color.setHex(0xfff4e0); }
   if (G.lobbyCard && !G.shopOpen) { G.cardT -= dt; if (G.cardT <= 0) closeLobbyCard(); }
   G.throwCd -= dt;
   if (inLobby()) updatePlayer(dt); else { input.act = input.jump = false; p.vx *= 0.8; p.vz *= 0.8; }
@@ -3173,12 +3195,15 @@ function lobbyTick(dt) {
     if (c.puppet) { netPuppetStep(c, dt); continue; }   // other people (and, on a friend's device, everyone else) move from the network
     if (NETC() && c !== p) continue;
     moveChar(c, dt);
-    for (const b of LOBBY_PADS) if (c.onGround && c.y < 0.3 && Math.hypot(c.x - b.x, c.z - b.z) < 1.0) { c.vy = 13; c.onGround = false; if (c === p) sfx.boing(); speak(c, 'wheee', c === p ? 0.8 : 0.6); }
+    for (const b of LOBBY_PADS) if (c.onGround && c.y < 0.3 && Math.hypot(c.x - b.x, c.z - b.z) < 1.0) { c.vy = hasCheat(c, 'pads') || (c === p && meCheat('pads')) ? 21 : 13; c.onGround = false; if (c === p) sfx.boing(); speak(c, 'wheee', c === p ? 0.8 : 0.6); }
   }
   updateBalls(dt); animChars(dt); updateCamera();
   G.nearShop = Math.hypot(p.x - LOBBY_SHOP.x, p.z - LOBBY_SHOP.z) < 2.3;
   G.nearBooth = !G.nearShop && Math.hypot(p.x - LOBBY_BOOTH.x, p.z - LOBBY_BOOTH.z) < 1.4 && p.y < 0.3;
   G.nearJuke = !G.nearShop && !G.nearBooth && Math.hypot(p.x - LOBBY_JUKE.x, p.z - LOBBY_JUKE.z) < 1.8;
+  const atVault = Math.hypot(p.x - LOBBY_VAULT.x, p.z - LOBBY_VAULT.z) < 0.9 && p.y < 0.3;   // the secret door: walk into it
+  if (atVault && !G.atVault && inLobby()) { sfx.alert(); openCodes('lobby'); }
+  G.atVault = atVault;
   if (!G.ready && Math.hypot(p.x - LOBBY_READY.x, p.z - LOBBY_READY.z) < 1.6 && p.y < 0.5) lobbyReady();
   if (NETC()) G.lobbyT = Math.max(0, G.lobbyT - dt);   // a friend's device: the host's timer decides (it comes with every update)
   // alone, the timer waits while you look at the card or the shop; with friends it keeps going, so nobody waits for one person
@@ -3366,7 +3391,7 @@ function drawShop() {
     return `<button class="item ${cls}" data-kind="${kind}" data-id="${id}"><div class="ie">${icon}</div><div class="in">${it.name}</div><div class="ip">${label}</div></button>`;
   };
   // owned and free things first, then the rest from cheapest up, so the next thing to save for is easy to find
-  const items = Object.entries(K.list()).filter(([, it]) => !it.hidden);
+  const items = Object.entries(K.list()).filter(([id, it]) => !it.hidden || owns(kind, id));   // secret items show once you have them
   $('shopGrid').innerHTML = items.map(([id, it]) => card(id, it)).join('');
   $('shopCustom').hidden = !(kind === 'paint' && G.shopPick);
 }
@@ -3399,6 +3424,84 @@ function jukeNext() {
 /* jukebox songs (0.3.3): every recorded song; the menu and lobby songs are free */
 const JUKEBOX = {};
 for (const [slug, title] of Object.entries(typeof SONG_TITLE === 'object' ? SONG_TITLE : {})) JUKEBOX[slug] = { name: title, emoji: '🎵', price: ['carefree', 'winner-winner', 'paradise-found'].includes(slug) ? 0 : 60 + (hashOf(slug) % 5) * 15 };
+/* ---------- 11c. secret cheat codes (0.3.4) ----------
+   The code box opens from a little door hidden behind the shop in the lobby, or 5 taps on the menu title. The game
+   keeps only a fingerprint of each code word (CHEAT_CODES: cheatHash → cheat); the words are in docs/CHEATS.md, which
+   is never on a website, and tools/add-cheat.cjs adds new ones. Toggle cheats stay on (SHOP.cheats) until typed or
+   tapped again. They work anywhere, also with friends: they see your looks and a 🧪 badge (from the next round). */
+const CHEATS = {
+  head: { name: 'Big head', emoji: '🎈', kind: 'look' },
+  tiny: { name: 'Tiny you', emoji: '🐜', kind: 'look' },
+  giant: { name: 'Giant you', emoji: '🦒', kind: 'look' },
+  party: { name: 'Hat party', emoji: '🥳', kind: 'look' },
+  trail: { name: 'Rainbow trail', emoji: '🌈', kind: 'look' },
+  disco: { name: 'Disco lobby', emoji: '🪩', kind: 'look' },
+  bouncy: { name: 'Bouncy walk', emoji: '🏀', kind: 'look' },
+  moon: { name: 'Moon boots', emoji: '🌙', kind: 'physics' },
+  pads: { name: 'Super bounce pads', emoji: '🚀', kind: 'physics' },
+  ice: { name: 'Slippery floors', emoji: '🧊', kind: 'physics' },
+  slow: { name: 'Slow motion', emoji: '🐌', kind: 'physics' },
+  jump: { name: 'Super jump', emoji: '🦘', kind: 'power' },
+  speed: { name: 'Super speed', emoji: '⚡', kind: 'power' },
+  paint: { name: 'Endless paint balls', emoji: '🎯', kind: 'power' },
+  xray: { name: 'X-ray eyes', emoji: '👓', kind: 'power' },
+  invis: { name: 'Invisible', emoji: '🫥', kind: 'power' },
+  coins: { name: '+500 coins', emoji: '🪙', kind: 'once' },
+  cone: { name: 'Secret hat: Traffic Cone', emoji: '🚧', kind: 'unlock' },
+  sprinkles: { name: 'Secret paint ball: Sprinkles', emoji: '🧁', kind: 'unlock' }
+};
+const CHEAT_CODES = { '273rjxj1b2m': 'head', '29i77vic5my': 'tiny', '29w5f4hqsae': 'giant', 'mry71r7v7c': 'party', '1zzjm02yd33': 'trail', '1tlkcb9ysq0': 'disco', '1xotj64q9gi': 'bouncy', '14w0jfyghgr': 'moon', '21aqho2aojp': 'pads', '1gfm0uouxwg': 'ice', '23q1puc16lo': 'slow', '15afvv745gb': 'jump', '25ab2hly1dc': 'speed', '17g1vsiunrs': 'paint', '1c7haxr1n8c': 'xray', '1u8zfgd5cqf': 'invis', 'hfdz0kquv1': 'coins', '1a6rd3ec6ys': 'cone', '2b07youf1y5': 'sprinkles' };
+function cheatHash(word) {   // the same as tools/add-cheat.cjs (cyrb53 with the game's seed)
+  const t = String(word).toUpperCase().replace(/[^A-Z0-9]/g, ''), seed = 0x5eed;
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0; i < t.length; i++) { const ch = t.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+const myCheats = () => (Array.isArray(SHOP.cheats) ? SHOP.cheats : []).filter(id => CHEATS[id] && CHEATS[id].kind !== 'once' && CHEATS[id].kind !== 'unlock');
+/* does character c have cheat id on? (you: your own list, at once; others: what came with them, from the next round) */
+const hasCheat = (c, id) => !!c && (c === G.player ? myCheats().includes(id) : !!(c.cos && c.cos.ch && c.cos.ch.includes(id)));
+const meCheat = id => myCheats().includes(id);
+function useCode(text) {
+  const id = CHEAT_CODES[cheatHash(text)], C = CHEATS[id];
+  if (!C) { sfx.error(); return '🤔 That\'s not a secret code. Try again!'; }
+  if (C.kind === 'once') { SHOP.coins += 500; saveShop(); sfx.coin(); refreshMenu(); return '🪙 +500 coins! You have ' + SHOP.coins + '.'; }
+  if (C.kind === 'unlock') {
+    const key = id === 'cone' ? 'hat:cone' : 'paint:sprinkles';
+    if (!SHOP.owned.includes(key)) SHOP.owned.push(key);
+    if (id === 'cone') SHOP.hat = 'cone'; else SHOP.paint = 'sprinkles';
+    saveShop(); jingle('win'); refreshLobbyMe(); return C.emoji + ' Unlocked: ' + C.name + '! (It\'s on now; change it in the shop.)';
+  }
+  const list = myCheats(), on = !list.includes(id);
+  SHOP.cheats = on ? list.concat(id) : list.filter(x => x !== id); saveShop();
+  cheatsChanged(); sfx.pop();
+  return C.emoji + ' ' + C.name + (on ? ' is ON! 🧪' : ' is off.');
+}
+function cheatsChanged() {
+  if (G.player) G.player.cos = myCos();
+  netShareLook(); drawCodes();
+}
+function openCodes(from) {
+  G.codesFrom = from; G.codesOpen = true; $('codeIn').value = ''; $('codeMsg').textContent = ''; drawCodes();
+  if (locked && document.exitPointerLock) document.exitPointerLock();
+  showScreen('codes'); setTimeout(() => { try { $('codeIn').focus(); } catch (e) { /* no keyboard */ } }, 50);
+}
+function closeCodes() {
+  G.codesOpen = false; $('codeIn').blur(); refreshMenu();
+  if (G.codesFrom === 'lobby' && G.phase === 'lobby') { refreshLobbyMe(); showScreen(null); lobbyHud(); } else showScreen('menu');
+}
+function drawCodes() {
+  const on = myCheats();
+  $('codeList').innerHTML = on.length ? '<div class="vsub">On now (tap to turn off):</div>' + on.map(id => '<button class="small" data-c="' + id + '">' + CHEATS[id].emoji + ' ' + CHEATS[id].name + ' ✕</button>').join(' ') : '<div class="vsub">No cheats on.</div>';
+}
+$('codeGo').onclick = () => { const t = $('codeIn').value; if (!t.trim()) return; $('codeMsg').textContent = useCode(t); $('codeIn').value = ''; };
+$('codeIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') $('codeGo').onclick(); if (e.key === 'Escape') closeCodes(); });
+$('codeList').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; SHOP.cheats = myCheats().filter(x => x !== b.dataset.c); saveShop(); cheatsChanged(); $('codeMsg').textContent = CHEATS[b.dataset.c].emoji + ' ' + CHEATS[b.dataset.c].name + ' is off.'; sfx.pop(); });
+$('codesBack').onclick = closeCodes;
+// 5 taps on the title (within 3 seconds) open the code box
+{ let taps = []; document.querySelector('#menu .logo').addEventListener('click', () => { const t = performance.now(); taps = taps.filter(x => t - x < 3000).concat(t); if (taps.length >= 5) { taps = []; ac(); openCodes('menu'); } }); }
+
 /* ---------- 11b. launchers, tag celebrations, lobby emotes (0.3.1) ---------- */
 const LAUNCHERS = {
   hand:    { name: 'Just throw', emoji: '✋', price: 0 },
@@ -3429,10 +3532,10 @@ const EMOTES = {
   dance: { name: 'Dance', emoji: '💃', price: 120, dur: 2.6 },
   wheel: { name: 'Cartwheel', emoji: '🤸', price: 150, dur: 1.1 }
 };
-const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti', v: VOICES[SHOP.voice] && owns('voice', SHOP.voice) ? SHOP.voice : 'normal', j: JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza' });
+const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti', v: VOICES[SHOP.voice] && owns('voice', SHOP.voice) ? SHOP.voice : 'normal', j: JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza', ch: myCheats() });
 /* a player's cosmetics from the match list or the network, made safe */
 const cosOf = pl => { const c = (pl && pl.cos) || {}; const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-  return { l: has(LAUNCHERS, c.l) ? c.l : 'hand', t: has(CELS, c.t) ? c.t : 'confetti', v: has(VOICES, c.v) ? c.v : 'normal', j: has(JINGLES, c.j) ? c.j : 'pizza' }; };
+  return { l: has(LAUNCHERS, c.l) ? c.l : 'hand', t: has(CELS, c.t) ? c.t : 'confetti', v: has(VOICES, c.v) ? c.v : 'normal', j: has(JINGLES, c.j) ? c.j : 'pizza', ch: Array.isArray(c.ch) ? c.ch.filter(id => typeof id === 'string' && has(CHEATS, id)).slice(0, 20) : [] }; };
 /* computer players show off the shop now and then */
 const botCos = () => ({ l: Math.random() < 0.5 ? pick(Object.keys(LAUNCHERS)) : 'hand', t: Math.random() < 0.6 ? pick(Object.keys(CELS)) : 'confetti', v: Math.random() < 0.4 ? pick(Object.keys(VOICES)) : 'normal', j: 'pizza' });
 
@@ -3859,7 +3962,7 @@ function askRestart() {
 }
 function toMenu(msg) {
   if (NET.on) netLeave();
-  G.juke = null; clearRound(); G.phase = 'menu'; G.paused = false; G.vote = null; G.match = null; G.shopOpen = false; G.myKey = 'you'; G.menuOpen = false;
+  G.juke = null; G.codesOpen = false; clearRound(); G.phase = 'menu'; G.paused = false; G.vote = null; G.match = null; G.shopOpen = false; G.myKey = 'you'; G.menuOpen = false;
   hideRoundUi();
   if (document.exitPointerLock && locked) document.exitPointerLock();
   showScreen('menu'); refreshMenu();
@@ -3967,7 +4070,30 @@ function alertOf(h) {
   if (bots.some(s => s.state === 'chase' && s.target === h)) return 2;
   return Math.max(0, ...bots.map(c => c.susp.get(h) || 0)) > 0.2 ? 1 : 0;
 }
+/* cheat looks: big head, tiny / giant, bouncy walk, rainbow trail, hat party, invisible, x-ray (see 11c) */
+const RAINBOW_HEX = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x007aff, 0xaf52de];
+function cheatLooks(c, dt) {
+  const big = hasCheat(c, 'head') ? 1.7 : 1;
+  if (c._big !== big) { c._big = big; c.headM.scale.setScalar(0.36 * big); c.eyes.scale.setScalar(big); c.eyes.position.y = 1.1 * (1 - big); c.hatPivot.scale.setScalar(big); c.hatPivot.position.y = 1.1 + 0.18 * big; }
+  const size = hasCheat(c, 'tiny') ? 0.55 : hasCheat(c, 'giant') ? 1.6 : 1;
+  if (c.g.scale.x !== size) c.g.scale.setScalar(size);
+  if (hasCheat(c, 'bouncy') && c.moving && c.onGround) c.model.position.y += Math.abs(Math.sin(c.bob * 0.8)) * 0.22;
+  if (hasCheat(c, 'trail') && c.moving && !G.silent && Math.random() < dt * 24) {
+    const m = new THREE.Mesh(BOXG, paintMat(RAINBOW_HEX[Math.floor(G.time * 8) % 6])); m.scale.setScalar(0.12); m.position.set(c.x + rnd(-0.15, 0.15), c.y + 0.2, c.z + rnd(-0.15, 0.15)); scene.add(m);
+    bits.push({ m, v: new V3(0, 0.3, 0), t: 0.4, spin: rnd(-3, 3) });
+  }
+  if (G.partyHats && !c.hatG && c.role !== 'seeker' && !c._party) { c._party = true; const hg = new THREE.Group(); hg.scale.setScalar(0.8); hg.position.y = -1.26 * 0.8; c.hatPivot.add(hg); HATS.party.build(hg, c.hatMat); c.hatG = hg; }
+  const inv = hasCheat(c, 'invis') && c.role === 'hider' && !c.caught, xr = !inv && c.role === 'hider' && !c.caught && G.phase === 'seek' && G.player && G.player.role === 'seeker' && meCheat('xray');
+  const look = inv ? 'inv' : xr ? 'xray' : '';
+  if (c._look !== look && c !== ghosted) {
+    c._look = look;
+    eachMat(c, mm => { mm.transparent = !!look; mm.opacity = inv ? (c === G.player ? 0.3 : 0.1) : xr ? 0.75 : 1; mm.depthTest = !xr; mm.needsUpdate = true; });
+    c.g.traverse(o => { if (o.isMesh) o.renderOrder = xr ? 20 : 0; });
+    c.eyes.visible = !inv || c === G.player;
+  }
+}
 function animChars(dt) {
+  G.partyHats = G.chars.some(c => hasCheat(c, 'party'));
   for (const c of G.chars) {
     const sp = Math.hypot(c.vx, c.vz); c.moving = sp > 0.6 || !c.onGround;
     if (c === G.player && c.role === 'hider' && !c.caught) { c.stillT = c.moving || c.paintT > 0 ? 0 : c.stillT + dt; c.eyesOpen = c.stillT < 1.5; }
@@ -3992,11 +4118,12 @@ function animChars(dt) {
       c.legL.rotation.x = sw * 0.3; c.legR.rotation.x = -sw * 0.3;
       if (!painting) c.armL.rotation.x = c.armR.rotation.x = 0;
     } else { c.model.rotation.x = 0; c.model.position.set(0, 0, 0); }
-    c.eyes.visible = c.eyesOpen;
+    c.eyes.visible = c.eyesOpen && !(hasCheat(c, 'invis') && c.role === 'hider' && c !== G.player);
     if (c.spin) c.spin.rotation.y += dt * (c.moving ? 18 : 4);
     c.g.position.set(c.x, c.y, c.z); c.g.rotation.y = c.yaw;
     if (c.caught) c.g.position.y = 0.5 + Math.abs(Math.sin(G.time * 4 + c.bob)) * 0.15;
     if (c.emote) emoteStep(c, dt);   // a lobby emote plays over the normal moves
+    cheatLooks(c, dt);
   }
 }
 let menuA = 0;
@@ -4055,7 +4182,7 @@ function frame(t) {
     G.silent = true;
     for (let k = 0; k < 25 && G.skipping; k++) { update(1 / 12); if (G.phase !== 'seek' && G.phase !== 'hide') G.skipping = false; }
     if (!G.skipping) G.silent = false;
-  } else update(dt);
+  } else update(dt * (meCheat('slow') && !NETC() ? 0.5 : 1));   // cheat: slow motion
   draw();
   autoGfxTick();
 }
@@ -4172,7 +4299,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.3.3';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.3.4';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
