@@ -2,6 +2,11 @@
 
 Made by `tools/make-sounds.cjs` (FFmpeg) from these downloads. The game's 🎵 Credits screen shows the same.
 
+## 🎧 Studio music (0.4): free to use, commercial use included (credit optional)
+Made for Paint & Seek by Claude with the **ACE-Step 1.5** music model (MIT license) on acemusic.ai, whose terms
+(version 2026-11-01, section 4.2) allow ACE-Step v1.5 music to be used for any purpose, commercial included. In
+`music/studio/`, made by `tools/make-studio.cjs`. Saved proof (dated pages, every song's id): `docs/licenses/acemusic/`.
+
 ## Recorded music: CC-BY 4.0 (credit required)
 Songs by **Kevin MacLeod** (incompetech.com), licensed under Creative Commons: By Attribution 4.0
 (https://creativecommons.org/licenses/by/4.0/). In `music/`, re-encoded to 64 kbps mono:
