@@ -382,7 +382,7 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
 <!-- lobby between rounds -->
 <div class="screen" id="lobby"><div class="card wide">
   <div class="vtitle" id="lobTitle">Round 1</div>
-  <div class="seekline" id="lobSeeker">🔍 Next seeker</div>
+  <div class="seekline" id="lobSeeker">🔍 Next seeker</div> <button class="small" id="lobSeekMe">🔍 Let me seek!</button>
   <table class="board" id="board"></table>
   <div class="coinline" id="lobCoins"></div>
   <div class="vsub">Run around the lobby, throw paint and visit the shop.<br>Ready for the map vote? Tap <b>✅ I'm ready!</b> or stand on the <b style="background:#2ecc71">green pad</b>.</div>
@@ -3582,8 +3582,22 @@ function openLobby() {
   if (NETH()) netScene();
 }
 /* the results card shown over the lobby (also opened by the pause button there) */
+/* who seeks next: the turn order, unless someone tapped 🔍 Let me seek! (0.4.4; they seek every round until they tap it
+   again). Playing alone or as the host only: the host's device runs the rounds. */
+const nextSeeker = M => M.seekMe && P(M.seekMe) ? M.seekMe : M.order[M.round];
+function seekMeUi() {
+  const M = G.match, b = $('lobSeekMe'); if (!M || !b) return;
+  b.style.display = NETC() ? 'none' : '';
+  b.textContent = M.seekMe === ME() ? '🎲 Take turns again' : '🔍 Let me seek!';
+}
+$('lobSeekMe').onclick = () => {
+  const M = G.match; if (!M || NETC()) return;
+  M.seekMe = M.seekMe === ME() ? null : ME(); sfx.pop();
+  openLobbyCard(); drawLobbyBoard(); if (NETH()) netScene();
+};
 function openLobbyCard() {
-  const M = G.match, next = M.order[M.round], sp = P(next);
+  const M = G.match, next = nextSeeker(M), sp = P(next);
+  seekMeUi();
   $('lobTitle').textContent = M.round === 0 ? '🎲 Round 1 of ' + M.rounds : '🏁 Round ' + M.round + ' of ' + M.rounds + ' is over!';
   const sl = $('lobSeeker');
   sl.textContent = next === ME() ? '🔍 Round ' + (M.round + 1) + ': YOU are the seeker!' : '🔍 Round ' + (M.round + 1) + ': ' + sp.name + ' seeks, you hide!';
@@ -3607,7 +3621,7 @@ function closeLobbyCard() {
 }
 function drawLobbyBoard() {
   if (!lobbyBoard || !G.match) return;
-  const M = G.match, next = P(M.order[M.round]);
+  const M = G.match, next = P(nextSeeker(M));
   lobbyBoard.draw((g, w, h) => {
     g.fillStyle = '#1f2240'; g.fillRect(0, 0, w, h);
     g.textBaseline = 'middle'; g.textAlign = 'center';
@@ -3685,7 +3699,7 @@ function lobbyTick(dt) {
   G.hudT -= dt; if (G.hudT <= 0) { G.hudT = 0.1; lobbyHud(); }
 }
 function lobbyHud() {
-  const M = G.match, next = P(M.order[M.round]);
+  const M = G.match, next = P(nextSeeker(M));
   $('phase').textContent = '🎪 Lobby · map vote in';
   $('timer').textContent = fmt(G.lobbyT); $('timer').classList.toggle('low', G.lobbyT < 6);
   $('found').textContent = isMe(next) ? '🔍 Next seeker: YOU!' : '🔍 Next seeker: ' + next.name;
@@ -4337,7 +4351,7 @@ function startRound(force) {
   if (!G.match) newMatch();
   clearRound(); ac();
   const M = G.match, me = ME();
-  let seekKey = M.order[M.round] || me;
+  let seekKey = nextSeeker(M) || me;
   if (force === 'seek') seekKey = me; else if (force === 'hide' && seekKey === me) seekKey = M.players.find(p => !p.human).key;
   const sp = P(seekKey);
   G.D = roundSettings(); if (MAP.timeK) for (const k of ['hideTime', 'seekTimeYou', 'seekTimeBot']) G.D[k] = Math.round(G.D[k] * MAP.timeK);   // big maps: more time
@@ -5041,7 +5055,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.4.3';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.4.4';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
@@ -5485,7 +5499,7 @@ function netResync() { if (NETH() && NET.sid) netEv(['scene', netSceneNow()]); }
 function netSceneNow() {
   const M = G.match, ph = G.phase === 'lobby' ? 'lobby' : G.phase === 'vote' ? 'vote' : G.phase === 'final' ? 'final' : 'round';
   const S = { sid: NET.sid, ph, rule: NET.rule,
-    m: { id: M.id, rounds: M.rounds, round: M.round, order: M.order, players: M.players.map(p => ({ key: p.key, pid: p.pid, name: p.name, hex: p.hex, hat: p.hat, paint: p.paint, cos: p.cos, human: p.human ? 1 : 0, away: p.away ? 1 : 0, total: p.total, last: p.last })) } };
+    m: { id: M.id, rounds: M.rounds, round: M.round, order: M.order, seekMe: typeof M.seekMe === 'string' ? M.seekMe : null, players: M.players.map(p => ({ key: p.key, pid: p.pid, name: p.name, hex: p.hex, hat: p.hat, paint: p.paint, cos: p.cos, human: p.human ? 1 : 0, away: p.away ? 1 : 0, total: p.total, last: p.last })) } };
   if (ph === 'vote') S.ids = G.vote.ids;
   if (ph === 'lobby' || ph === 'round') S.c = G.chars.map(c => [c.pkey, r2(c.x), r2(c.z), r2(c.yaw), c.role, c.bot ? 1 : 0, c.origSeeker ? 1 : 0, c.caught ? 1 : 0, c.wasFound ? 1 : 0, c.base.getHex(), c.foundN, c.splatHits]);
   if (ph === 'round') Object.assign(S, { map: mapId, rph: G.phase, t: r2(G.t), D: G.D, sk: G.seekKeys, seekKey: G.seekKey, hs: G.humanSeek ? 1 : 0, total: G.total, found: G.found });
