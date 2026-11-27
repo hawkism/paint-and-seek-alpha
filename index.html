@@ -568,7 +568,7 @@ const PS_TRACK = 'alpha';
 const trackKey = k => PS_TRACK === 'stable' ? k : k + '@' + PS_TRACK;
 const TRACK_NAME = { stable: '', beta: '🧪 Beta: the next version, almost ready', alpha: '🧪 Alpha: the newest features, still being tested' };
 const BEST = Object.assign({ seek: {}, hideWins: 0, matchWins: 0 }, load(trackKey('ps-best'), {}));
-const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti', brush: 'brush', look: null, voice: 'normal', jingle: 'pizza' }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
+const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti', brush: 'brush', look: null, gunLooks: [], gunLook: -1, voice: 'normal', jingle: 'pizza' }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
 const saveShop = () => save(trackKey('ps-shop'), SHOP);
 
 /* Smarts sliders (1-10) for the computer hiders and the computer seekers. Values are read off these points
@@ -943,10 +943,11 @@ function wallZ(x0, z1, z2, cN, cP, gaps = [], H = 2.8) {
   for (const [a, b] of segs(z1, z2, gaps)) { addBox(x0 - 0.075, (a + b) / 2, 0.15, b - a, H, cN); addBox(x0 + 0.075, (a + b) / 2, 0.15, b - a, H, cP); }
 }
 function perimeter(hex, h, t) {
-  addBox(0, -24.2, 48.8, 0.4, h, hex, 0, false, t); addBox(0, 24.2, 48.8, 0.4, h, hex, 0, false, t);
-  addBox(-24.2, 0, 0.4, 48, h, hex, 0, false, t); addBox(24.2, 0, 0.4, 48, h, hex, 0, false, t);
+  const P = halfOf() + 0.7, L = P * 2 + 0.4;
+  addBox(0, -P, L, 0.4, h, hex, 0, false, t); addBox(0, P, L, 0.4, h, hex, 0, false, t);
+  addBox(-P, 0, 0.4, L - 0.8, h, hex, 0, false, t); addBox(P, 0, 0.4, L - 0.8, h, hex, 0, false, t);
 }
-function ground(hex, t, rep) { addBox(0, 0, 70, 70, 0.1, hex, -0.1, false, t, [rep, rep]); }
+function ground(hex, t, rep) { const S = Math.max(70, halfOf() * 2 + 24); addBox(0, 0, S, S, 0.1, hex, -0.1, false, t, [rep, rep]); }
 function tree(x, z, leaf = 0x3f9b3a, leaf2 = 0x4caa42) {
   addCyl(x, z, 0.35, 2.6, 0x7b4f2c);
   addBall(x, 3.4, z, 1.7, leaf, false);
@@ -1217,6 +1218,180 @@ function buildCandy() {
   for (let k = 0; k < 40; k++) deco(SPHG, pick([0xe63946, 0x2ecc71, 0xffd60a, 0x9b59b6, 0xff8c42, 0x3fa7ff]), r() * 40 - 20, 0.1, r() * 40 - 20, 0.12, 0.1, 0.2, { rot: [0, r() * 6, 0], tex: null });
   clouds = makeClouds(0xfff0f8);
 }
+/* ---------- 3b. secret levels (0.3.5): bigger than the normal maps, unlocked with codes, played through lobby doors ---------- */
+const water = b => { boxes[boxes.length - 1].k = 'water'; return b; };   // the last box splashes when you walk on it
+function pine(x, z, s = 1) { addCyl(x, z, 0.28 * s, 1.2 * s, 0x6b4423); for (let k = 0; k < 3; k++) { deco(CONEG, 0x2f6b3a, x, (1.6 + k * 0.9) * s, z, (1.6 - k * 0.4) * s, 1.4 * s, (1.6 - k * 0.4) * s); deco(CONEG, 0xffffff, x, (2.05 + k * 0.9) * s, z, (0.7 - k * 0.15) * s, 0.5 * s, (0.7 - k * 0.15) * s, { tex: 'frosting' }); } }
+function stairs(x, z, dirX, dirZ, n, w, top) {   // steps going up toward (dirX, dirZ), each 0.3 m: walkable without jumping
+  for (let k = 0; k < n; k++) { const h = Math.min(top, (k + 1) * 0.3); addBox(x + dirX * k * 0.7, z + dirZ * k * 0.7, dirX ? 0.7 : w, dirZ ? 0.7 : w, h, 0xb08a5a, 0, false, 'wood'); }
+}
+/* abstract art in code (no copied paintings): shapes and stripes in bright colors, in a gold frame */
+function artPiece(x, y, z, rotY, W, H, seed) {
+  const back = new V3(-Math.sin(rotY) * 0.04, 0, -Math.cos(rotY) * 0.04);
+  deco(BOXG, 0xd4a017, x + back.x, y, z + back.z, rotY % Math.PI === 0 ? W + 0.3 : 0.06, H + 0.3, rotY % Math.PI === 0 ? 0.06 : W + 0.3, { tex: null, rot: [0, 0, 0] });
+  signPlane(x, y, z, rotY, W, H, (g, w, h) => {
+    const r = seeded(seed), P = ['#ff2fa0', '#2f8bff', '#ffd60a', '#22c55e', '#ff7a00', '#9b4dff', '#e63946', '#00c2a8', '#ffffff', '#1d1d2b'];
+    g.fillStyle = pick(['#fff7e6', '#f0f4ff', '#1d1d2b', '#ffe3f2']); g.fillRect(0, 0, w, h);
+    const style = seed % 4;
+    for (let k = 0; k < 14; k++) {
+      g.fillStyle = P[Math.floor(r() * P.length)]; g.globalAlpha = 0.85;
+      if (style === 0) { g.beginPath(); g.arc(r() * w, r() * h, (0.08 + r() * 0.25) * h, 0, 7); g.fill(); }
+      else if (style === 1) g.fillRect(r() * w, r() * h, (0.1 + r() * 0.4) * w, (0.05 + r() * 0.3) * h);
+      else if (style === 2) { g.fillRect(k * w / 14, 0, w / 14, h * (0.3 + r() * 0.7)); }
+      else { g.beginPath(); g.moveTo(r() * w, r() * h); g.lineTo(r() * w, r() * h); g.lineTo(r() * w, r() * h); g.fill(); }
+    }
+    g.globalAlpha = 1;
+  });
+}
+function buildKitchen() {   // you're tiny in a giant's kitchen
+  ground(0xf3e3c3, 'check', 22);
+  perimeter(0xe9d8b8, 7, 'wood');
+  const r = seeded(21);
+  // cabinets along the walls (tall, with handles)
+  for (let k = -27; k <= 27; k += 9) { addBox(k, -29.2, 8.6, 1.4, 6.5, 0xf1e6cf, 0, false, 'wood'); deco(BOXG, 0xb08a5a, k, 3.3, -28.45, 0.4, 2, 0.1); }
+  // the giant table: you walk under it (the top is far above), and its legs
+  for (const [x, z] of [[-16, -14], [-16, 4], [6, -14], [6, 4]]) addCyl(x, z, 0.9, 13, 0x9b6b3d, 0, true, 'wood');
+  addBox(-5, -5, 25, 21, 0.8, 0x9b6b3d, 13, false, 'wood');
+  for (const [x, z] of [[-24, -2], [14, -8]]) { for (const [dx, dz] of [[-3, -3], [-3, 3], [3, -3], [3, 3]]) addCyl(x + dx, z + dz, 0.5, 7.5, 0xc08552, 0, true, 'wood'); addBox(x, z, 7.4, 7.4, 0.6, 0xc08552, 7.5, false, 'wood'); }
+  // cereal and crackers, a milk carton, a toaster, a bread loaf
+  addBox(18, -20, 8, 3, 11, 0xffc93c); deco(BOXG, 0xe63946, 18, 7, -18.45, 6, 3, 0.1, { tex: null }); deco(SPHG, 0xffffff, 18, 3.5, -18.45, 1.4, 1.4, 0.1, { tex: null });
+  addBox(25, -12, 4, 6, 7, 0x3fa7ff); addBox(-22, 20, 6, 4, 9, 0xffffff); deco(BOXG, 0x2f8bff, -22, 7.6, 22.05, 6, 1.6, 0.1, { tex: null });
+  addBox(-6, 22, 7, 4.5, 5.5, 0xc8ccd4, 0, false, 'panel'); deco(BOXG, 0x1d1d2b, -7.3, 5.55, 22, 1.1, 0.1, 3.6, { tex: null }); deco(BOXG, 0x1d1d2b, -4.7, 5.55, 22, 1.1, 0.1, 3.6, { tex: null });
+  addBox(10, 20, 9, 5, 4, 0xd99a5b, 0, false, 'hay'); addBall(10, 4, 20, 2.6, 0xc4813f, false, 0.5, 'hay');
+  // cups and a mixing bowl
+  for (const [x, z, c] of [[-26, 8, 0xff77aa], [22, 8, 0x2ecc71], [0, 14, 0x9b4dff]]) { addCyl(x, z, 2.4, 4.6, c); deco(TORG, c, x + 2.6, 2.4, z, 1.1, 1.1, 0.9, { rot: [0, 0, Math.PI / 2] }); }
+  addCyl(26, 24, 4, 3.2, 0xf4f4f4); deco(TORG, 0xdddddd, 26, 3.2, 24, 4, 4, 1.2, { rot: [Math.PI / 2, 0, 0] });
+  // plates: stacks you can climb
+  for (const [x, z, n] of [[-12, 14, 4], [16, -2, 3], [-26, -20, 5]]) for (let k = 0; k < n; k++) addCyl(x, z, 3.6 - k * 0.25, 0.35, 0xffffff, k * 0.35);
+  // sponges, cookies, cheese, books (all things you can stand on)
+  for (const [x, z] of [[2, -22], [-14, -24]]) { addBox(x, z, 4.5, 2.6, 1.6, 0xffd60a, 0, false, 'carpet'); addBox(x, z, 4.5, 2.6, 0.5, 0x2ecc71, 1.6, false, 'grass'); }
+  for (const [x, z] of [[8, 10], [-2, -8], [-18, -6], [12, -24]]) addCyl(x, z, 2, 0.6, 0xc4813f, 0, true, 'dirt');
+  addBox(-28, 26, 5, 3, 3, 0xffcc33); for (let k = 0; k < 4; k++) addBox(28, -26 + k * 0.4, 6 - k * 0.7, 4, 1.1, [0xe63946, 0x2f8bff, 0x22c55e, 0xff7a00][k], k * 1.1, false, 'noise');
+  // fruit: apples, an orange, a banana, grapes
+  for (const [x, z, c, rr] of [[-8, 4, 0xe63946, 2.2], [4, -2, 0x6abf4b, 2], [-20, 12, 0xff8c1a, 2.4]]) addBall(x, rr * 0.95, z, rr, c, true, 0.95);
+  for (let k = 0; k < 4; k++) addCyl(14 + k * 1.6, 14 + Math.sin(k) * 0.8, 0.9, 1.6, 0xffe066, 0, true);
+  for (let k = 0; k < 9; k++) addBall(-14 + (k % 3) * 1.2, 0.6 + Math.floor(k / 3) * 1.0, -16 + (k % 2) * 0.6, 0.65, 0x7b3fa0, k < 3, 1);
+  // a giant spoon and fork lying on the floor, a rug
+  addBox(-4, 6, 1.2, 12, 0.4, 0xc8ccd4, 0, false, 'panel'); addBall(-4, 0.3, 13, 1.6, 0xc8ccd4, false, 0.3, 'panel');
+  addBox(20, 0, 12, 1.0, 0.4, 0xc8ccd4, 0, false, 'panel');
+  patch(-14, -10, 12, 8, 0xd94f4f, 'carpet', 0, 3);
+  // crumbs everywhere
+  for (let k = 0; k < 40; k++) deco(BOXG, pick([0xd99a5b, 0xffd166, 0xc4813f]), r() * 54 - 27, 0.12, r() * 54 - 27, 0.3, 0.25, 0.3, { rot: [r(), r() * 3, r()], tex: null });
+}
+function buildMuseum() {   // halls of art on two floors
+  ground(0xd9d2c3, 'tile', 30);
+  perimeter(0xf4efe5, 6.5);
+  const W = 0xf6f1e7, W2 = 0xebe3d3, H = 4.6;
+  // the rooms: three rows of halls joined by wide doorways
+  wallX(-12, -35, 35, W, W2, [[-27, -21], [-5, 5], [21, 27]], H); wallX(12, -35, 35, W2, W, [[-27, -21], [-5, 5], [21, 27]], H);
+  wallZ(-12, -35, -12, W, W2, [[-26, -20]], H); wallZ(12, -35, -12, W, W2, [[-26, -20]], H);
+  wallZ(-12, 12, 35, W, W2, [[20, 26]], H); wallZ(12, 12, 35, W, W2, [[20, 26]], H);
+  wallZ(-24, -12, 12, W, W2, [[-3, 3]], H); wallZ(24, -12, 12, W, W2, [[-3, 3]], H);
+  // paintings on the walls (all made up in code)
+  let seed = 100;
+  for (const z of [-35.45, 35.45]) for (let x = -30; x <= 30; x += 7.5) if (Math.abs(x) > 3) artPiece(x, 2.4, z, z < 0 ? 0 : Math.PI, 3.6, 2.4, seed++);
+  for (const x of [-35.45, 35.45]) for (let z = -30; z <= 30; z += 7.5) if (Math.abs(z) > 14) artPiece(x, 2.4, z, x < 0 ? Math.PI / 2 : -Math.PI / 2, 3.6, 2.4, seed++);
+  for (const z of [-11.8, 11.8]) for (const x of [-18, 18, -31, 31]) artPiece(x, 2.4, z, z < 0 ? 0 : Math.PI, 3, 2, seed++);   // on the middle hall's side of its walls
+  // statues on pedestals (made of simple shapes)
+  const statue = (x, z, c) => { addBox(x, z, 1.6, 1.6, 1.2, 0xf4f1ea, 0, false, 'noise'); addBox(x, z, 0.8, 0.6, 1.4, c, 1.2); addBall(x, 3.0, z, 0.45, c, false); addBox(x, z, 1.6, 0.3, 0.3, c, 2.2); };
+  for (const [x, z] of [[-30, -6], [30, 6], [-18, 26], [18, -26], [-6, 30], [6, -30]]) statue(x, z, pick([0xf4f1ea, 0xd4a017, 0x9aa5b1]));
+  // the center hall: a giant colorful sculpture, a rocket exhibit and a ball-pit exhibit
+  for (let k = 0; k < 6; k++) addBox(Math.sin(k) * 2, Math.cos(k * 1.3) * 2, 1.4, 1.4, 1 + k * 0.5, [0xff2fa0, 0x2f8bff, 0xffd60a, 0x22c55e, 0xff7a00, 0x9b4dff][k], 0, false, 'noise');
+  addCyl(-18, 0, 1.6, 7, 0xffffff, 0, true, 'panel'); deco(CONEG, 0xe63946, -18, 8.2, 0, 1.6, 2.4, 1.6); for (const a of [0, 2.1, 4.2]) deco(BOXG, 0xe63946, -18 + Math.cos(a) * 1.8, 1, Math.sin(a) * 1.8, 0.3, 2, 1.2, { rot: [0, -a, 0] });
+  addBox(18, 0, 7, 7, 0.8, 0x2f8bff, 0, false, 'noise'); for (let k = 0; k < 40; k++) deco(SPHG, pick([0xff2fa0, 0xffd60a, 0x22c55e, 0xffffff]), 15.3 + (k % 8) * 0.75, 0.95, -2.8 + Math.floor(k / 8) * 1.3, 0.35, 0.35, 0.35, { tex: null });
+  // a dinosaur model (blocks, not bones) and gem cases
+  addBox(-24, -24, 6, 2, 2.4, 0x6abf4b, 0.8); addBox(-20.6, -24, 1.6, 1.4, 1.6, 0x6abf4b, 2.6); addBox(-28, -24, 3, 0.8, 0.8, 0x6abf4b, 1.6); for (const dx of [-26, -22]) for (const dz of [-24.7, -23.3]) addCyl(dx, dz, 0.35, 0.8, 0x6abf4b);
+  for (const [x, z] of [[22, 22], [26, 18], [30, 22]]) { addBox(x, z, 1.4, 1.4, 1.1, 0x2b2d42); deco(CONEG, pick([0x9b4dff, 0x00c2a8, 0xe63946, 0x2f8bff]), x, 1.6, z, 0.4, 0.9, 0.4, { tex: null }); }
+  // rope barriers and benches
+  for (const x of [-30, -26, -22]) addCyl(x, 8, 0.12, 1.1, 0xd4a017); deco(BOXG, 0xe63946, -26, 0.95, 8, 8, 0.08, 0.08, { tex: null });
+  for (const [x, z, rot] of [[0, -24, 0], [0, 24, 0], [-30, 18, 1], [30, -18, 1]]) addBox(x, z, rot ? 1.2 : 4, rot ? 4 : 1.2, 0.6, 0x8d6e63, 0, false, 'wood');
+  // the balcony above the north halls, with stairs (you can go up; computer players stay downstairs)
+  addBox(0, -30, 50, 9, 0.3, 0xcfc6b4, 3, false, 'tile');
+  for (let x = -24; x <= 24; x += 4) addCyl(x, -25.6, 0.12, 1.1, 0xd4a017, 3.3);
+  stairs(-27, -20, 0, -1, 10, 2.4, 3.3);
+}
+function buildVillage() {   // a snowy village
+  ground(0xf4f8ff, 'frosting', 30);
+  perimeter(0xdde8f3, 2.4, 'frosting');
+  const r = seeded(31);
+  const house = (x, z, w, d, c, roof, doorSide) => {
+    const H = 3, x1 = x - w / 2, x2 = x + w / 2, z1 = z - d / 2, z2 = z + d / 2, dg = [[-1.1, 1.1]];
+    wallX(z1, x1, x2, c, 0xfff3e0, doorSide === 'n' ? dg.map(([a, b]) => [x + a, x + b]) : [], H);
+    wallX(z2, x1, x2, 0xfff3e0, c, doorSide === 's' ? dg.map(([a, b]) => [x + a, x + b]) : [], H);
+    wallZ(x1, z1, z2, c, 0xfff3e0, [], H); wallZ(x2, z1, z2, 0xfff3e0, c, [], H);
+    for (const sgn of [-1, 1]) deco(BOXG, roof, x, H + 0.9, z + sgn * d / 4, w + 0.6, 0.25, d / 2 + 0.8, { rot: [sgn * 0.55, 0, 0] });
+    deco(BOXG, 0xffffff, x, H + 1.75, z, w + 0.6, 0.3, 0.5, { tex: 'frosting' });
+    addBox(x - w / 4, z, 1.4, 1, 0.8, 0x8d6e63, 0, false, 'wood'); addBox(x + w / 4, z + d / 4, 1, 1, 1.2, pick([0xe63946, 0x2f8bff, 0x22c55e]), 0, false, 'carpet');
+  };
+  house(-24, -24, 8, 6, 0xc0392b, 0x4a2a12, 's'); house(-8, -26, 7, 6, 0x2f8bff, 0x3b3b5c, 's'); house(10, -24, 8, 7, 0xf1c40f, 0x7b2f2f, 's');
+  house(26, -10, 6, 8, 0x22c55e, 0x4a2a12, 'n'); house(-26, 10, 7, 7, 0x9b4dff, 0x3b3b5c, 'n'); house(24, 22, 8, 6, 0xff7a00, 0x4a2a12, 'n');
+  // igloos, snowmen, snow forts
+  for (const [x, z] of [[-10, 18], [4, 28], [30, 6]]) { addBall(x, 0, z, 2.4, 0xffffff, true, 0.8, 'frosting'); addBox(x + 2.4, z, 1.6, 1.4, 1.2, 0xf4f8ff, 0, false, 'frosting'); }
+  for (const [x, z, sc] of [[-2, -6, 0xe63946], [14, 6, 0x2f8bff], [-18, -6, 0x22c55e], [20, -24, 0x9b4dff]]) {
+    addBall(x, 0.9, z, 1, 0xffffff, true, 1, 'frosting'); addBall(x, 2.3, z, 0.7, 0xffffff, false, 1, 'frosting'); addBall(x, 3.35, z, 0.5, 0xffffff, false, 1, 'frosting');
+    deco(CONEG, 0xff8c1a, x, 3.35, z + 0.6, 0.12, 0.5, 0.12, { rot: [Math.PI / 2, 0, 0], tex: null }); deco(TORG, sc, x, 2.85, z, 0.55, 0.55, 0.5, { rot: [Math.PI / 2, 0, 0] });
+  }
+  for (const [x, z, w, d] of [[-30, -2, 6, 1.2], [-30, 2, 1.2, 5], [8, 14, 7, 1.2], [8, 18, 1.2, 6], [-4, 8, 5, 1.2]]) addBox(x, z, w, d, 1.3, 0xffffff, 0, false, 'frosting');
+  // the frozen pond and the sledding hill
+  patch(-2, 20, 12, 8, 0xbfe6ff, 'tile', 0, 3);
+  for (let k = 0; k < 8; k++) addBox(22, 30 - k * 0.8, 10 - k, 0.9, 0.3 * (k + 1), 0xffffff, 0, false, 'frosting');   // 0.3 m steps: walk up
+  addBox(16, 30, 2.6, 1, 0.5, 0xe63946, 0, false, 'wood');
+  // pine trees, lamp posts, a market stall, fences
+  for (const [x, z] of [[-32, -30], [-32, 30], [32, -30], [0, -32], [-16, 30], [32, 32], [-2, 4], [16, -4], [-32, -16], [6, -12]]) pine(x, z, 1 + r() * 0.5);
+  for (const [x, z] of [[-14, -14], [2, -16], [18, 12], [-20, 26], [30, -20]]) { addCyl(x, z, 0.12, 3.2, 0x2b2d42); addBall(x, 3.4, z, 0.35, 0xffe9a8, false); }
+  addBox(-4, -16, 5, 2.4, 1.1, 0x8d6e63, 0, false, 'wood'); for (let k = 0; k < 5; k++) deco(BOXG, k % 2 ? 0xffffff : 0xe63946, -6 + k, 2.9, -16, 1, 0.12, 3, { rot: [0.3, 0, 0], tex: null }); for (const x of [-6.2, -1.8]) addCyl(x, -15, 0.08, 2.8, 0x6d4c41);
+  for (let x = -30; x <= -14; x += 2) addCyl(x, -34, 0.1, 1.2, 0x8d6e63); deco(BOXG, 0x8d6e63, -22, 0.9, -34, 16, 0.12, 0.08);
+  // sleds
+  for (const [x, z, c] of [[-24, -14, 0xe63946], [12, 28, 0x2f8bff]]) { addBox(x, z, 1, 2.2, 0.35, c, 0.15, false, 'wood'); deco(BOXG, 0x2b2d42, x - 0.45, 0.08, z, 0.08, 0.08, 2.4); deco(BOXG, 0x2b2d42, x + 0.45, 0.08, z, 0.08, 0.08, 2.4); }
+  clouds = makeClouds(0xf2f6ff);
+}
+function buildShip() {   // a pirate ship in a shallow lagoon, by the dock
+  ground(0x2f8fc8, 'noise', 30); water();
+  perimeter(0x7a5a3a, 2.2, 'wood');
+  const WD = 0x8b5a2b, HULL = 0x6d3f1f, DECK = 0xa0703f;
+  // the dock
+  patch(-28, 0, 24, 80, 0xa0774a, 'wood', 0.02, 3);
+  for (let z = -36; z <= 36; z += 6) addCyl(-15.8, z, 0.35, 1.6, 0x6d4c41);
+  for (const [x, z] of [[-30, -20], [-24, 12], [-34, 26], [-20, -32]]) { addBox(x, z, 2, 2, 1.8, 0xb5651d, 0, false, 'wood'); addBox(x + 2.2, z + 0.4, 1.6, 1.6, 1.4, 0xc08552, 0, false, 'wood'); }
+  for (const [x, z] of [[-26, -6], [-22, 24], [-36, 0], [-18, -18]]) { addCyl(x, z, 0.7, 1.4, 0x8b5a2b, 0, true, 'wood'); addCyl(x + 1.6, z, 0.7, 1.4, 0x8b5a2b, 0, true, 'wood'); }
+  addBox(-33, -30, 6, 6, 0.05, 0x2b2d42); wallX(-33, -36, -30, 0xd9c7a1, 0xd9c7a1, [[-34, -32]], 3); wallZ(-36, -33, -27, 0xd9c7a1, 0xd9c7a1, [], 3); wallZ(-30, -33, -27, 0xd9c7a1, 0xd9c7a1, [[-31, -29]], 3);
+  for (let k = 0; k < 6; k++) deco(TORG, 0xc9b27c, -27 + k * 1.2, 0.2, 30, 0.45, 0.45, 0.35, { rot: [Math.PI / 2, 0, 0] });
+  // the hull: walls you can't climb, a cargo door on the dock side, the hold floor inside
+  wallZ(-7, -34, 34, HULL, WD, [[-2, 2]], 3); wallZ(7, -34, 34, WD, HULL, [], 3);
+  wallX(-34, -7, 7, HULL, WD, [], 3); wallX(34, -7, 7, WD, HULL, [], 3);
+  patch(0, 0, 13.6, 67.6, 0x7a4a22, 'wood', 0.02, 2);
+  // the main deck (3 m up, on top of the hull): reach it by the gangplank; the hold below by the cargo door
+  addBox(0, 0, 14.2, 68.2, 0.3, DECK, 3, false, 'wood');
+  addBox(6.8, 0, 0.2, 68, 1, WD, 3.3, false, 'wood'); addBox(-6.8, -14.5, 0.2, 39, 1, WD, 3.3, false, 'wood'); addBox(-6.8, 20.5, 0.2, 27, 1, WD, 3.3, false, 'wood');   // rails, open where the gangplank arrives
+  // the gangplank from the dock up to the deck
+  for (let k = 0; k < 11; k++) addBox(-15.3 + k * 0.75, 6, 0.75, 2, 0.3 * (k + 1), 0xb08a5a, 0, false, 'wood');
+  // masts and sails (high up), the crow's nest
+  for (const z of [-20, 0, 20]) { addCyl(0, z, 0.45, 15, 0x5d3a1a, 3.3); deco(BOXG, 0xfbf3e2, 0, 11, z, 9, 6, 0.12, { tex: 'carpet' }); deco(BOXG, 0x5d3a1a, 0, 14.2, z, 10, 0.25, 0.25); }
+  deco(CYLG, 0x5d3a1a, 0, 16.5, 0, 1.2, 0.8, 1.2); deco(BOXG, 0x1d1d2b, 0, 19.8, 0, 0.05, 1.2, 2, { tex: null });
+  // cannons, barrels, crates and treasure in the hold; more on deck
+  for (const z of [-26, -6, 6, 26]) for (const sx of [-1, 1]) { addBox(sx * 5.4, z, 1.6, 1.2, 0.5, 0x5d3a1a, 0, false, 'wood'); deco(CYLG, 0x2b2d42, sx * 5.6, 0.75, z, 0.35, 2.2, 0.35, { rot: [0, 0, Math.PI / 2], tex: 'panel' }); }
+  for (const [x, z] of [[-3, -30], [3, -28], [-4, 18], [3, 24], [0, -4]]) addCyl(x, z, 0.75, 1.5, 0x8b5a2b, 0, true, 'wood');
+  for (const [x, z] of [[-4, 28], [4, -20], [-3, 8], [3, 30]]) addBox(x, z, 1.8, 1.8, 1.8, 0xb5651d, 0, false, 'wood');
+  for (const [x, z] of [[2, 31], [-2, -31]]) { addBox(x, z, 1.8, 1.1, 0.9, 0xd4a017, 0, false, 'wood'); for (let k = 0; k < 6; k++) deco(CYLG, 0xffd166, x - 0.6 + (k % 3) * 0.6, 1.0, z - 0.25 + Math.floor(k / 3) * 0.5, 0.2, 0.06, 0.2, { tex: null }); }
+  for (const [x, z] of [[-3, -24, 3.3], [4, 20, 3.3]]) addCyl(x, z, 0.75, 1.5, 0x8b5a2b, 3.3, true, 'wood');
+  addBox(-4, 26, 1.8, 1.8, 1.4, 0xb5651d, 3.3, false, 'wood'); addBox(3, -28, 1.6, 1.6, 1.2, 0xc08552, 3.3, false, 'wood');
+  // the captain's cabin at the back, on the deck, and the ship's wheel
+  addBox(0, 33.5, 14, 0.3, 3, 0x7a4a22, 3.3, false, 'wood'); addBox(-5.5, 30, 3, 0.3, 3, 0x7a4a22, 3.3, false, 'wood'); addBox(5.5, 30, 3, 0.3, 3, 0x7a4a22, 3.3, false, 'wood');
+  deco(BOXG, 0x5d3a1a, 0, 6.5, 32, 14, 0.3, 4.4, { tex: 'wood' });
+  addCyl(0, 26, 0.15, 1.2, 0x5d3a1a, 3.3); deco(TORG, 0x5d3a1a, 0, 4.9, 26, 0.7, 0.7, 0.3);
+  // flags
+  for (const z of [-20, 20]) deco(BOXG, pick([0xe63946, 0x1d1d2b]), 1.2, 17.4, z, 2.2, 1.2, 0.05, { tex: null });
+  clouds = makeClouds();
+}
+const SECRET_MAPS = {
+  kitchen: { name: 'Giant\'s Kitchen', emoji: '🥣', art: ['#fff3d6', '#f4a261'], build: buildKitchen, sky: [0xfff2dc, 0xfff8ee], fog: [80, 190], half: 30, timeK: 1.25, secret: true,
+             count: { x: 26, z: 27, yaw: 0 }, start: { x: 0, z: 8 }, bench: { x: 22, z: 26.6, hex: 0x9b6b3d }, orbit: [0, 0] },
+  museum:  { name: 'Art Museum', emoji: '🖼️', art: ['#f6f1e7', '#d4a017'], build: buildMuseum, sky: [0xf6f1e7, 0xfffaf2], fog: [90, 200], half: 35, timeK: 1.4, secret: true,
+             count: { x: -30, z: 32, yaw: 0 }, start: { x: 0, z: 6 }, bench: { x: -24, z: 33.6, hex: 0x8d6e63 }, orbit: [0, 0] },
+  village: { name: 'Snowy Village', emoji: '⛄', art: ['#dff1ff', '#ffffff'], build: buildVillage, sky: [0x9fc8ef, 0xf2f6ff], fog: [70, 190], half: 37, timeK: 1.4, secret: true,
+             count: { x: -30, z: 34, yaw: 0 }, start: { x: 0, z: 0 }, bench: { x: -24, z: 34.6, hex: 0x8d6e63 }, orbit: [0, 0] },
+  ship:    { name: 'Pirate Ship', emoji: '🏴‍☠️', art: ['#7fc8ff', '#8b5a2b'], build: buildShip, sky: [0x4fa8ff, 0xe4f4ff], fog: [80, 200], half: 40, timeK: 1.4, secret: true,
+             count: { x: -34, z: 38, yaw: 0 }, start: { x: -24, z: 0 }, bench: { x: -28, z: 38.6, hex: 0x8d6e63 }, orbit: [-6, 0] }
+};
 /* every map: name, look, where the seeker counts, where players start, the Found Bench */
 const MAPS = {
   house: { name: 'Backyard House', emoji: '🏡', art: ['#8fd3ff', '#6abf4b'], build: buildHouse, sky: [0x5fb4ff, 0xd8f1ff], fog: [50, 140],
@@ -1232,6 +1407,49 @@ const MAPS = {
 };
 let MAP = MAPS.house, mapId = 'house';
 
+/* ---------- the gun painting gallery (0.3.5) ----------
+   A room behind the lobby's north wall (unlocked with a code). A big copy of a paint blaster stands in the middle:
+   walk up to it and press PAINT to paint it (paint mode, every brush). 💾 Save makes it a framed design on the wall
+   and puts it on your launcher; walk up to a frame and press USE to pick that design again. Designs: SHOP.gunLooks
+   (up to 8 pictures), the one in use: SHOP.gunLook. Friends get your painted launcher with your skin. */
+const GALLERY = { x: -10, z: -19.5 };
+const FRAMES = [[-15.83, -22.5, Math.PI / 2], [-15.83, -20, Math.PI / 2], [-15.83, -17.5, Math.PI / 2], [-4.17, -22.5, -Math.PI / 2], [-4.17, -20, -Math.PI / 2], [-4.17, -17.5, -Math.PI / 2], [-12.5, -23.83, 0], [-7.5, -23.83, 0]];
+let galleryGun = null, galleryFrames = [];
+function loadSkinImg(sk, url, done) { if (!okSkinUrl(url)) return; const img = new Image(); img.onload = () => { sk.g.globalAlpha = 1; sk.g.clearRect(0, 0, SKIN_W, SKIN_H); sk.g.drawImage(img, 0, 0, SKIN_W, SKIN_H); sk.tex.needsUpdate = true; if (done) done(); }; img.src = url; }
+function buildGallery() {
+  patch(-10, -19.2, 11.7, 9.6, 0xd9c7a1, 'wood', 0, 2);
+  wallX(-24, -16, -4, 0xfff7e6, 0xfff7e6, [], 4); wallZ(-16, -24, -14.3, 0xfff7e6, 0xfff7e6, [], 4); wallZ(-4, -24, -14.3, 0xfff7e6, 0xfff7e6, [], 4);
+  signPlane(-10, 3.3, -14.0, Math.PI, 3, 0.7, (g, w, h) => { g.fillStyle = '#7b3fd6'; rrect(g, 0, 0, w, h, 30); g.fill(); g.fillStyle = '#fff'; g.font = '800 ' + h * 0.5 + 'px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🖼️ GALLERY', w / 2, h * 0.55); });
+  addBox(GALLERY.x, GALLERY.z, 1.6, 1.6, 1.0, 0xffffff, 0, false, 'noise');
+  // the big blaster on the stand (its body is a skin you paint)
+  const gg = new THREE.Group(), sk = makeSkin(0xffffff), P2 = (geo, m, x, y, z, sx, sy, sz, rot) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.scale.set(sx, sy, sz); if (rot) o.rotation.set(rot[0], rot[1], rot[2]); o.castShadow = true; gg.add(o); return o; };
+  const body = P2(SKIN_BOXG, sk.mat, 0, 0, 0.06, 0.12, 0.13, 0.34);
+  P2(CYLG, lmat(0xffb703), 0, 0.01, 0.3, 0.045, 0.18, 0.045, [Math.PI / 2, 0, 0]); P2(BOXG, lmat(0xffb703), 0, -0.1, -0.02, 0.07, 0.12, 0.07); P2(SPHG, lmat(0x2f8bff), 0, 0.12, 0.02, 0.07, 0.07, 0.07);
+  gg.scale.setScalar(4.2); gg.position.set(GALLERY.x, 1.65, GALLERY.z); world.add(gg);
+  galleryGun = { g: gg, sk, body };
+  if (SHOP.gunLooks[SHOP.gunLook]) loadSkinImg(sk, SHOP.gunLooks[SHOP.gunLook]);
+  galleryFrames = FRAMES.map(([x, z, r], i) => { const back = deco(BOXG, 0xd4a017, x - Math.sin(r) * 0.03, 2.0, z - Math.cos(r) * 0.03, r === 0 ? 2.1 : 0.05, 1.5, r === 0 ? 0.05 : 2.1, { tex: null }); return { x, z, r, i, sign: signPlane(x, 2.0, z, r, 1.9, 1.3) }; });
+  drawFrames();
+}
+function drawFrames() {
+  galleryFrames.forEach(f => {
+    const url = SHOP.gunLooks[f.i];
+    const paint = img => f.sign.draw((g, w, h) => { g.fillStyle = f.i === SHOP.gunLook ? '#2ecc71' : '#fff7e6'; g.fillRect(0, 0, w, h); if (img) g.drawImage(img, w * 0.06, h * 0.08, w * 0.88, h * 0.72); g.fillStyle = '#2b2d42'; g.font = '800 ' + h * 0.13 + 'px ' + FONT; g.textAlign = 'center'; g.fillText(img ? (f.i === SHOP.gunLook ? '✓ Using design ' + (f.i + 1) : 'Design ' + (f.i + 1)) : 'Empty frame', w / 2, h * 0.95); });
+    if (okSkinUrl(url)) { const img = new Image(); img.onload = () => paint(img); img.src = url; } else paint(null);
+  });
+}
+const nearFrame = p => galleryFrames.find(f => SHOP.gunLooks[f.i] && Math.hypot(p.x - (f.x + Math.sin(f.r) * 0.9), p.z - (f.z + Math.cos(f.r) * 0.9)) < 1.0);
+function useDesign(i) {
+  SHOP.gunLook = SHOP.gunLooks[i] ? i : -1; saveShop(); drawFrames();
+  const p = G.player; if (p) { p.gunSkin = null; myGunSkin(p); }
+  toast(SHOP.gunLook >= 0 ? '🔫 Your launcher has design ' + (i + 1) + ' now!' : '🔫 No painted design', 2.5); sfx.coin();
+}
+/* your painted launcher: a skin for the launcher's body, from the design in use (friends get it with your skins) */
+function myGunSkin(c) {
+  const url = SHOP.gunLooks[SHOP.gunLook];
+  if (!okSkinUrl(url)) { if (c.gunSkin) { c.gunSkin = null; addLauncher(c); } return; }
+  c.gunSkin = makeSkin(0xffffff); loadSkinImg(c.gunSkin, url, () => { addLauncher(c); skinDirty(c, 'gun'); });
+}
 /* the walk-around lobby between rounds (it is not on the map vote) */
 const FONT = '"Baloo 2", "Trebuchet MS", Arial, sans-serif';
 function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
@@ -1245,17 +1463,24 @@ function signPlane(x, y, z, rotY, W, H, draw) {
   if (draw) s.draw(draw);
   return s;
 }
+const LOBBY_DOORS = [{ id: 'kitchen', x: -11.6 }, { id: 'museum', x: -8.6 }, { id: 'village', x: 8.6 }, { id: 'ship', x: 11.6 }];
+const levelOpen = id => SHOP.owned.includes('level:' + id);
 const LOBBY_VAULT = { x: 13.5, z: -12.2 }, LOBBY_JUKE = { x: -11.4, z: -2.4 }, LOBBY_BOOTH = { x: 9.5, z: 2 }, LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
 let lobbyBoard = null;
 function buildLobby() {
+  galleryGun = null; galleryFrames = [];
   ground(0xe6dcff, 'check', 35);
-  addBox(0, -14.15, 28.6, 0.3, 4, 0xffd6e7); addBox(0, 14.15, 28.6, 0.3, 4, 0xd6f0ff);
+  const gal = SHOP.owned.includes('gallery');   // 0.3.5: the gun painting gallery has a doorway in the north wall
+  if (gal) { addBox(-12.65, -14.15, 3.3, 0.3, 4, 0xffd6e7); addBox(2.65, -14.15, 23.3, 0.3, 4, 0xffd6e7); addBox(-10, -14.15, 2, 0.3, 1.4, 0xffd6e7, 2.6); }
+  else addBox(0, -14.15, 28.6, 0.3, 4, 0xffd6e7);
+  addBox(0, 14.15, 28.6, 0.3, 4, 0xd6f0ff);
+  if (gal) buildGallery();
   addBox(-14.15, 0, 0.3, 28, 4, 0xfff1b8); addBox(14.15, 0, 0.3, 28, 4, 0xd8f5d0);
   // paint splats on the walls
   const r = seeded(9), SPL = [0xff2fa0, 0x2f8bff, 0x22c55e, 0xffc400, 0x9b4dff, 0xff7a00];
   for (let k = 0; k < 28; k++) {
     const side = k % 4, a = r() * 24 - 12, y = 0.5 + r() * 3.2, s = 0.3 + r() * 0.5;
-    if (side === 0 && Math.abs(a) < 6) continue;   // keep the scoreboard clean
+    if (side === 0 && (Math.abs(a) < 6 || Math.abs(a + 10) < 1.6)) continue;   // keep the scoreboard (and the gallery doorway) clean
     const m = new THREE.Mesh(CIRG, decalMat(SPL[k % SPL.length])); m.scale.set(s, s, 1);
     if (side === 0) m.position.set(a, y, -13.99);
     else if (side === 1) { m.position.set(a, y, 13.99); m.rotation.y = Math.PI; }
@@ -1303,6 +1528,12 @@ function buildLobby() {
   for (const [x, z, c] of [[-11.5, -11.5, 0xff2fa0], [-12, -8.6, 0x2f8bff], [11.5, 11.5, 0xffc400], [-11.5, 11.5, 0x22c55e], [12, 8.6, 0x9b4dff]]) {
     addCyl(x, z, 1.1, 1.6, 0xdfe6ee); deco(CYLG, c, x, 1.62, z, 1.0, 0.04, 1.0, { tex: null }); deco(TORG, 0x9aa5b1, x, 1.8, z, 0.75, 0.75, 0.3);
   }
+  // doors to the secret levels you've unlocked (0.3.5); with friends only the host's doors (the host's door decides)
+  if (!NETC()) for (const d of LOBBY_DOORS) if (levelOpen(d.id)) {
+    const L = SECRET_MAPS[d.id];
+    deco(BOXG, 0x4a2a12, d.x, 1.25, 13.97, 1.8, 2.5, 0.1, { tex: 'wood' }); deco(BOXG, 0x7b3fd6, d.x, 1.25, 13.93, 1.5, 2.2, 0.04, { tex: null }); deco(SPHG, 0xffd166, d.x + 0.5, 1.2, 13.88, 0.08, 0.08, 0.08, { tex: null });
+    signPlane(d.x, 2.95, 13.9, Math.PI, 2.6, 0.7, (g, w, h) => { g.fillStyle = '#7b3fd6'; rrect(g, 0, 0, w, h, 30); g.fill(); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; let fs = h * 0.42; g.font = '800 ' + fs + 'px ' + FONT; const t = '✨ ' + L.emoji + ' ' + L.name; while (g.measureText(t).width > w * 0.9 && fs > 8) { fs *= 0.92; g.font = '800 ' + fs + 'px ' + FONT; } g.fillText(t, w / 2, h * 0.55); });
+  }
   // a little door hidden behind the shop (0.3.4): walk into it to open the secret code box
   deco(BOXG, 0x6d4c41, 13.99, 0.42, LOBBY_VAULT.z, 0.06, 0.8, 0.55, { tex: 'wood' });
   deco(SPHG, 0xffd166, 13.94, 0.42, LOBBY_VAULT.z + 0.18, 0.04, 0.04, 0.04, { tex: null });
@@ -1321,13 +1552,16 @@ function buildLobby() {
   clouds = makeClouds();
 }
 const LOBBY = { name: 'Lobby', emoji: '🎪', build: buildLobby, sky: [0x7fc8ff, 0xeaf6ff], fog: [60, 150], count: { x: 0, z: -12, yaw: 0 }, start: { x: 0, z: 0 }, noBench: true, orbit: [0, 0] };
-const WORLDS = Object.assign({ lobby: LOBBY }, MAPS);
+const WORLDS = Object.assign({ lobby: LOBBY }, MAPS, SECRET_MAPS);
 
 /* ---------- 4. navigation grid + hiding spots (rebuilt for each map) ---------- */
-const GS = 0.5, G0 = -24, GN = 96, NC = GN * GN;
-const blocked = new Uint8Array(NC);
-const gScore = new Float32Array(NC), came = new Int32Array(NC), closed = new Uint8Array(NC);
-const heapI = new Int32Array(NC * 8), heapF = new Float32Array(NC * 8); let heapN = 0;
+/* 0.3.5: the grid follows the map's size (MAP.half). The arrays are made once, big enough for the biggest map. */
+const GS = 0.5, GMAX = 168;
+let G0 = -24, GN = 96, NC = GN * GN;
+const halfOf = () => (MAP && MAP.half) || 23.5;
+const blocked = new Uint8Array(GMAX * GMAX);
+const gScore = new Float32Array(GMAX * GMAX), came = new Int32Array(GMAX * GMAX), closed = new Uint8Array(GMAX * GMAX);
+const heapI = new Int32Array(GMAX * GMAX * 8), heapF = new Float32Array(GMAX * GMAX * 8); let heapN = 0;
 const DXs = [1, -1, 0, 0, 1, 1, -1, -1], DZs = [0, 0, 1, -1, 1, -1, 1, -1];
 const cellOf = (x, z) => { const ix = Math.floor((x - G0) / GS), iz = Math.floor((z - G0) / GS); return ix < 0 || iz < 0 || ix >= GN || iz >= GN ? -1 : ix + iz * GN; };
 const cellX = i => G0 + (i % GN + 0.5) * GS, cellZ = i => G0 + ((i / GN | 0) + 0.5) * GS;
@@ -1335,10 +1569,11 @@ function rectDist(x, z, b) { const dx = Math.max(b.x1 - x, 0, x - b.x2), dz = Ma
 const bodyHits = b => b.y2 > 0.3 && b.y1 < 1.1;   // things a walking player bumps into
 const spots = [];
 function buildNav() {
+  const H = halfOf(); G0 = -(H + 0.5); GN = Math.min(GMAX, Math.ceil((H + 0.5) * 2 / GS)); NC = GN * GN;
   blocked.fill(0);
   for (let i = 0; i < NC; i++) {
     const x = cellX(i), z = cellZ(i);
-    if (Math.abs(x) > 23.5 || Math.abs(z) > 23.5) { blocked[i] = 1; continue; }
+    if (Math.abs(x) > H || Math.abs(z) > H) { blocked[i] = 1; continue; }
     for (const b of boxes) if (bodyHits(b) && rectDist(x, z, b) < R + 0.02) { blocked[i] = 1; break; }
     if (!blocked[i]) for (const c of cyls) if (bodyHits(c) && Math.hypot(x - c.x, z - c.z) < c.r + R + 0.02) { blocked[i] = 1; break; }
   }
@@ -1439,6 +1674,7 @@ function loadMap(id) {
     addBox(MAP.bench.x, MAP.bench.z, 4.6, 0.8, 0.5, MAP.bench.hex, 0, false, 'wood');
     deco(BOXG, 0xffffff, MAP.bench.x, 0.75, MAP.bench.z + 0.42, 2.4, 0.4, 0.04, { tex: null });
   }
+  { const sh = halfOf() + 9; Object.assign(sun.shadow.camera, { left: -sh, right: sh, top: sh, bottom: -sh, far: 60 + sh * 2 }); sun.shadow.camera.updateProjectionMatrix(); }   // shadows cover the whole map
   skyMat.uniforms.top.value.setHex(MAP.sky[0]); skyMat.uniforms.bot.value.setHex(MAP.sky[1]);
   skyC = new THREE.Color(MAP.sky[1]);
   scene.fog = MAP.fog ? new THREE.Fog(MAP.sky[1], MAP.fog[0], MAP.fog[1]) : null;
@@ -1480,6 +1716,10 @@ const HATS = {
   mohawk:    { name: 'Mohawk', emoji: '🦔', price: 140, build: (g, m) => { for (let k = 0; k < 5; k++) part(g, CONEG, m, 0, 1.34 - Math.abs(k - 2) * 0.02, -0.2 + k * 0.1, 0.05, 0.22, 0.08); } },
   pirate:    { name: 'Pirate Hat', emoji: '🏴‍☠️', price: 160, build: (g, m) => { part(g, CYLG, m, 0, 1.36, 0, 0.24, 0.22, 0.24); part(g, BOXG, m, 0, 1.3, 0, 0.72, 0.14, 0.3); for (const s of [-1, 1]) part(g, BOXG, m, s * 0.34, 1.38, 0, 0.06, 0.2, 0.3, [0, 0, s * 0.4]); } },
   grad:      { name: 'Grad Cap', emoji: '🎓', price: 170, build: (g, m) => { part(g, CYLG, m, 0, 1.28, 0, 0.25, 0.12, 0.25); part(g, BOXG, m, 0, 1.36, 0, 0.6, 0.03, 0.6, [0, Math.PI / 4, 0]); part(g, CYLG, m, 0.22, 1.27, 0.22, 0.012, 0.16, 0.012); part(g, SPHG, m, 0.22, 1.18, 0.22, 0.04, 0.05, 0.04); } },
+  duck:      { name: 'Rubber Duck', emoji: '🐤', price: 99999, hidden: true, build: (g, m) => { part(g, SPHG, m, 0, 1.36, 0, 0.26, 0.18, 0.3); part(g, SPHG, m, 0, 1.56, 0.12, 0.15, 0.15, 0.15); part(g, CONEG, m, 0, 1.55, 0.3, 0.06, 0.14, 0.06, [Math.PI / 2, 0, 0]); } },
+  pizza:     { name: 'Pizza Slice', emoji: '🍕', price: 99999, hidden: true, build: (g, m) => { part(g, CONEG, m, 0, 1.3, 0, 0.45, 0.08, 0.45, [0, Math.PI / 6, 0]); for (const [x, z] of [[0.12, 0.08], [-0.1, 0.12], [0.02, -0.14]]) part(g, CYLG, m, x, 1.36, z, 0.07, 0.02, 0.07); } },
+  astro:     { name: 'Astronaut Helmet', emoji: '👨‍🚀', price: 99999, hidden: true, build: (g, m) => { part(g, SPHG, m, 0, 1.1, 0, 0.36, 0.36, 0.36); part(g, CYLG, m, 0, 0.78, 0, 0.32, 0.08, 0.32); part(g, BOXG, m, 0, 1.12, 0.3, 0.36, 0.22, 0.1); } },
+  dino:      { name: 'Dino Hood', emoji: '🦖', price: 99999, hidden: true, build: (g, m) => { part(g, SPHG, m, 0, 1.22, -0.02, 0.32, 0.22, 0.34); for (let k = 0; k < 5; k++) part(g, CONEG, m, 0, 1.42 - k * 0.04, -0.2 + k * 0.1, 0.05, 0.14, 0.08); part(g, BOXG, m, 0, 1.25, 0.3, 0.3, 0.06, 0.16); } },
   cone:      { name: 'Traffic Cone', emoji: '🚧', price: 99999, hidden: true, build: (g, m) => { part(g, BOXG, m, 0, 1.25, 0, 0.5, 0.05, 0.5); part(g, CONEG, m, 0, 1.55, 0, 0.2, 0.6, 0.2); } },   // secret (a cheat code)
   viking:    { name: 'Viking Helmet', emoji: '⛑️', price: 200, build: (g, m) => { part(g, SPHG, m, 0, 1.24, 0, 0.3, 0.22, 0.3); part(g, CYLG, m, 0, 1.2, 0, 0.31, 0.05, 0.31); for (const s of [-1, 1]) { part(g, CONEG, m, s * 0.34, 1.4, 0, 0.07, 0.28, 0.07, [0, 0, -s * 0.75]); } } }
 };
@@ -1509,7 +1749,11 @@ const PAINTS = {
   tiedye:  { name: 'Tie-dye', hex: 0xff5ab4, price: 250, design: true },
   galaxy:  { name: 'Galaxy', hex: 0x3a2a8c, price: 300, design: true },
   rainbow: { name: 'Rainbow', hex: 0xff4d6d, price: 300, design: true },
-  sprinkles: { name: 'Sprinkles', hex: 0xffb3d9, price: 99999, design: true, hidden: true }   // secret (a cheat code)
+  sprinkles: { name: 'Sprinkles', hex: 0xffb3d9, price: 99999, design: true, hidden: true },   // secret (a cheat code)
+  lava:    { name: 'Lava', hex: 0xff4500, price: 99999, design: true, hidden: true },
+  glow:    { name: 'Glow', hex: 0x7dff3a, price: 99999, design: true, hidden: true },
+  ice:     { name: 'Ice Crystal', hex: 0x9fe8ff, price: 99999, design: true, hidden: true },
+  glitter: { name: 'Glitter', hex: 0xd88cff, price: 99999, design: true, hidden: true }
 };
 /* any ink from a save or the network, made safe: a number is a color, a design must be a real design, a plain color's
    name (older versions sent those) becomes its color */
@@ -1525,7 +1769,8 @@ const inkHex = ink => typeof ink === 'number' ? ink : (PAINTS[ink] || PAINTS.pin
 const INK_BITS = { gold: [0xffd36b, 0xfff0b8, 0xc8902a], rainbow: [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x007aff, 0xaf52de],
   camo: [0x5f6f3a, 0x8a7a4a, 0x3b3a26, 0x9aa86a], plaid: [0xc0392b, 0x1e3d2f, 0xf3e9d2], tiedye: [0xff5ab4, 0x7b61ff, 0x3fd4ff, 0xffe14d],
   galaxy: [0x1a1446, 0x6a3fd0, 0xff7ad9, 0xffffff], zebra: [0xffffff, 0x1d1d1d], tiger: [0xff8a1f, 0x1d1d1d], leopard: [0xe0b064, 0x5a3a1a],
-  candy: [0xe63946, 0xffffff], checker: [0x1d1d1d, 0xffffff], sprinkles: [0xffb3d9, 0x3fa7ff, 0xffd60a, 0x2ecc71, 0xffffff] };
+  candy: [0xe63946, 0xffffff], checker: [0x1d1d1d, 0xffffff], sprinkles: [0xffb3d9, 0x3fa7ff, 0xffd60a, 0x2ecc71, 0xffffff],
+  lava: [0xff4500, 0xffb300, 0x3b0a00], glow: [0x7dff3a, 0xd4ff9e], ice: [0x9fe8ff, 0xffffff, 0x5ab8ff], glitter: [0xd88cff, 0xff8cd8, 0xffffff, 0xffe066] };
 const inkBits = ink => typeof ink === 'number' ? [ink] : INK_BITS[ink] || [inkHex(ink)];
 /* each design is drawn in code once (a 128 px picture), then used on paint balls, splats, buckets and launchers */
 const INK_CV = {};
@@ -1571,6 +1816,10 @@ function inkCanvas(id) {
       break;
     case 'candy': fill('#ffffff'); g.fillStyle = '#e63946'; for (let k = -S; k < S * 2; k += 32) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 16, 0); g.lineTo(k + 16 - S, S); g.lineTo(k - S, S); g.fill(); } break;
     case 'sprinkles': fill('#ffb3d9'); for (let k = 0; k < 60; k++) { g.save(); g.translate(r() * S, r() * S); g.rotate(r() * 3.2); g.fillStyle = ['#3fa7ff', '#ffd60a', '#2ecc71', '#ffffff', '#e63946', '#9b4dff'][k % 6]; g.fillRect(-5, -1.6, 10, 3.2); g.restore(); } break;
+    case 'lava': fill('#3b0a00'); for (let k = 0; k < 18; k++) blob(r() * S, r() * S, 8 + r() * 16, ['#ff4500', '#ff7a00', '#ffb300'][k % 3]); break;
+    case 'glow': fill('#7dff3a'); for (let k = 0; k < 30; k++) blob(r() * S, r() * S, 3 + r() * 8, '#d4ff9e'); break;
+    case 'ice': fill('#9fe8ff'); g.strokeStyle = '#ffffff'; g.lineWidth = 2; for (let k = 0; k < 24; k++) { const x = r() * S, y = r() * S, a = r() * 3; g.beginPath(); for (let j = 0; j < 6; j++) { g.moveTo(x, y); g.lineTo(x + Math.cos(a + j * 1.047) * 9, y + Math.sin(a + j * 1.047) * 9); } g.stroke(); } break;
+    case 'glitter': fill('#b06ae0'); for (let k = 0; k < 260; k++) { g.fillStyle = ['#ffffff', '#ffe066', '#ff8cd8', '#8cf0ff'][k % 4]; g.fillRect(r() * S, r() * S, 2, 2); } break;
     case 'checker': for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? '#1d1d1d' : '#ffffff'; g.fillRect(x * 16, y * 16, 16, 16); } break;
     case 'gold': {   // only for menus: a shiny gold ball
       const gr = g.createRadialGradient(S * 0.35, S * 0.3, 2, S * 0.5, S * 0.5, S * 0.7);
@@ -1699,6 +1948,7 @@ function makeChar(o) {
   c.cos = o.pkey !== undefined && o.pkey === ME() ? myCos() : cosOf(P(o.pkey));   // launcher, tag celebration (section 11b)
   if (o.role === 'seeker' || o.role === 'lobby') addLauncher(c);
   if (c.pkey !== undefined && c.pkey === ME() && (o.role === 'hider' || o.role === 'lobby') && SHOP.look) applyLook(c, SHOP.look);   // your saved design (paint booth)
+  if (c.pkey !== undefined && c.pkey === ME() && SHOP.gunLook >= 0) myGunSkin(c);   // your painted launcher (gallery)
   return c;
 }
 function boxPart(parent, m, x, y, z, w, h, d) {
@@ -1732,7 +1982,7 @@ function setPartColor(c, part, col) {
   skinDirty(c, part);
 }
 const eachMat = (c, f) => { for (const k of PARTS) for (const sk of c.skins[k]) f(sk.mat); f(c.hatMat); };
-const disposeChar = c => eachMat(c, m => { if (m.map) m.map.dispose(); m.dispose(); });
+const disposeChar = c => { if (c.petG && c.petG.parent) c.petG.parent.remove(c.petG); eachMat(c, m => { if (m.map) m.map.dispose(); m.dispose(); }); };
 function setPose(c, pose) {
   if (!POSES[pose] || c.pose === pose) return;
   c.pose = pose;
@@ -1804,9 +2054,10 @@ function applyLook(c, look, fromNet) {
     img.onload = () => { if (!c.skins) return; sk.g.globalAlpha = 1; sk.g.clearRect(0, 0, SKIN_W, SKIN_H); sk.g.drawImage(img, 0, 0, SKIN_W, SKIN_H); sk.tex.needsUpdate = true; skinStats(sk); if (!fromNet) refreshPart(c, k); };
     img.src = u;
   }
+  if (fromNet && okSkinUrl(look.gun0)) { const gs = c.gunSkin || (c.gunSkin = makeSkin(0xffffff)); loadSkinImg(gs, look.gun0, () => addLauncher(c)); }   // a friend's painted launcher
   if (fromNet) c.skinNet = true;   // from now on their colors come from the network, their pictures from these messages
 }
-function lookOf(c, only) { const o = {}; for (const [k, i] of SKIN_KEYS) if (!only || only.has(k)) o[k + i] = c.skins[k][i].cv.toDataURL('image/png'); return o; }
+function lookOf(c, only) { const o = {}; for (const [k, i] of SKIN_KEYS) if (!only || only.has(k)) o[k + i] = c.skins[k][i].cv.toDataURL('image/png'); if (c.gunSkin && (!only || only.has('gun'))) o.gun0 = c.gunSkin.cv.toDataURL('image/png'); return o; }
 function netSkinTick(dt) {
   if (!G.skinDirty || !G.skinDirty.size || !G.player) return;
   G.skinSendT = (G.skinSendT || 0) - dt; if (G.skinSendT > 0) return;
@@ -1873,22 +2124,28 @@ function enterDraw(booth) {
   const p = G.player; if (!p || G.draw) return;
   if (!booth && (p.role !== 'hider' || p.caught || !inRound())) return;
   closePalette(); if (locked && document.exitPointerLock) document.exitPointerLock();
-  G.draw = { booth: !!booth, yaw: p.yaw, pitch: 0.15, dist: 2.3, undo: [], stroke: null, orbit: null };
+  const gun = booth === 'gun' && galleryGun;
+  G.draw = { booth: !!booth && !gun, gun: !!gun, yaw: gun ? Math.atan2(p.x - GALLERY.x, p.z - GALLERY.z) : p.yaw, pitch: 0.25, dist: gun ? 3.4 : 2.3, undo: [], stroke: null, orbit: null,
+    target: gun ? { x: GALLERY.x, y: 1.6, z: GALLERY.z } : null, meshes: gun ? [galleryGun.body] : null, skins: gun ? [galleryGun.sk] : null };
   p.vx = p.vz = 0; drawUi(); sfx.pop();
 }
 function exitDraw(quiet) {
   if (!G.draw) return;
   const d = G.draw; G.draw = null; $('drawUi').classList.remove('on');
   if (d.booth && G.player) { SHOP.look = lookOf(G.player); saveShop(); if (!quiet) { toast('💾 Saved! Every round starts with this look.', 2.5); sfx.coin(); } }   // the booth always keeps your design
+  if (d.gun && d.painted && !quiet) {   // the gallery: a new framed design, now on your launcher
+    SHOP.gunLooks = (SHOP.gunLooks || []).concat(galleryGun.sk.cv.toDataURL('image/png')).slice(-FRAMES.length); saveShop();
+    useDesign(SHOP.gunLooks.length - 1); toast('💾 Saved in frame ' + SHOP.gunLooks.length + ', and it\'s on your launcher!', 3);
+  }
   if (inRound()) updatePartsUi();
   if (G.phase === 'lobby' && !G.lobbyCard) { drawEmotes(); $('emotes').classList.add('on'); }
   $('tbtns').classList.toggle('on', TOUCH && (inRound() || G.phase === 'lobby'));
 }
 function drawUi() {
   const ui = $('drawUi'); ui.classList.add('on'); $('parts').classList.remove('on'); $('tbtns').classList.remove('on'); $('emotes').classList.remove('on');
-  $('drawTitle').textContent = G.draw.booth ? '🎨 Paint booth: design your look' : '🖌️ Paint yourself';
-  $('drawDone').textContent = G.draw.booth ? '💾 Save my look' : '✔ Done';
-  $('drawClear').hidden = !G.draw.booth;
+  $('drawTitle').textContent = G.draw.gun ? '🔫 Paint your launcher' : G.draw.booth ? '🎨 Paint booth: design your look' : '🖌️ Paint yourself';
+  $('drawDone').textContent = G.draw.gun ? '💾 Save design' : G.draw.booth ? '💾 Save my look' : '✔ Done';
+  $('drawClear').hidden = !G.draw.booth && !G.draw.gun;
   $('drawBrushes').innerHTML = Object.keys(BRUSHES).filter(id => owns('brush', id)).map(id => '<button data-b="' + id + '" class="' + (id === brushId() ? 'on' : '') + '">' + BRUSHES[id].emoji + '<span>' + BRUSHES[id].name.split(' ')[0] + '</span></button>').join('');
   $('drawSize').value = brushSize(); $('drawOp').value = Math.round(brushOp() * 100);
   $('drawCol').style.background = BRUSHES[brushId()] && brushId() === 'rainbow' ? inkCss('rainbow') : '#' + BR.col.getHexString();
@@ -1896,7 +2153,7 @@ function drawUi() {
 function skinHit(e) {
   const r = renderer.domElement.getBoundingClientRect();
   drawRay.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -(e.clientY - r.top) / r.height * 2 + 1 }, camera);
-  const h = drawRay.intersectObjects(G.player.skinMeshes, false)[0];
+  const h = drawRay.intersectObjects(G.draw.meshes || G.player.skinMeshes, false)[0];
   return h && h.uv ? { sk: h.object.material.userData.skin, x: h.uv.x * SKIN_W, y: (1 - h.uv.y) * SKIN_H } : null;
 }
 function drawSeg(sk, x0, y0, x1, y1) {
@@ -1909,7 +2166,7 @@ function drawSeg(sk, x0, y0, x1, y1) {
 }
 function drawDown(e) {
   const d = G.draw, h = skinHit(e);
-  if (h) { d.undo.push(SKIN_KEYS.map(([k, i]) => G.player.skins[k][i].g.getImageData(0, 0, SKIN_W, SKIN_H))); if (d.undo.length > 15) d.undo.shift(); d.stroke = { id: e.pointerId, last: h }; drawSeg(h.sk, h.x, h.y, h.x, h.y); }
+  if (h) { d.undo.push(drawSkins().map(sk => sk.g.getImageData(0, 0, SKIN_W, SKIN_H))); if (d.undo.length > 15) d.undo.shift(); d.stroke = { id: e.pointerId, last: h }; drawSeg(h.sk, h.x, h.y, h.x, h.y); }
   else d.orbit = { id: e.pointerId, x: e.clientX, y: e.clientY };
 }
 function drawMove(e) {
@@ -1928,10 +2185,11 @@ function drawUp(e) {
   if (d.stroke && e.pointerId === d.stroke.id) { d.stroke = null; drawRefresh(); }
   if (d.orbit && e.pointerId === d.orbit.id) d.orbit = null;
 }
-function drawRefresh() { if (!G.draw || !G.draw.changed) return; G.draw.changed = false; for (const k of PARTS) refreshPart(G.player, k); clearSplats(G.player); if (NETC()) netSend(['pt']); }
+const drawSkins = () => G.draw.skins || SKIN_KEYS.map(([k, i]) => G.player.skins[k][i]);
+function drawRefresh() { if (!G.draw || !G.draw.changed) return; if (G.draw.gun) { G.draw.painted = true; G.draw.changed = false; return; } G.draw.changed = false; for (const k of PARTS) refreshPart(G.player, k); clearSplats(G.player); if (NETC()) netSend(['pt']); }
 function drawUndo() {
   const d = G.draw, snap = d && d.undo.pop(); if (!snap) return;
-  SKIN_KEYS.forEach(([k, i], n) => { const sk = G.player.skins[k][i]; sk.g.putImageData(snap[n], 0, 0); sk.tex.needsUpdate = true; });
+  drawSkins().forEach((sk, n) => { sk.g.putImageData(snap[n], 0, 0); sk.tex.needsUpdate = true; });
   d.changed = true; drawRefresh(); sfx.pop();
 }
 $('drawBrushes').addEventListener('click', e => { const b = e.target.closest('button[data-b]'); if (!b) return; SHOP.brush = b.dataset.b; saveShop(); drawUi(); sfx.pop(); });
@@ -1939,7 +2197,7 @@ $('drawSize').addEventListener('input', e => { SET.brushSize = +e.target.value; 
 $('drawOp').addEventListener('input', e => { SET.brushOp = +e.target.value; save('ps-set', SET); });
 $('drawCol').addEventListener('click', () => openPalette());
 $('drawUndo').addEventListener('click', drawUndo);
-$('drawClear').addEventListener('click', () => { if (!G.draw) return; G.draw.undo.push(SKIN_KEYS.map(([k, i]) => G.player.skins[k][i].g.getImageData(0, 0, SKIN_W, SKIN_H))); setColor(G.player, new THREE.Color(0xffffff)); sfx.pop(); });
+$('drawClear').addEventListener('click', () => { if (!G.draw) return; G.draw.undo.push(drawSkins().map(sk => sk.g.getImageData(0, 0, SKIN_W, SKIN_H))); if (G.draw.gun) { fillSkin(galleryGun.sk, new THREE.Color(0xffffff)); G.draw.painted = true; } else setColor(G.player, new THREE.Color(0xffffff)); sfx.pop(); });
 $('drawDone').addEventListener('click', () => { drawRefresh(); exitDraw(); });
 for (const ev of ['pointerdown', 'pointermove', 'pointerup']) $('drawUi').addEventListener(ev, e => e.stopPropagation());
 
@@ -2025,7 +2283,7 @@ function moveChar(c, dt) {
       if (d < need) { if (d < 1e-4) { c.x += need; } else { c.x += dx / d * (need - d); c.z += dz / d * (need - d); } }
     }
   }
-  c.x = clamp(c.x, -23.5, 23.5); c.z = clamp(c.z, -23.5, 23.5);
+  const HB = halfOf(); c.x = clamp(c.x, -HB, HB); c.z = clamp(c.z, -HB, HB);
   const gh = groundAt(c.x, c.z, c.y);
   c.vy -= GRAV * dt * (hasCheat(c, 'moon') ? 0.3 : 1); c.y += c.vy * dt;   // cheat: moon boots
   if (c.y <= gh) { c.y = gh; c.vy = 0; c.onGround = true; } else c.onGround = c.y - gh < 0.03;
@@ -2083,7 +2341,7 @@ function updateBalls(dt) {
   for (let i = balls.length - 1; i >= 0; i--) {
     const b = balls[i]; b.age += dt;
     b.prev.copy(b.pos); b.vel.y -= 14 * dt; b.pos.addScaledVector(b.vel, dt); b.m.position.copy(b.pos);
-    if (typeof b.hex === 'string') { b.m.rotation.x += dt * 9; b.m.rotation.y += dt * 6; if (b.hex === 'gold' && !G.silent && Math.random() < dt * 7) sparkleAt(b.pos, 0.32, 0.35); }   // designs spin; gold twinkles
+    if (typeof b.hex === 'string') { b.m.rotation.x += dt * 9; b.m.rotation.y += dt * 6; if ((b.hex === 'gold' || b.hex === 'glitter' || b.hex === 'glow') && !G.silent && Math.random() < dt * 7) sparkleAt(b.pos, 0.32, 0.35); }   // designs spin; gold twinkles
     segD.copy(b.pos).sub(b.prev); const len = segD.length(); if (len < 1e-6) continue; segD.multiplyScalar(1 / len);
     let hitC = null, hitT = len;
     for (const c of G.chars) {
@@ -2266,7 +2524,7 @@ const sfx = {
   error: () => { if (!play(pickN('sfx/error', 3), { vol: 0.7 })) tone(300, 0.2, 'square', 0.06, 200); }
 };
 /* footsteps by floor: what's under someone's feet (the texture of the box they stand on) */
-const STEP_OF = { grass: 'grass', hay: 'grass', dirt: 'gravel', wood: 'wood', tile: 'tile', check: 'tile', frosting: 'tile', panel: 'metal', carpet: 'boots', noise: 'boots' };
+const STEP_OF = { water: 'water', grass: 'grass', hay: 'grass', dirt: 'gravel', wood: 'wood', tile: 'tile', check: 'tile', frosting: 'tile', panel: 'metal', carpet: 'boots', noise: 'boots' };
 function surfOf(c) {
   let k = null, top = -9;
   for (const b of boxes) if (c.x >= b.x1 - 0.05 && c.x <= b.x2 + 0.05 && c.z >= b.z1 - 0.05 && c.z <= b.z2 + 0.05 && b.y2 <= c.y + 0.06 && b.y2 > top) { top = b.y2; k = b.k; }
@@ -2298,6 +2556,7 @@ const hashOf = s => { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.ch
 function speak(c, line, v = 1) {
   if (!c || G.silent || !ac() || !AUD.voice) return;
   const L = LINES[line]; if (!L) return;
+  if (c.duckG) { const at = { x: c.x, y: c.y, z: c.z }; for (let k = 0; k < (line === 'giggle' ? 3 : 2); k++) { tone(520, 0.16, 'sawtooth', 0.12 * v, 300, k * 0.2, at); tone(1040, 0.12, 'square', 0.04 * v, 600, k * 0.2, at); } return; }   // quack!
   const V = VOICES[c.cos && c.cos.v] || VOICES.normal, r = seeded(hashOf(c.pkey || c.name) + line.length);
   const base = (150 + (hashOf(c.pkey || c.name) % 90)) * V.k, syl = L[3] / (V.fast || 1), at = c === G.player ? null : { x: c.x, y: c.y, z: c.z };
   const out = outAt(AUD.voice, at); let t = AC.currentTime + 0.02;
@@ -2627,9 +2886,9 @@ function setGhost(c) {
 function updateCamera() {
   let p = G.player; if (!p) return;
   if (G.draw) {
-    const d = G.draw, cy = p.y + poseOf(p).mid + 0.05;
-    camera.position.set(p.x + Math.sin(d.yaw) * Math.cos(d.pitch) * d.dist, cy + Math.sin(d.pitch) * d.dist, p.z + Math.cos(d.yaw) * Math.cos(d.pitch) * d.dist);
-    camera.lookAt(p.x, cy, p.z); setGhost(null); aimHit.ok = false; aimHit.c = null; return;
+    const d = G.draw, T = d.target || { x: p.x, y: p.y + poseOf(p).mid + 0.05, z: p.z };   // you, or the big blaster in the gallery
+    camera.position.set(T.x + Math.sin(d.yaw) * Math.cos(d.pitch) * d.dist, T.y + Math.sin(d.pitch) * d.dist, T.z + Math.cos(d.yaw) * Math.cos(d.pitch) * d.dist);
+    camera.lookAt(T.x, T.y, T.z); setGhost(null); aimHit.ok = false; aimHit.c = null; return;
   }
   if (G.spectate) { const s = G.chars.find(c => c.role === 'seeker'); if (s) { p = s; input.yaw += angDiff(s.yaw, input.yaw) * 0.06; input.pitch += (0.35 - input.pitch) * 0.05; } }
   camD.set(Math.sin(input.yaw) * Math.cos(input.pitch), -Math.sin(input.pitch), Math.cos(input.yaw) * Math.cos(input.pitch));
@@ -2672,6 +2931,8 @@ function updatePlayer(dt) {
     if (G.phase === 'lobby') {   // lobby: open the shop at the stand, otherwise throw paint for fun
       if (G.nearShop) openShop('lobby');
       else if (G.nearBooth) enterDraw(true);
+      else if (G.nearGun) { if (galleryGun && !(SHOP.gunLooks[SHOP.gunLook])) fillSkin(galleryGun.sk, new THREE.Color(0xffffff)); enterDraw('gun'); }
+      else if (G.nearFrame) useDesign(G.nearFrame.i);
       else if (G.nearJuke) jukeNext();
       else if (G.throwCd <= 0) { G.throwCd = 0.35; p.yaw = input.yaw; throwBall(p, p, aimHit.p); }
     } else if (p.role === 'hider') {
@@ -3201,6 +3462,14 @@ function lobbyTick(dt) {
   G.nearShop = Math.hypot(p.x - LOBBY_SHOP.x, p.z - LOBBY_SHOP.z) < 2.3;
   G.nearBooth = !G.nearShop && Math.hypot(p.x - LOBBY_BOOTH.x, p.z - LOBBY_BOOTH.z) < 1.4 && p.y < 0.3;
   G.nearJuke = !G.nearShop && !G.nearBooth && Math.hypot(p.x - LOBBY_JUKE.x, p.z - LOBBY_JUKE.z) < 1.8;
+  G.nearGun = !!galleryGun && SHOP.owned.includes('gallery') && Math.hypot(p.x - GALLERY.x, p.z - GALLERY.z) < 1.9;
+  G.nearFrame = !G.nearGun && SHOP.owned.includes('gallery') ? nearFrame(p) : null;
+  if (galleryGun && !G.draw) galleryGun.g.rotation.y += dt * 0.5;   // the blaster turns slowly on its stand
+  // a secret level's door: the next round is there (alone, or the host for everyone)
+  if (!NETC() && inLobby()) for (const d of LOBBY_DOORS) if (levelOpen(d.id) && Math.hypot(p.x - d.x, p.z - 13.4) < 1.1 && G.nextMap !== d.id) {
+    G.nextMap = d.id; const msg = '✨ Next round: ' + SECRET_MAPS[d.id].emoji + ' ' + SECRET_MAPS[d.id].name + '!';
+    toast(msg, 3); if (NETH()) netEv(['t', '*', msg, 3]); jingle('found'); G.lobbyT = Math.min(G.lobbyT, 5);
+  }
   const atVault = Math.hypot(p.x - LOBBY_VAULT.x, p.z - LOBBY_VAULT.z) < 0.9 && p.y < 0.3;   // the secret door: walk into it
   if (atVault && !G.atVault && inLobby()) { sfx.alert(); openCodes('lobby'); }
   G.atVault = atVault;
@@ -3219,11 +3488,13 @@ function lobbyHud() {
   const w = $('warn'), people = M.players.filter(p => playsHuman(p)).length;
   if (G.nearShop) { w.textContent = TOUCH ? '🛒 Tap SHOP to open the shop' : '🛒 Click or press E to open the shop'; w.className = 'pill on'; }
   else if (G.nearBooth) { w.textContent = TOUCH ? '🎨 Tap PAINT to design your look' : '🎨 Click or press E to design your look'; w.className = 'pill on'; }
+  else if (G.nearGun) { w.textContent = TOUCH ? '🔫 Tap PAINT to paint your launcher' : '🔫 Click or press E to paint your launcher'; w.className = 'pill on'; }
+  else if (G.nearFrame) { w.textContent = '🖼️ Design ' + (G.nearFrame.i + 1) + (TOUCH ? ': tap USE to put it on your launcher' : ': click or press E to use it'); w.className = 'pill on'; }
   else if (G.nearJuke) { w.textContent = (G.juke ? '📻 ' + SONG_TITLE[G.juke] + ' · ' : '📻 ') + (TOUCH ? 'Tap SONG for the next song' : 'Click or press E for the next song'); w.className = 'pill on'; }
   else if (G.ready) { w.textContent = '✅ Ready!' + (people > 1 ? ' (' + G.readyKeys.size + ' of ' + people + ' ready)' : ''); w.className = 'pill on'; }
   else { w.textContent = '🟢 Tap ✅ I\'m ready! or stand on the green pad'; w.className = 'pill on'; }
-  $('bMain').querySelector('.ico').textContent = G.nearShop ? '🛒' : G.nearBooth ? '🎨' : G.nearJuke ? '📻' : '🎯';
-  $('bMainTxt').textContent = G.nearShop ? 'SHOP' : G.nearBooth ? 'PAINT' : G.nearJuke ? 'SONG' : 'THROW';
+  $('bMain').querySelector('.ico').textContent = G.nearShop ? '🛒' : G.nearBooth || G.nearGun ? '🎨' : G.nearFrame ? '🖼️' : G.nearJuke ? '📻' : '🎯';
+  $('bMainTxt').textContent = G.nearShop ? 'SHOP' : G.nearBooth || G.nearGun ? 'PAINT' : G.nearFrame ? 'USE' : G.nearJuke ? 'SONG' : 'THROW';
   $('cross').className = ''; $('bSw').style.display = 'none';
 }
 /* after buying or changing a hat in the lobby, swap in a player wearing it */
@@ -3266,6 +3537,7 @@ function openVote(ids) {
   clearRound(); hideRoundUi();
   G.phase = 'vote'; G.paused = false; G.shopOpen = false; G.lobbyCard = false;
   // the map from the last round isn't offered again, so the same map can't win round after round
+  if (!ids && G.nextMap && WORLDS[G.nextMap]) { ids = [G.nextMap]; G.nextMap = null; }   // a secret level's door was picked
   ids = ids || shuffle(Object.keys(MAPS).filter(id => id !== G.lastMap)).slice(0, 3);
   const fav = pick(ids);
   // picks: player key -> map id, for everyone (computer players vote by themselves; people tap a card)
@@ -3275,7 +3547,7 @@ function openVote(ids) {
   };
   const box = $('vcards'); box.innerHTML = '';
   for (const id of ids) {
-    const m = MAPS[id], b = document.createElement('button');
+    const m = WORLDS[id], b = document.createElement('button');
     b.className = 'vcard'; b.dataset.id = id;
     b.innerHTML = `<div class="vart" style="background:linear-gradient(160deg,${m.art[0]},${m.art[1]})">${m.emoji}</div><div class="vname">${m.name}</div><div class="vcount">0 votes</div><div class="vdots"></div>`;
     b.addEventListener('click', () => {
@@ -3344,7 +3616,7 @@ function voteUpdate(dt) {
   if (changed) drawVote(); else $('voteT').textContent = Math.max(0, Math.ceil(V.t));
 }
 function voteWinText(V) {
-  $('voteWin').textContent = '🎉 ' + MAPS[V.win].name + ' wins' + (V.tie ? ' (it was a tie, so it picked one!)' : '!');
+  $('voteWin').textContent = '🎉 ' + WORLDS[V.win].name + ' wins' + (V.tie ? ' (it was a tie, so it picked one!)' : '!');
   sfx.win();
 }
 
@@ -3379,13 +3651,13 @@ function shopPreviewTick() {
   src.connect(g).connect(AUD.fx); src.start(t, Math.min(20, b.duration * 0.2)); src.stop(t + 8.1); PREV = src;
 }
 function drawShop() {
-  $('shopCoins').textContent = '🪙 ' + SHOP.coins;
+  $('shopCoins').textContent = '🪙 ' + (meCheat('rich') ? '∞' : SHOP.coins);
   const kind = G.shopTab || 'hat', K = SHOP_KINDS[kind];
   $('shopTabs').innerHTML = Object.entries(SHOP_KINDS).map(([k, v]) => `<button data-tab="${k}" class="${k === kind ? 'on' : ''}">${v.tab}</button>`).join('');
   $('shopSub').textContent = K.sub;
   const card = (id, it) => {
     const own = owns(kind, id), on = K.using && SHOP[K.using] === id;
-    const cls = on ? 'on' : own ? '' : SHOP.coins >= it.price ? 'buy' : 'poor';
+    const cls = on ? 'on' : own ? '' : SHOP.coins >= it.price || meCheat('rich') ? 'buy' : 'poor';
     const icon = kind === 'paint' ? `<span class="sw${id === 'gold' ? ' gold' : ''}" style="background:${id === 'custom' ? hexCss(+SHOP.paintHex || PAINT_HEX) : it.design ? inkCss(id) : hexCss(it.hex)}"></span>` : it.emoji;
     const label = (kind === 'emote' || kind === 'song') && own ? '✓ Yours' : on ? (kind === 'hat' ? '✓ Wearing' : '✓ Using') : own ? (id === 'custom' ? '🎨 Pick' : 'Use it') : '🪙 ' + it.price;
     return `<button class="item ${cls}" data-kind="${kind}" data-id="${id}"><div class="ie">${icon}</div><div class="in">${it.name}</div><div class="ip">${label}</div></button>`;
@@ -3398,8 +3670,8 @@ function drawShop() {
 function shopClick(kind, id) {
   const it = SHOP_KINDS[kind].list()[id]; if (!it) return;
   if (!owns(kind, id)) {
-    if (SHOP.coins < it.price) { $('shopMsg').textContent = 'You need ' + (it.price - SHOP.coins) + ' more coins. Play more rounds to earn them!'; sfx.lose(); return; }
-    SHOP.coins -= it.price; SHOP.owned.push(kind + ':' + id);
+    if (SHOP.coins < it.price && !meCheat('rich')) { $('shopMsg').textContent = 'You need ' + (it.price - SHOP.coins) + ' more coins. Play more rounds to earn them!'; sfx.lose(); return; }
+    if (!meCheat('rich')) SHOP.coins -= it.price; SHOP.owned.push(kind + ':' + id);   // cheat: infinite coins
     $('shopMsg').textContent = '🎉 You bought the ' + it.name + '!'; sfx.coin();
   } else { $('shopMsg').textContent = ''; sfx.pop(); }
   G.shopPick = kind === 'paint' && id === 'custom';   // "Any color" opens the color grid below
@@ -3447,10 +3719,46 @@ const CHEATS = {
   xray: { name: 'X-ray eyes', emoji: '👓', kind: 'power' },
   invis: { name: 'Invisible', emoji: '🫥', kind: 'power' },
   coins: { name: '+500 coins', emoji: '🪙', kind: 'once' },
-  cone: { name: 'Secret hat: Traffic Cone', emoji: '🚧', kind: 'unlock' },
-  sprinkles: { name: 'Secret paint ball: Sprinkles', emoji: '🧁', kind: 'unlock' }
+  cone: { name: 'Secret hat: Traffic Cone', emoji: '🚧', kind: 'unlock', give: 'hat:cone' },
+  sprinkles: { name: 'Secret paint ball: Sprinkles', emoji: '🧁', kind: 'unlock', give: 'paint:sprinkles' },
+  // 0.3.5
+  gallery: { name: 'The gun painting gallery', emoji: '🖼️', kind: 'unlock', give: 'gallery' },
+  lvkitchen: { name: 'Secret level: Giant\'s Kitchen', emoji: '🥣', kind: 'unlock', give: 'level:kitchen' },
+  lvmuseum: { name: 'Secret level: Art Museum', emoji: '🖼️', kind: 'unlock', give: 'level:museum' },
+  lvvillage: { name: 'Secret level: Snowy Village', emoji: '⛄', kind: 'unlock', give: 'level:village' },
+  lvship: { name: 'Secret level: Pirate Ship', emoji: '🏴‍☠️', kind: 'unlock', give: 'level:ship' },
+  lvall: { name: 'All four secret levels', emoji: '🗝️', kind: 'unlock', give: 'level:kitchen level:museum level:village level:ship' },
+  hduck: { name: 'Secret hat: Rubber Duck', emoji: '🐤', kind: 'unlock', give: 'hat:duck' },
+  hpizza: { name: 'Secret hat: Pizza Slice', emoji: '🍕', kind: 'unlock', give: 'hat:pizza' },
+  hastro: { name: 'Secret hat: Astronaut Helmet', emoji: '👨‍🚀', kind: 'unlock', give: 'hat:astro' },
+  hdino: { name: 'Secret hat: Dino Hood', emoji: '🦖', kind: 'unlock', give: 'hat:dino' },
+  plava: { name: 'Secret paint ball: Lava', emoji: '🌋', kind: 'unlock', give: 'paint:lava' },
+  pglow: { name: 'Secret paint ball: Glow', emoji: '🟢', kind: 'unlock', give: 'paint:glow' },
+  pice: { name: 'Secret paint ball: Ice Crystal', emoji: '❄️', kind: 'unlock', give: 'paint:ice' },
+  pglitter: { name: 'Secret paint ball: Glitter', emoji: '✨', kind: 'unlock', give: 'paint:glitter' },
+  lbanana: { name: 'Secret launcher: Banana Blaster', emoji: '🍌', kind: 'unlock', give: 'launch:banana' },
+  lbottle: { name: 'Secret launcher: Water Bottle', emoji: '🧴', kind: 'unlock', give: 'launch:bottle' },
+  lchicken: { name: 'Secret launcher: Golden Rubber Chicken', emoji: '🐔', kind: 'unlock', give: 'launch:chicken' },
+  eworm: { name: 'Secret emote: Worm', emoji: '🪱', kind: 'unlock', give: 'emote:worm' },
+  erobot: { name: 'Secret emote: Robot', emoji: '🤖', kind: 'unlock', give: 'emote:robot' },
+  cbolt: { name: 'Secret celebration: Lightning', emoji: '⚡', kind: 'unlock', give: 'cel:lightning' },
+  crainbow: { name: 'Secret celebration: Rainbow Burst', emoji: '🌈', kind: 'unlock', give: 'cel:rainbow' },
+  cmega: { name: 'Secret celebration: Giant Confetti Cannon', emoji: '🎉', kind: 'unlock', give: 'cel:mega' },
+  pup: { name: 'Pet: Puppy', emoji: '🐶', kind: 'pet' },
+  kitten: { name: 'Pet: Kitten', emoji: '🐱', kind: 'pet' },
+  bunny: { name: 'Pet: Bunny', emoji: '🐰', kind: 'pet' },
+  babydino: { name: 'Pet: Baby Dino', emoji: '🦕', kind: 'pet' },
+  dragon: { name: 'Pet: Dragon', emoji: '🐉', kind: 'pet' },
+  axolotl: { name: 'Pet: Axolotl', emoji: '🦎', kind: 'pet' },
+  jelly: { name: 'Pet: Jellyfish', emoji: '🪼', kind: 'pet' },
+  rain: { name: 'Rain', emoji: '🌧️', kind: 'look' },
+  snow: { name: 'Snow', emoji: '🌨️', kind: 'look' },
+  bubbles: { name: 'Bubbles', emoji: '🫧', kind: 'look' },
+  mystery: { name: 'Mystery box', emoji: '🎁', kind: 'daily' },
+  rich: { name: 'Infinite coins', emoji: '💰', kind: 'power' },
+  duckday: { name: 'Duck Day', emoji: '🦆', kind: 'look' }
 };
-const CHEAT_CODES = { '273rjxj1b2m': 'head', '29i77vic5my': 'tiny', '29w5f4hqsae': 'giant', 'mry71r7v7c': 'party', '1zzjm02yd33': 'trail', '1tlkcb9ysq0': 'disco', '1xotj64q9gi': 'bouncy', '14w0jfyghgr': 'moon', '21aqho2aojp': 'pads', '1gfm0uouxwg': 'ice', '23q1puc16lo': 'slow', '15afvv745gb': 'jump', '25ab2hly1dc': 'speed', '17g1vsiunrs': 'paint', '1c7haxr1n8c': 'xray', '1u8zfgd5cqf': 'invis', 'hfdz0kquv1': 'coins', '1a6rd3ec6ys': 'cone', '2b07youf1y5': 'sprinkles' };
+const CHEAT_CODES = { '273rjxj1b2m': 'head', '29i77vic5my': 'tiny', '29w5f4hqsae': 'giant', 'mry71r7v7c': 'party', '1zzjm02yd33': 'trail', '1tlkcb9ysq0': 'disco', '1xotj64q9gi': 'bouncy', '14w0jfyghgr': 'moon', '21aqho2aojp': 'pads', '1gfm0uouxwg': 'ice', '23q1puc16lo': 'slow', '15afvv745gb': 'jump', '25ab2hly1dc': 'speed', '17g1vsiunrs': 'paint', '1c7haxr1n8c': 'xray', '1u8zfgd5cqf': 'invis', 'hfdz0kquv1': 'coins', '1a6rd3ec6ys': 'cone', '2b07youf1y5': 'sprinkles', '1w9xk50jaxj': 'gallery', 'c1b4bueald': 'lvkitchen', '485a10are6': 'lvmuseum', '1abbpjflnjv': 'lvvillage', 'b4od26c1f8': 'lvship', 'rqz6tbq1ss': 'lvall', 'j7tvafko37': 'hduck', 'hm21ftq7bc': 'hpizza', '24anlpfwpbv': 'hastro', 'oe5x2xwwzd': 'hdino', '1sy538ys4dv': 'plava', '19qcrzi0hmd': 'pglow', 'oij07sfsdf': 'pice', 'ia9inrnkib': 'pglitter', '15z6a21qix2': 'lbanana', '1gttlox8u3f': 'lbottle', '185x100zqwf': 'lchicken', 'wjxyvhxo4w': 'eworm', '1hj70wz2lh4': 'erobot', '1nm8wgfn7cn': 'cbolt', '133l2da3a1q': 'crainbow', 'i7mp5ha0ug': 'cmega', 'u5pl8t8b5z': 'pup', 'd867yfkfzu': 'kitten', 'dcgocn7k1d': 'bunny', '1s7uq0ib8zn': 'babydino', '16yjhtwdw7e': 'dragon', 'aabaxknv4v': 'axolotl', '1htsyentvyt': 'jelly', '2x2mshifoz': 'rain', '231n25eh45v': 'snow', '2e8mlhgghpz': 'bubbles', '27lwlloixr3': 'mystery', 'y8u7m4ob3x': 'rich', '1tqsdwjtcd3': 'duckday' };
 function cheatHash(word) {   // the same as tools/add-cheat.cjs (cyrb53 with the game's seed)
   const t = String(word).toUpperCase().replace(/[^A-Z0-9]/g, ''), seed = 0x5eed;
   let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -3459,7 +3767,17 @@ function cheatHash(word) {   // the same as tools/add-cheat.cjs (cyrb53 with the
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
-const myCheats = () => (Array.isArray(SHOP.cheats) ? SHOP.cheats : []).filter(id => CHEATS[id] && CHEATS[id].kind !== 'once' && CHEATS[id].kind !== 'unlock');
+const myCheats = () => (Array.isArray(SHOP.cheats) ? SHOP.cheats : []).filter(id => CHEATS[id] && ['look', 'physics', 'power'].includes(CHEATS[id].kind));
+const WEATHER = ['rain', 'snow', 'bubbles'];
+/* the things that hide in the mystery box (secret items you don't have yet) */
+const MYSTERY = ['hat:duck', 'hat:pizza', 'hat:astro', 'hat:dino', 'hat:cone', 'paint:lava', 'paint:glow', 'paint:ice', 'paint:glitter', 'paint:sprinkles', 'launch:banana', 'launch:bottle', 'launch:chicken', 'emote:worm', 'emote:robot', 'cel:lightning', 'cel:rainbow', 'cel:mega'];
+/* give a secret thing and put it on (a hat, paint ball, launcher, celebration), or open a level door / the gallery */
+function giveSecret(key) {
+  if (!SHOP.owned.includes(key)) SHOP.owned.push(key);
+  const [kind, id] = key.split(':'), use = { hat: 'hat', paint: 'paint', launch: 'launcher', cel: 'cel' }[kind];
+  if (use) SHOP[use] = id;
+}
+const SECRET_NAME = key => { const [kind, id] = key.split(':'); const K = SHOP_KINDS[kind]; const it = K && K.list()[id]; return it ? (it.emoji ? it.emoji + ' ' : '') + it.name : key; };
 /* does character c have cheat id on? (you: your own list, at once; others: what came with them, from the next round) */
 const hasCheat = (c, id) => !!c && (c === G.player ? myCheats().includes(id) : !!(c.cos && c.cos.ch && c.cos.ch.includes(id)));
 const meCheat = id => myCheats().includes(id);
@@ -3468,11 +3786,24 @@ function useCode(text) {
   if (!C) { sfx.error(); return '🤔 That\'s not a secret code. Try again!'; }
   if (C.kind === 'once') { SHOP.coins += 500; saveShop(); sfx.coin(); refreshMenu(); return '🪙 +500 coins! You have ' + SHOP.coins + '.'; }
   if (C.kind === 'unlock') {
-    const key = id === 'cone' ? 'hat:cone' : 'paint:sprinkles';
-    if (!SHOP.owned.includes(key)) SHOP.owned.push(key);
-    if (id === 'cone') SHOP.hat = 'cone'; else SHOP.paint = 'sprinkles';
-    saveShop(); jingle('win'); refreshLobbyMe(); return C.emoji + ' Unlocked: ' + C.name + '! (It\'s on now; change it in the shop.)';
+    for (const key of C.give.split(' ')) giveSecret(key);
+    saveShop(); jingle('win'); refreshLobbyMe(); if (G.phase === 'lobby' && /level:|gallery/.test(C.give)) G.lobbyRebuild = true;
+    return C.emoji + ' Unlocked: ' + C.name + '!' + (/level:/.test(C.give) ? (C.give.includes(' ') ? ' Look for their doors in the lobby.' : ' Look for its door in the lobby.') : C.give === 'gallery' ? ' Its door is in the lobby\'s back wall.' : ' (It\'s on now; change it in the shop.)');
   }
+  if (C.kind === 'daily') {   // the mystery box: once a day
+    const today = new Date().toDateString();
+    if (SHOP.mysteryDay === today) { sfx.error(); return '🎁 The mystery box is empty today. Come back tomorrow!'; }
+    SHOP.mysteryDay = today;
+    const left = MYSTERY.filter(k => !SHOP.owned.includes(k));
+    if (!left.length) { SHOP.coins += 300; saveShop(); sfx.coin(); refreshMenu(); return '🎁 You have every secret item already, so: +300 coins!'; }
+    const key = pick(left); giveSecret(key); saveShop(); jingle('win'); refreshLobbyMe();
+    return '🎁 The mystery box had… ' + SECRET_NAME(key) + '!';
+  }
+  if (C.kind === 'pet') {   // one pet at a time; the same code again sends it home
+    SHOP.pet = SHOP.pet === id ? null : id; saveShop(); cheatsChanged(); sfx.pop();
+    return SHOP.pet ? C.emoji + ' Your ' + C.name.replace('Pet: ', '').toLowerCase() + ' follows you now!' : C.emoji + ' Your pet went home.';
+  }
+  if (WEATHER.includes(id)) SHOP.cheats = myCheats().filter(x => !WEATHER.includes(x) || x === id);   // one kind of weather at a time
   const list = myCheats(), on = !list.includes(id);
   SHOP.cheats = on ? list.concat(id) : list.filter(x => x !== id); saveShop();
   cheatsChanged(); sfx.pop();
@@ -3489,15 +3820,18 @@ function openCodes(from) {
 }
 function closeCodes() {
   G.codesOpen = false; $('codeIn').blur(); refreshMenu();
-  if (G.codesFrom === 'lobby' && G.phase === 'lobby') { refreshLobbyMe(); showScreen(null); lobbyHud(); } else showScreen('menu');
+  if (G.codesFrom === 'lobby' && G.phase === 'lobby') {
+    if (G.lobbyRebuild) { G.lobbyRebuild = false; const t = G.lobbyT; openLobby(); closeLobbyCard(); G.lobbyT = t; }   // new doors (secret levels, the gallery)
+    else { refreshLobbyMe(); showScreen(null); lobbyHud(); }
+  } else showScreen('menu');
 }
 function drawCodes() {
-  const on = myCheats();
+  const on = myCheats().concat(SHOP.pet && CHEATS[SHOP.pet] ? [SHOP.pet] : []);
   $('codeList').innerHTML = on.length ? '<div class="vsub">On now (tap to turn off):</div>' + on.map(id => '<button class="small" data-c="' + id + '">' + CHEATS[id].emoji + ' ' + CHEATS[id].name + ' ✕</button>').join(' ') : '<div class="vsub">No cheats on.</div>';
 }
 $('codeGo').onclick = () => { const t = $('codeIn').value; if (!t.trim()) return; $('codeMsg').textContent = useCode(t); $('codeIn').value = ''; };
 $('codeIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') $('codeGo').onclick(); if (e.key === 'Escape') closeCodes(); });
-$('codeList').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; SHOP.cheats = myCheats().filter(x => x !== b.dataset.c); saveShop(); cheatsChanged(); $('codeMsg').textContent = CHEATS[b.dataset.c].emoji + ' ' + CHEATS[b.dataset.c].name + ' is off.'; sfx.pop(); });
+$('codeList').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; if (SHOP.pet === b.dataset.c) SHOP.pet = null; SHOP.cheats = myCheats().filter(x => x !== b.dataset.c); saveShop(); cheatsChanged(); $('codeMsg').textContent = CHEATS[b.dataset.c].emoji + ' ' + CHEATS[b.dataset.c].name + ' is off.'; sfx.pop(); });
 $('codesBack').onclick = closeCodes;
 // 5 taps on the title (within 3 seconds) open the code box
 { let taps = []; document.querySelector('#menu .logo').addEventListener('click', () => { const t = performance.now(); taps = taps.filter(x => t - x < 3000).concat(t); if (taps.length >= 5) { taps = []; ac(); openCodes('menu'); } }); }
@@ -3510,7 +3844,10 @@ const LAUNCHERS = {
   bubble:  { name: 'Bubble Blaster', emoji: '🫧', price: 160 },
   cannon:  { name: 'Paint Cannon', emoji: '💣', price: 220 },
   rainbow: { name: 'Rainbow Blaster', emoji: '🌈', price: 350 },
-  gold:    { name: 'Gold Blaster', emoji: '🏆', price: 400 }
+  gold:    { name: 'Gold Blaster', emoji: '🏆', price: 400 },
+  banana:  { name: 'Banana Blaster', emoji: '🍌', price: 99999, hidden: true },
+  bottle:  { name: 'Water Bottle', emoji: '🧴', price: 99999, hidden: true },
+  chicken: { name: 'Golden Rubber Chicken', emoji: '🐔', price: 99999, hidden: true }
 };
 const CELS = {
   confetti: { name: 'Confetti', emoji: '🎊', price: 0 },
@@ -3519,7 +3856,10 @@ const CELS = {
   bubbles:  { name: 'Bubbles', emoji: '🫧', price: 120 },
   balloons: { name: 'Balloons', emoji: '🎈', price: 160 },
   fireworks:{ name: 'Fireworks', emoji: '🎆', price: 200 },
-  coins:    { name: 'Gold Shower', emoji: '🪙', price: 300 }
+  coins:    { name: 'Gold Shower', emoji: '🪙', price: 300 },
+  lightning:{ name: 'Lightning', emoji: '⚡', price: 99999, hidden: true },
+  rainbow:  { name: 'Rainbow Burst', emoji: '🌈', price: 99999, hidden: true },
+  mega:     { name: 'Giant Confetti Cannon', emoji: '🎉', price: 99999, hidden: true }
 };
 const EMOTES = {
   wave:  { name: 'Wave', emoji: '👋', price: 0, dur: 1.6 },
@@ -3530,12 +3870,14 @@ const EMOTES = {
   flex:  { name: 'Flex', emoji: '💪', price: 80, dur: 1.6 },
   dab:   { name: 'Dab', emoji: '🫡', price: 90, dur: 1.2 },
   dance: { name: 'Dance', emoji: '💃', price: 120, dur: 2.6 },
-  wheel: { name: 'Cartwheel', emoji: '🤸', price: 150, dur: 1.1 }
+  wheel: { name: 'Cartwheel', emoji: '🤸', price: 150, dur: 1.1 },
+  worm:  { name: 'Worm', emoji: '🪱', price: 99999, hidden: true, dur: 2.4 },
+  robot: { name: 'Robot', emoji: '🤖', price: 99999, hidden: true, dur: 2.4 }
 };
-const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti', v: VOICES[SHOP.voice] && owns('voice', SHOP.voice) ? SHOP.voice : 'normal', j: JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza', ch: myCheats() });
+const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti', v: VOICES[SHOP.voice] && owns('voice', SHOP.voice) ? SHOP.voice : 'normal', j: JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza', ch: myCheats(), pet: CHEATS[SHOP.pet] && CHEATS[SHOP.pet].kind === 'pet' ? SHOP.pet : null });
 /* a player's cosmetics from the match list or the network, made safe */
 const cosOf = pl => { const c = (pl && pl.cos) || {}; const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-  return { l: has(LAUNCHERS, c.l) ? c.l : 'hand', t: has(CELS, c.t) ? c.t : 'confetti', v: has(VOICES, c.v) ? c.v : 'normal', j: has(JINGLES, c.j) ? c.j : 'pizza', ch: Array.isArray(c.ch) ? c.ch.filter(id => typeof id === 'string' && has(CHEATS, id)).slice(0, 20) : [] }; };
+  return { l: has(LAUNCHERS, c.l) ? c.l : 'hand', t: has(CELS, c.t) ? c.t : 'confetti', v: has(VOICES, c.v) ? c.v : 'normal', j: has(JINGLES, c.j) ? c.j : 'pizza', ch: Array.isArray(c.ch) ? c.ch.filter(id => typeof id === 'string' && has(CHEATS, id)).slice(0, 20) : [], pet: typeof c.pet === 'string' && has(CHEATS, c.pet) && CHEATS[c.pet].kind === 'pet' ? c.pet : null }; };
 /* computer players show off the shop now and then */
 const botCos = () => ({ l: Math.random() < 0.5 ? pick(Object.keys(LAUNCHERS)) : 'hand', t: Math.random() < 0.6 ? pick(Object.keys(CELS)) : 'confetti', v: Math.random() < 0.4 ? pick(Object.keys(VOICES)) : 'normal', j: 'pizza' });
 
@@ -3545,15 +3887,16 @@ const lmat = (hex, o) => LMATS[hex + (o ? JSON.stringify(o) : '')] || (LMATS[hex
 function inkSolidMat(ink) { return ink === 'gold' ? goldMat() : typeof ink === 'string' ? new THREE.MeshStandardMaterial({ map: inkTex(ink), roughness: 0.35 }) : new THREE.MeshStandardMaterial({ color: ink, roughness: 0.35 }); }
 function addLauncher(c) {
   if (c.launcher) { c.armR.remove(c.launcher); c.launcher = null; }
-  const id = c.cos && c.cos.l; if (!id || id === 'hand') return;
+  let id = c.cos && c.cos.l; if (c.gunSkin) id = 'blaster';   // a painted design (the gallery) is a painted blaster
+  if (!id || id === 'hand') return;
   const g = new THREE.Group(); g.position.set(0, -0.4, 0.05); g.rotation.x = Math.PI / 2;   // held in the fist, pointing where the arm points
   const ink = c.paintHex === undefined ? PAINT_HEX : c.paintHex, tank = inkSolidMat(ink);
   const P2 = (geo, m, x, y, z, sx, sy, sz, rot) => { const p = new THREE.Mesh(geo, m); p.position.set(x, y, z); p.scale.set(sx, sy, sz); if (rot) p.rotation.set(rot[0], rot[1], rot[2]); p.castShadow = true; g.add(p); return p; };
   const AX = [Math.PI / 2, 0, 0];   // a cylinder lying along the barrel
   if (id === 'blaster' || id === 'rainbow' || id === 'gold') {
-    const body = id === 'gold' ? goldMat() : id === 'rainbow' ? new THREE.MeshStandardMaterial({ map: inkTex('rainbow'), roughness: 0.4 }) : lmat(0x2f8bff);
+    const body = c.gunSkin ? c.gunSkin.mat : id === 'gold' ? goldMat() : id === 'rainbow' ? new THREE.MeshStandardMaterial({ map: inkTex('rainbow'), roughness: 0.4 }) : lmat(0x2f8bff);
     const trim = id === 'gold' ? goldMat({ roughness: 0.4 }) : lmat(0xffb703);
-    P2(BOXG, body, 0, 0, 0.06, 0.12, 0.13, 0.34);
+    P2(c.gunSkin ? SKIN_BOXG : BOXG, body, 0, 0, 0.06, 0.12, 0.13, 0.34);
     P2(CYLG, trim, 0, 0.01, 0.3, 0.045, 0.18, 0.045, AX);
     P2(BOXG, trim, 0, -0.1, -0.02, 0.07, 0.12, 0.07);
     P2(SPHG, tank, 0, 0.12, 0.02, 0.07, 0.07, 0.07);
@@ -3566,6 +3909,15 @@ function addLauncher(c) {
     P2(SPHG, lmat(0x7fd8ff, { transparent: true, opacity: 0.75, roughness: 0.1 }), 0, 0, 0.06, 0.12, 0.12, 0.14);
     P2(CYLG, lmat(0xff77aa), 0, 0, 0.24, 0.05, 0.14, 0.05, AX);
     for (const [x, y] of [[0.05, 0.12], [-0.04, 0.16], [0.02, 0.2]]) P2(SPHG, tank, x, y, 0.02, 0.03, 0.03, 0.03);
+  } else if (id === 'banana') {
+    for (let k = 0; k < 4; k++) P2(CYLG, lmat(0xffe066), 0, -0.04 + Math.abs(k - 1.5) * 0.03, 0.02 + k * 0.1, 0.05, 0.12, 0.05, [Math.PI / 2 + (k - 1.5) * 0.3, 0, 0]);
+    P2(SPHG, lmat(0x6b4423), 0, 0.01, 0.38, 0.03, 0.03, 0.03); P2(SPHG, tank, 0, 0.08, 0.1, 0.05, 0.05, 0.05);
+  } else if (id === 'bottle') {
+    P2(CYLG, lmat(0x7fd8ff, { transparent: true, opacity: 0.6, roughness: 0.05 }), 0, 0, 0.08, 0.07, 0.3, 0.07, AX);
+    P2(CYLG, lmat(0x2f8bff), 0, 0, 0.27, 0.04, 0.08, 0.04, AX); P2(SPHG, tank, 0, 0, 0.06, 0.05, 0.05, 0.1);
+  } else if (id === 'chicken') {
+    const gm = goldMat({ roughness: 0.3 });
+    P2(SPHG, gm, 0, 0, 0.08, 0.08, 0.07, 0.14); P2(SPHG, gm, 0, 0.09, 0.2, 0.05, 0.05, 0.05); P2(CONEG, lmat(0xff7a00), 0, 0.09, 0.26, 0.02, 0.05, 0.02, AX); P2(BOXG, lmat(0xe63946), 0, 0.14, 0.2, 0.01, 0.04, 0.04);
   } else if (id === 'cannon') {
     P2(CYLG, lmat(0x3a3f4b, { metalness: 0.4 }), 0, 0, 0.12, 0.09, 0.42, 0.09, AX);
     for (const z of [0.0, 0.3]) P2(CYLG, lmat(0xffb703), 0, 0, z, 0.1, 0.03, 0.1, AX);
@@ -3606,6 +3958,17 @@ function celebrate(h, s) {
         end: o => { burst(o.position.x, o.position.y, o.position.z, [col, 0xffffff, pick(BOT_COLORS)], 28); sparkleAt(o.position, 1.2, 0.5); noise(0.3, 0.35 * volAt(o.position), 600); } });
     }
     noise(0.4, 0.2, 3000);
+  } else if (id === 'lightning') {
+    const m = new THREE.MeshBasicMaterial({ color: 0xfff4a8 }); let y = 14, x = at.x, z = at.z;
+    for (let k = 0; k < 7; k++) { const nx = at.x + rnd(-1, 1), nz = at.z + rnd(-1, 1), ny = 14 - (k + 1) * 2; const seg = fxMesh(BOXG, m, new V3((x + nx) / 2, (y + ny) / 2, (z + nz) / 2), new V3(0.12, Math.hypot(nx - x, 2, nz - z), 0.12)); seg.lookAt(nx, ny, nz); seg.rotateX(Math.PI / 2); cosFx.push({ m: seg, v: new V3(), t: 0, life: 0.35 }); x = nx; y = ny; z = nz; }
+    hemi.intensity *= 3; setTimeout(() => { hemi.intensity /= 3; }, 120);
+    noise(0.6, 0.6, 400); noise(1.2, 0.3, 200);
+  } else if (id === 'rainbow') {
+    for (let k = 0; k < 36; k++) { const a = k / 36 * Math.PI * 2; cosFx.push({ m: fxMesh(SPHG, paintMat(RAINBOW_HEX[k % 6]), at, new V3(0.12, 0.12, 0.12)), v: new V3(Math.cos(a) * 5, 2 + Math.sin(k) * 1.5, Math.sin(a) * 5), t: 0, life: 1.2, grav: 3 }); }
+    [523, 659, 784, 988, 1175, 1319].forEach((f, k) => tone(f, 0.2, 'sine', 0.1, 0, k * 0.06));
+  } else if (id === 'mega') {
+    burst(at.x, at.y, at.z, BOT_COLORS, 140); noise(0.5, 0.5, 300); tone(90, 0.4, 'sine', 0.3, 40);
+    for (let k = 0; k < 8; k++) cosFx.push({ delay: 0.1 * k, fn: () => sparkleAt(at.clone().add(new V3(rnd(-2, 2), rnd(0, 3), rnd(-2, 2))), 1, 0.6) });
   } else if (id === 'coins') {
     const m = goldMat({ roughness: 0.3 });
     for (let k = 0; k < 16; k++) cosFx.push({ m: fxMesh(CYLG, m, at, new V3(0.09, 0.018, 0.09)), v: new V3(rnd(-2.5, 2.5), rnd(4, 7), rnd(-2.5, 2.5)), t: 0, life: 2.2, spin: rnd(6, 14), grav: 12, floor: true });
@@ -3643,7 +4006,7 @@ function emoteStep(c, dt) {
   const e = c.emote, E = EMOTES[e.id]; e.t += dt;
   const t = e.t, f = Math.min(1, t / E.dur), s = Math.sin(f * Math.PI);   // s: 0 → 1 → 0 over the move
   const aL = c.armL.rotation, aR = c.armR.rotation, M = c.model;
-  if (t >= E.dur) { c.emote = null; aL.z = aR.z = 0; M.rotation.y = M.rotation.z = 0; return; }
+  if (t >= E.dur) { c.emote = null; aL.z = aR.z = 0; M.rotation.y = M.rotation.z = 0; M.position.z = 0; return; }
   switch (e.id) {
     case 'wave': aR.x = -2.9; aR.z = Math.sin(t * 12) * 0.45; break;
     case 'jump': aL.x = aR.x = -2.9; aL.z = 0.4; aR.z = -0.4; break;
@@ -3654,6 +4017,8 @@ function emoteStep(c, dt) {
     case 'dab': aL.x = -2.3 * s; aL.z = 0.9 * s; aR.x = -1.5 * s; aR.z = -1.1 * s; M.rotation.z = 0.15 * s; break;
     case 'dance': { const b = Math.sin(t * 9); aL.x = -1.6 - b * 0.9; aR.x = -1.6 + b * 0.9; c.legL.rotation.x = Math.max(0, b) * 0.6; c.legR.rotation.x = Math.max(0, -b) * 0.6; M.rotation.y = Math.sin(t * 4.5) * 0.5; break; }
     case 'wheel': M.rotation.z = f * Math.PI * 2; M.position.y = s * 0.45; aL.z = 2.8; aR.z = -2.8; aL.x = aR.x = 0; break;
+    case 'worm': M.rotation.x = -Math.PI / 2 * s; M.position.y = 0.18 * s + Math.abs(Math.sin(t * 7)) * 0.25 * s; M.position.z = 0.5 * s; aL.x = aR.x = -2.8; break;
+    case 'robot': { const st = Math.floor(t * 4) % 4; aL.x = [-1.5, 0, -1.5, -3][st]; aR.x = [0, -1.5, -3, -1.5][st]; M.rotation.y = [0, 0.4, 0, -0.4][st]; break; }
   }
 }
 /* the emote buttons in the lobby (owned ones only); keys 1–9 there too */
@@ -3688,7 +4053,8 @@ function startRound(force) {
   let seekKey = M.order[M.round] || me;
   if (force === 'seek') seekKey = me; else if (force === 'hide' && seekKey === me) seekKey = M.players.find(p => !p.human).key;
   const sp = P(seekKey);
-  G.D = roundSettings(); G.paused = false; G.found = 0; G.time = 0; G.seekKey = seekKey; G.paintPart = 'all'; G.lastMap = mapId;
+  G.D = roundSettings(); if (MAP.timeK) for (const k of ['hideTime', 'seekTimeYou', 'seekTimeBot']) G.D[k] = Math.round(G.D[k] * MAP.timeK);   // big maps: more time
+  G.paused = false; G.found = 0; G.time = 0; G.seekKey = seekKey; G.paintPart = 'all'; G.lastMap = mapId;
   G.humanSeek = playsHuman(sp);   // a person seeks: the players they find sit on the bench, so every find is theirs
   G.D.seekTime = G.humanSeek ? G.D.seekTimeYou : G.D.seekTimeBot;   // a person seeking gets "time to find them"; a computer seeker, "time to stay hidden"
   const bots = M.players.filter(p => !playsHuman(p));
@@ -3962,7 +4328,7 @@ function askRestart() {
 }
 function toMenu(msg) {
   if (NET.on) netLeave();
-  G.juke = null; G.codesOpen = false; clearRound(); G.phase = 'menu'; G.paused = false; G.vote = null; G.match = null; G.shopOpen = false; G.myKey = 'you'; G.menuOpen = false;
+  G.juke = null; G.codesOpen = false; G.nextMap = null; clearRound(); G.phase = 'menu'; G.paused = false; G.vote = null; G.match = null; G.shopOpen = false; G.myKey = 'you'; G.menuOpen = false;
   hideRoundUi();
   if (document.exitPointerLock && locked) document.exitPointerLock();
   showScreen('menu'); refreshMenu();
@@ -4070,6 +4436,88 @@ function alertOf(h) {
   if (bots.some(s => s.state === 'chase' && s.target === h)) return 2;
   return Math.max(0, ...bots.map(c => c.susp.get(h) || 0)) > 0.2 ? 1 : 0;
 }
+/* ---- pets (0.3.5): a little friend follows you, painted with you while you hide ---- */
+function petModel(kind) {
+  const g = new THREE.Group(), mm = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55 }), dark = new THREE.MeshStandardMaterial({ color: 0x1d1d2b, roughness: 0.4 });
+  const P = (geo, m, x, y, z, sx, sy, sz, rot) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.scale.set(sx, sy, sz); if (rot) o.rotation.set(rot[0], rot[1], rot[2]); o.castShadow = true; g.add(o); return o; };
+  const eyes = (y, z, w) => { P(SPHG, dark, -w, y, z, 0.03, 0.03, 0.03); P(SPHG, dark, w, y, z, 0.03, 0.03, 0.03); };
+  const legs = (h) => { for (const [x, z] of [[-0.1, -0.12], [0.1, -0.12], [-0.1, 0.12], [0.1, 0.12]]) P(CYLG, mm, x, h / 2, z, 0.04, h, 0.04); };
+  const base = { pup: 0xb5803f, kitten: 0xff9b3d, bunny: 0xffffff, babydino: 0x6abf4b, dragon: 0x9b4dff, axolotl: 0xffb3d9, jelly: 0x9fd8ff }[kind] || 0xffffff;
+  switch (kind) {
+    case 'pup': legs(0.16); P(BOXG, mm, 0, 0.24, 0, 0.24, 0.18, 0.36); P(BOXG, mm, 0, 0.36, 0.22, 0.2, 0.18, 0.18); P(BOXG, mm, -0.1, 0.38, 0.2, 0.05, 0.14, 0.08); P(BOXG, mm, 0.1, 0.38, 0.2, 0.05, 0.14, 0.08); g.userData.tail = P(CYLG, mm, 0, 0.32, -0.2, 0.025, 0.16, 0.025, [-0.6, 0, 0]); eyes(0.4, 0.31, 0.05); break;
+    case 'kitten': legs(0.14); P(BOXG, mm, 0, 0.2, 0, 0.2, 0.15, 0.3); P(SPHG, mm, 0, 0.32, 0.18, 0.12, 0.11, 0.11); P(CONEG, mm, -0.06, 0.44, 0.18, 0.04, 0.08, 0.04); P(CONEG, mm, 0.06, 0.44, 0.18, 0.04, 0.08, 0.04); g.userData.tail = P(CYLG, mm, 0, 0.32, -0.2, 0.02, 0.28, 0.02, [-0.3, 0, 0]); eyes(0.34, 0.28, 0.045); break;
+    case 'bunny': P(SPHG, mm, 0, 0.16, 0, 0.16, 0.15, 0.18); P(SPHG, mm, 0, 0.32, 0.12, 0.1, 0.1, 0.1); P(SPHG, mm, -0.04, 0.5, 0.1, 0.03, 0.12, 0.02); P(SPHG, mm, 0.04, 0.5, 0.1, 0.03, 0.12, 0.02); g.userData.tail = P(SPHG, mm, 0, 0.18, -0.18, 0.05, 0.05, 0.05); eyes(0.34, 0.21, 0.04); break;
+    case 'babydino': legs(0.14); P(BOXG, mm, 0, 0.24, 0, 0.22, 0.2, 0.34); P(BOXG, mm, 0, 0.4, 0.2, 0.18, 0.16, 0.2); for (let k = 0; k < 4; k++) P(CONEG, mm, 0, 0.36 + (k === 0 ? 0.1 : 0), -0.12 + k * 0.08, 0.03, 0.08, 0.04); g.userData.tail = P(CONEG, mm, 0, 0.24, -0.28, 0.07, 0.24, 0.07, [-Math.PI / 2, 0, 0]); eyes(0.44, 0.3, 0.05); break;
+    case 'dragon': legs(0.14); P(BOXG, mm, 0, 0.26, 0, 0.22, 0.2, 0.34); P(BOXG, mm, 0, 0.42, 0.22, 0.17, 0.15, 0.2); P(CONEG, mm, -0.05, 0.54, 0.2, 0.025, 0.08, 0.025); P(CONEG, mm, 0.05, 0.54, 0.2, 0.025, 0.08, 0.025); g.userData.wings = [P(BOXG, mm, -0.2, 0.38, 0, 0.28, 0.02, 0.2, [0, 0, 0.4]), P(BOXG, mm, 0.2, 0.38, 0, 0.28, 0.02, 0.2, [0, 0, -0.4])]; g.userData.tail = P(CONEG, mm, 0, 0.26, -0.3, 0.06, 0.26, 0.06, [-Math.PI / 2, 0, 0]); eyes(0.46, 0.32, 0.045); break;
+    case 'axolotl': for (const [x, z] of [[-0.09, -0.1], [0.09, -0.1], [-0.09, 0.1], [0.09, 0.1]]) P(CYLG, mm, x, 0.05, z, 0.03, 0.1, 0.03); P(BOXG, mm, 0, 0.13, 0, 0.16, 0.1, 0.34); P(BOXG, mm, 0, 0.16, 0.2, 0.2, 0.12, 0.14); for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) P(CONEG, new THREE.MeshStandardMaterial({ color: 0xff4f8b }), sx * 0.12, 0.18 + k * 0.03, 0.17, 0.02, 0.09, 0.02, [0, 0, -sx * (0.8 + k * 0.3)]); g.userData.tail = P(BOXG, mm, 0, 0.14, -0.26, 0.02, 0.1, 0.22); eyes(0.2, 0.275, 0.06); break;
+    case 'jelly': P(SPHG, mm, 0, 0.45, 0, 0.18, 0.13, 0.18); g.userData.tent = []; for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; g.userData.tent.push(P(CYLG, mm, Math.cos(a) * 0.1, 0.3, Math.sin(a) * 0.1, 0.012, 0.28, 0.012)); } eyes(0.48, 0.17, 0.05); mm.transparent = true; mm.opacity = 0.8; break;
+  }
+  mm.color.setHex(base); g.userData.mat = mm; g.userData.base = new THREE.Color(base); g.userData.kind = kind;
+  return g;
+}
+function petTick(c, dt) {
+  const want = c.cos && c.cos.pet;
+  if (!want || c.caught && c.role !== 'hider') { if (c.petG) { c.petG.parent && c.petG.parent.remove(c.petG); c.petG = null; } return; }
+  if (!c.petG || c.petG.userData.kind !== want) {
+    if (c.petG && c.petG.parent) c.petG.parent.remove(c.petG);
+    c.petG = petModel(want); c.petG.position.set(c.x - Math.sin(c.yaw) * 0.8, c.y, c.z - Math.cos(c.yaw) * 0.8); world.add(c.petG);
+  }
+  const g = c.petG, u = g.userData, hiding = c.role === 'hider' && !c.caught && inRound() && !c.moving;
+  // where it wants to be: just behind you, or snuggled right next to you while you hide
+  const off = hiding ? 0.5 : 0.95, side = hiding ? 0.35 : 0.5, tx = c.x - Math.sin(c.yaw) * off + Math.cos(c.yaw) * side, tz = c.z - Math.cos(c.yaw) * off - Math.sin(c.yaw) * side;
+  const dx = tx - g.position.x, dz = tz - g.position.z, d = Math.hypot(dx, dz);
+  if (d > 6) { g.position.x = tx; g.position.z = tz; }
+  else if (d > 0.05) { const sp = Math.min(d, dt * Math.max(2.5, d * 4)); g.position.x += dx / d * sp; g.position.z += dz / d * sp; g.rotation.y = Math.atan2(dx, dz); }
+  else g.rotation.y += angDiff(c.yaw, g.rotation.y) * Math.min(1, dt * 4);
+  const run = d > 0.15, t = G.time * 12;
+  const fly = u.kind === 'jelly' || u.kind === 'dragon' && run;
+  g.position.y = groundAt(g.position.x, g.position.z, c.y + 0.3) + (fly ? 0.4 + Math.sin(G.time * 3) * 0.1 : run && u.kind === 'bunny' ? Math.abs(Math.sin(t)) * 0.25 : 0);
+  g.scale.setScalar(hiding ? 0.85 : 1);
+  if (u.tail) u.tail.rotation.z = Math.sin(t * (c.wasFound ? 2 : 0.6)) * 0.6;
+  if (u.wings) { const w = fly ? Math.sin(t * 1.5) * 0.6 : 0.4; u.wings[0].rotation.z = w; u.wings[1].rotation.z = -w; }
+  if (u.tent) u.tent.forEach((o, k) => { o.rotation.x = Math.sin(G.time * 4 + k) * 0.3; });
+  // painted with you while you hide, so it never gives you away
+  const col = c.role === 'hider' && !c.caught && inRound() ? c.cols.body : u.base;
+  if (!u.mat.color.equals(col)) u.mat.color.copy(col);
+}
+/* ---- Duck Day (0.3.5): every computer seeker is a waddling rubber duck ---- */
+function duckModel() {
+  const g = new THREE.Group(), y = new THREE.MeshStandardMaterial({ color: 0xffd60a, roughness: 0.3 }), o = new THREE.MeshStandardMaterial({ color: 0xff7a00, roughness: 0.4 }), k = new THREE.MeshStandardMaterial({ color: 0x1d1d2b });
+  const P = (geo, m, x, yy, z, sx, sy, sz) => { const q = new THREE.Mesh(geo, m); q.position.set(x, yy, z); q.scale.set(sx, sy, sz); q.castShadow = true; g.add(q); };
+  P(SPHG, y, 0, 0.45, 0, 0.5, 0.42, 0.62); P(SPHG, y, 0, 1.0, 0.25, 0.32, 0.32, 0.32); P(BOXG, o, 0, 0.95, 0.6, 0.26, 0.08, 0.26); P(SPHG, k, -0.13, 1.1, 0.5, 0.05, 0.05, 0.05); P(SPHG, k, 0.13, 1.1, 0.5, 0.05, 0.05, 0.05); P(CONEG, y, 0, 0.6, -0.6, 0.18, 0.3, 0.18);
+  return g;
+}
+function duckTick(c) {
+  const on = c.bot && c.role === 'seeker' && G.duckDay;
+  if (!on) { if (c.duckG) { c.g.remove(c.duckG); c.duckG = null; c.model.visible = true; } return; }
+  if (!c.duckG) { c.duckG = duckModel(); c.g.add(c.duckG); }
+  c.model.visible = false; c.duckG.rotation.z = c.moving ? Math.sin(c.bob * 0.8) * 0.18 : 0;   // waddle
+}
+/* ---- weather (0.3.5, just for looks): rain, snow or bubbles around you ---- */
+let WX = null;
+function weatherTick(dt) {
+  const kind = WEATHER.find(w => G.chars.some(c => hasCheat(c, w)) || meCheat(w)) || null;
+  if (!kind || G.phase === 'menu' && !meCheat(kind)) { if (WX) { scene.remove(WX.pts); WX.pts.geometry.dispose(); WX = null; } return; }
+  if (!WX || WX.kind !== kind) {
+    if (WX) { scene.remove(WX.pts); WX.pts.geometry.dispose(); }
+    const n = kind === 'rain' ? 1600 : kind === 'snow' ? 1000 : 260, p = new Float32Array(n * 3);
+    for (let i = 0; i < n * 3; i++) p[i] = (Math.random() - 0.5) * (i % 3 === 1 ? 24 : 44);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    const cv = document.createElement('canvas'); cv.width = cv.height = 32; const g = cv.getContext('2d');
+    if (kind === 'rain') { g.fillStyle = 'rgba(190,220,255,0.9)'; g.fillRect(15, 0, 2, 32); }
+    else if (kind === 'snow') { const gr = g.createRadialGradient(16, 16, 0, 16, 16, 15); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); }
+    else { g.strokeStyle = 'rgba(220,245,255,0.9)'; g.lineWidth = 2; g.beginPath(); g.arc(16, 16, 13, 0, 7); g.stroke(); g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillRect(10, 9, 4, 4); }
+    const m = new THREE.PointsMaterial({ map: new THREE.CanvasTexture(cv), size: kind === 'rain' ? 0.35 : kind === 'snow' ? 0.22 : 0.6, transparent: true, depthWrite: false });
+    WX = { kind, pts: new THREE.Points(geo, m), n }; scene.add(WX.pts);
+  }
+  WX.pts.position.set(camera.position.x, camera.position.y - 4, camera.position.z);
+  const a = WX.pts.geometry.attributes.position, v = WX.kind === 'rain' ? 16 : WX.kind === 'snow' ? 1.4 : -0.9;
+  for (let i = 0; i < WX.n; i++) {
+    let y = a.getY(i) - v * dt; if (y < -12) y += 24; else if (y > 12) y -= 24;
+    a.setY(i, y); if (WX.kind !== 'rain') a.setX(i, a.getX(i) + Math.sin(G.time + i) * dt * 0.4);
+  }
+  a.needsUpdate = true;
+}
 /* cheat looks: big head, tiny / giant, bouncy walk, rainbow trail, hat party, invisible, x-ray (see 11c) */
 const RAINBOW_HEX = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x007aff, 0xaf52de];
 function cheatLooks(c, dt) {
@@ -4094,6 +4542,7 @@ function cheatLooks(c, dt) {
 }
 function animChars(dt) {
   G.partyHats = G.chars.some(c => hasCheat(c, 'party'));
+  G.duckDay = G.chars.some(c => hasCheat(c, 'duckday'));
   for (const c of G.chars) {
     const sp = Math.hypot(c.vx, c.vz); c.moving = sp > 0.6 || !c.onGround;
     if (c === G.player && c.role === 'hider' && !c.caught) { c.stillT = c.moving || c.paintT > 0 ? 0 : c.stillT + dt; c.eyesOpen = c.stillT < 1.5; }
@@ -4123,14 +4572,14 @@ function animChars(dt) {
     c.g.position.set(c.x, c.y, c.z); c.g.rotation.y = c.yaw;
     if (c.caught) c.g.position.y = 0.5 + Math.abs(Math.sin(G.time * 4 + c.bob)) * 0.15;
     if (c.emote) emoteStep(c, dt);   // a lobby emote plays over the normal moves
-    cheatLooks(c, dt);
+    cheatLooks(c, dt); petTick(c, dt); duckTick(c);
   }
 }
 let menuA = 0;
 function menuCam(dt) {
   menuA += dt * 0.07;
   const [ox, oz] = MAP.orbit;
-  camera.position.set(ox + Math.cos(menuA) * 30, 19, oz + Math.sin(menuA) * 30);
+  const rr = halfOf() * 1.28; camera.position.set(ox + Math.cos(menuA) * rr, 19 * rr / 30, oz + Math.sin(menuA) * rr);
   camera.lookAt(ox, 0, oz);
 }
 function update(dt) {
@@ -4139,7 +4588,7 @@ function update(dt) {
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) $('toast').classList.remove('on'); }
   if (!G.paused) { updateSparkles(dt); goldTwinkle(dt); cosTick(dt); }
   if (NET.on) netSkinTick(dt);   // your skin to your friends
-  audTick(); shopPreviewTick(); if (!G.paused) footsteps(dt);   // music, stings and footsteps (section 6b)   // gold twinkles, tag celebrations, emotes (section 11b)
+  weatherTick(dt); audTick(); shopPreviewTick(); if (!G.paused) footsteps(dt);   // music, stings and footsteps (section 6b)   // gold twinkles, tag celebrations, emotes (section 11b)
   if (NET.on) netTick(dt);   // playing with friends: send and check the links (updates, timeouts, who is still here)
   if (G.phase === 'menu' || G.phase === 'final' || G.phase === 'wait') { menuCam(dt); return; }
   if (G.phase === 'lobby') { lobbyTick(dt); return; }
@@ -4299,7 +4748,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.3.4';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.3.5';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
