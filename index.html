@@ -169,6 +169,22 @@ h1.logo .p1{color:#ff2fa0}h1.logo .p2{color:#ffb703}h1.logo .p3{color:#3fa7ff}
 #hud.lobby #meter{display:none}
 #parts{position:absolute;left:50%;bottom:calc(38px + var(--sb));transform:translateX(-50%);display:none;gap:4px;padding:5px 6px;pointer-events:auto;align-items:center}
 #parts.on{display:flex}
+#drawUi{position:fixed;left:0;right:0;bottom:calc(8px + var(--sb));z-index:8;display:none;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+#drawUi.on{display:flex}
+#drawUi .pill{pointer-events:auto}
+#drawUi .drawTop{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;justify-content:center;font-size:17px}
+#drawUi .drawTop span{font-size:13px;font-weight:600;opacity:.75}
+#drawUi .drawBar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:6px 10px;max-width:96vw}
+#drawBrushes{display:flex;gap:4px;flex-wrap:wrap}
+#drawBrushes button{border:2px solid transparent;background:#f1f3f8;border-radius:12px;font-size:20px;line-height:1.1;padding:3px 6px;display:flex;flex-direction:column;align-items:center;color:var(--ink);min-width:44px}
+#drawBrushes button span{font-size:11px;font-weight:800}
+#drawBrushes button.on{border-color:var(--paint);background:#ffe3f2}
+#drawUi label{font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px}
+#drawUi input[type=range]{width:90px}
+#drawCol{width:40px;height:40px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #c9cfdc}
+#drawUi .drawBar>button:not(#drawCol){border:0;border-radius:12px;font-size:16px;font-weight:800;padding:8px 12px;background:#eef1f7;color:var(--ink)}
+#drawUi #drawDone{background:var(--green);color:#fff}
+#drawUi #drawClear[hidden]{display:none}
 #emotes{position:absolute;left:50%;bottom:calc(38px + var(--sb));transform:translateX(-50%);display:none;gap:4px;padding:5px 6px;pointer-events:auto;align-items:center;background:rgba(255,255,255,.9);border-radius:16px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
 #emotes.on{display:flex}
 #emotes button{border:2px solid transparent;background:#f1f3f8;border-radius:12px;font-size:20px;line-height:1.1;padding:3px 6px;display:flex;flex-direction:column;align-items:center;color:var(--ink);min-width:44px}
@@ -182,7 +198,7 @@ body.touch #emotes.on{display:grid}
 #parts .sep{width:2px;height:34px;background:#d5d9e6;margin:0 3px}
 #parts #palBtn2{background:#fff3c4}
 /* touch screens: body-part buttons go in a small 2-column block at the top right, away from JUMP and PAINT */
-body.touch #parts{left:auto;right:calc(10px + var(--sr));top:calc(66px + var(--st));bottom:auto;transform:none;grid-template-columns:repeat(2,auto)}
+body.touch #parts{left:auto;right:calc(10px + var(--sr));top:calc(66px + var(--st));bottom:auto;transform:none;grid-template-columns:repeat(3,auto)}
 body.touch #parts.on{display:grid}
 body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
 #palette{position:fixed;right:calc(12px + var(--sr));top:50%;transform:translateY(-50%);z-index:9;background:var(--panel);border-radius:20px;
@@ -197,7 +213,7 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
 #bPal .ico{font-size:26px;line-height:1}
 /* phones held sideways are too short for COLORS under the body-part buttons (it covered Legs and Stand on an
    iPhone 11 Pro Max): put it above JUMP instead, beside PAINT */
-@media (max-height:460px){#bPal{right:calc(150px + var(--sr));bottom:calc(108px + var(--sb))}}
+@media (max-height:460px){#bPal{right:calc(150px + var(--sr));bottom:calc(108px + var(--sb))}body.touch #parts{grid-template-columns:repeat(4,auto)}}
 #hud.lobby #warn{top:auto;bottom:calc(150px + var(--sb));font-size:19px}
 #keys{left:auto;right:calc(12px + var(--sr));transform:none;bottom:auto;top:calc(66px + var(--st));max-width:240px;white-space:normal;text-align:right;line-height:1.3;text-shadow:0 1px 2px rgba(255,255,255,.8)}
 #count{position:fixed;inset:0;z-index:4;display:none;align-items:center;justify-content:center;flex-direction:column;
@@ -273,13 +289,25 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
   <div id="toast" class="pill"></div>
   <div id="cross"></div>
   <div id="mapName" class="pill"></div>
-  <div id="parts" class="pill"><button data-p="all">🧍<span>All</span></button><button data-p="head">🙂<span>Head</span></button><button data-p="body">👕<span>Body</span></button><button data-p="arms">💪<span>Arms</span></button><button data-p="legs">👖<span>Legs</span></button><i class="sep"></i><button id="poseBtn">🧍<span>Stand</span></button><button id="palBtn2" class="mouseonly">🎨<span>Colors</span></button></div>
+  <div id="parts" class="pill"><button data-p="all">🧍<span>All</span></button><button data-p="head">🙂<span>Head</span></button><button data-p="body">👕<span>Body</span></button><button data-p="arms">💪<span>Arms</span></button><button data-p="legs">👖<span>Legs</span></button><i class="sep"></i><button id="brushBtn">🖌️<span>Brush</span></button><button id="poseBtn">🧍<span>Stand</span></button><button id="palBtn2" class="mouseonly">🎨<span>Colors</span></button></div>
   <div id="keys"></div>
   <button id="skipBtn" class="pill">⏩ Skip to the end of the round</button>
   <div id="emotes"></div>
   <button id="readyBtn" class="pill">✅ I'm ready!</button>
   <button id="hidBtn" class="pill">✅ I'm hidden!</button>
   <button id="pauseBtn" aria-label="Pause">⏸</button>
+</div>
+<div id="drawUi">
+  <div class="drawTop pill"><b id="drawTitle"></b><span>Drag on you to paint · drag next to you to turn around</span></div>
+  <div class="drawBar pill">
+    <div id="drawBrushes"></div>
+    <label>📏 Size <input type="range" id="drawSize" min="1" max="10"></label>
+    <label>💧 Strength <input type="range" id="drawOp" min="10" max="100" step="10"></label>
+    <button id="drawCol" title="Color (Q)"></button>
+    <button id="drawUndo">↩️ Undo</button>
+    <button id="drawClear">🧽 Start over</button>
+    <button id="drawDone" class="green"></button>
+  </div>
 </div>
 <div id="tbtns">
   <button class="tb" id="bMain"><span class="ico">🎨</span><span id="bMainTxt">PAINT</span><span class="sw" id="bSw"></span></button>
@@ -500,7 +528,7 @@ const PS_TRACK = 'alpha';
 const trackKey = k => PS_TRACK === 'stable' ? k : k + '@' + PS_TRACK;
 const TRACK_NAME = { stable: '', beta: '🧪 Beta: the next version, almost ready', alpha: '🧪 Alpha: the newest features, still being tested' };
 const BEST = Object.assign({ seek: {}, hideWins: 0, matchWins: 0 }, load(trackKey('ps-best'), {}));
-const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti' }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
+const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti', brush: 'brush', look: null }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
 const saveShop = () => save(trackKey('ps-shop'), SHOP);
 
 /* Smarts sliders (1-10) for the computer hiders and the computer seekers. Values are read off these points
@@ -1177,7 +1205,7 @@ function signPlane(x, y, z, rotY, W, H, draw) {
   if (draw) s.draw(draw);
   return s;
 }
-const LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
+const LOBBY_BOOTH = { x: 9.5, z: 2 }, LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
 let lobbyBoard = null;
 function buildLobby() {
   ground(0xe6dcff, 'check', 35);
@@ -1235,6 +1263,11 @@ function buildLobby() {
   for (const [x, z, c] of [[-11.5, -11.5, 0xff2fa0], [-12, -8.6, 0x2f8bff], [11.5, 11.5, 0xffc400], [-11.5, 11.5, 0x22c55e], [12, 8.6, 0x9b4dff]]) {
     addCyl(x, z, 1.1, 1.6, 0xdfe6ee); deco(CYLG, c, x, 1.62, z, 1.0, 0.04, 1.0, { tex: null }); deco(TORG, 0x9aa5b1, x, 1.8, z, 0.75, 0.75, 0.3);
   }
+  // the paint booth (0.3.2): stand on the mat to design your look
+  deco(CYLG, 0xffb3d9, LOBBY_BOOTH.x, 0.03, LOBBY_BOOTH.z, 1.3, 0.05, 1.3, { tex: null, cast: false });
+  for (const [dx, dz, c] of [[-0.7, -0.5, 0xff2fa0], [0.5, -0.8, 0x2f8bff], [0.8, 0.4, 0xffc400], [-0.3, 0.8, 0x22c55e]]) deco(CIRG, c, LOBBY_BOOTH.x + dx, 0.07, LOBBY_BOOTH.z + dz, 0.22, 0.22, 1, { tex: null, rot: [-Math.PI / 2, 0, 0], cast: false });
+  addBox(LOBBY_BOOTH.x + 1.9, LOBBY_BOOTH.z, 0.12, 1.4, 1.6, 0xfff7e6, 0, false, 'wood');   // an easel
+  signPlane(LOBBY_BOOTH.x + 1.82, 2.1, LOBBY_BOOTH.z, -Math.PI / 2, 2.4, 0.8, (g, w, h) => { g.fillStyle = '#ff2fa0'; rrect(g, 0, 0, w, h, 40); g.fill(); g.fillStyle = '#fff'; g.font = `800 ${h * 0.5}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🎨 PAINT BOOTH', w / 2, h * 0.55); });
   plant(-13, 2); plant(13, -2); plant(13, 3);
   addBox(6, 11.5, 3, 1, 0.5, 0x8d6e63, 0, false, 'wood'); addBox(-6, 11.5, 3, 1, 0.5, 0x8d6e63, 0, false, 'wood');
   clouds = makeClouds();
@@ -1576,15 +1609,19 @@ function setSprite(s, text, color) {
 function makeChar(o) {
   const g = new THREE.Group();
   /* a blocky cartoon person (our own design). Head, body, arms and legs each have their own
-     paint (material), so you can paint them different colors. Arms and legs hang from pivots so
-     they can swing. Everything sits in "model" so poses can sit it down or lay it flat. */
-  const mats = {}, cols = {};
-  for (const k of PARTS) { mats[k] = new THREE.MeshStandardMaterial({ color: o.hex, roughness: 0.5, metalness: 0 }); cols[k] = new THREE.Color(o.hex); }
+     paint, so you can paint them different colors. Arms and legs hang from pivots so
+     they can swing. Everything sits in "model" so poses can sit it down or lay it flat.
+     0.3.2: each part (and each arm and leg on its own) has a skin, a little picture you can paint on (section 5b).
+     cols[k] is the average color of a part's skin: what seekers judge and what the color meter shows. */
+  const mats = {}, cols = {}, skins = {};
+  for (const k of PARTS) { skins[k] = (k === 'arms' || k === 'legs' ? [0, 1] : [0]).map(() => makeSkin(o.hex)); mats[k] = skins[k][0].mat; cols[k] = new THREE.Color(o.hex); }
+  const hatMat = new THREE.MeshStandardMaterial({ color: o.hex, roughness: 0.5 });   // hats take the head's average color
   const model = new THREE.Group(); g.add(model);
-  const legL = limb(model, mats.legs, -0.1, 0.46, 0.17, 0.46, 0.2), legR = limb(model, mats.legs, 0.1, 0.46, 0.17, 0.46, 0.2);
+  const legL = limb(model, skins.legs[0].mat, -0.1, 0.46, 0.17, 0.46, 0.2), legR = limb(model, skins.legs[1].mat, 0.1, 0.46, 0.17, 0.46, 0.2);
   const body = boxPart(model, mats.body, 0, 0.68, 0, 0.44, 0.46, 0.24);
-  const armL = limb(model, mats.arms, -0.3, 0.89, 0.13, 0.42, 0.15), armR = limb(model, mats.arms, 0.3, 0.89, 0.13, 0.42, 0.15);
+  const armL = limb(model, skins.arms[0].mat, -0.3, 0.89, 0.13, 0.42, 0.15), armR = limb(model, skins.arms[1].mat, 0.3, 0.89, 0.13, 0.42, 0.15);
   boxPart(model, mats.head, 0, 1.1, 0, 0.36, 0.36, 0.36);
+  const skinMeshes = []; model.traverse(m => { if (m.isMesh && m.material.userData.skin) skinMeshes.push(m); });
   const eyes = new THREE.Group();
   for (const sx of [-1, 1]) { boxPart(eyes, EYE_W, sx * 0.08, 1.13, 0.183, 0.085, 0.09, 0.012); boxPart(eyes, EYE_B, sx * 0.08, 1.12, 0.19, 0.045, 0.06, 0.01); }
   boxPart(eyes, EYE_B, 0, 1.01, 0.183, 0.13, 0.025, 0.01);   // smile
@@ -1597,11 +1634,11 @@ function makeChar(o) {
   const hatPivot = new THREE.Group(); hatPivot.position.y = 1.28; model.add(hatPivot);   // hats sit on top of the head
   let spin = null, hatG = null;
   if (o.role === 'seeker') addBucket(hatPivot, o.paintHex === undefined ? PAINT_HEX : o.paintHex);   // seekers wear a paint bucket hat
-  else if (o.hat && HATS[o.hat] && HATS[o.hat].build) { hatG = new THREE.Group(); hatG.scale.setScalar(0.8); hatG.position.y = -1.26 * 0.8; hatPivot.add(hatG); spin = HATS[o.hat].build(hatG, mats.head) || null; }
+  else if (o.hat && HATS[o.hat] && HATS[o.hat].build) { hatG = new THREE.Group(); hatG.scale.setScalar(0.8); hatG.position.y = -1.26 * 0.8; hatPivot.add(hatG); spin = HATS[o.hat].build(hatG, hatMat) || null; }
   const icon = textSprite(); icon.position.y = 1.95; g.add(icon);
   scene.add(g);
   const c = Object.assign({
-    g, model, body, mats, cols, mat: mats.body, eyes, icon, spin, hatG, hatPivot, legL, legR, armL, armR, sTargets, splatList: [], wasFound: false, origSeeker: false, pose: 'stand',
+    g, model, body, mats, cols, skins, skinMeshes, hatMat, mat: mats.body, eyes, icon, spin, hatG, hatPivot, legL, legR, armL, armR, sTargets, splatList: [], wasFound: false, origSeeker: false, pose: 'stand',
     x: 0, y: 0, z: 0, vx: 0, vz: 0, vy: 0, yaw: 0, onGround: true,
     color: cols.body, base: new THREE.Color(o.hex), splatN: 0, caught: false, eyesOpen: true, stillT: 0, moving: false,
     path: null, pi: 0, goal: null, stuckT: 0, lastX: 0, lastZ: 0, paintT: 0, state: 'idle', stT: 0, peekT: 3, peekOn: 0,
@@ -1610,10 +1647,11 @@ function makeChar(o) {
   }, o);
   c.cos = o.pkey !== undefined && o.pkey === ME() ? myCos() : cosOf(P(o.pkey));   // launcher, tag celebration (section 11b)
   if (o.role === 'seeker' || o.role === 'lobby') addLauncher(c);
+  if (c.pkey !== undefined && c.pkey === ME() && (o.role === 'hider' || o.role === 'lobby') && SHOP.look) applyLook(c, SHOP.look);   // your saved design (paint booth)
   return c;
 }
 function boxPart(parent, m, x, y, z, w, h, d) {
-  const b = new THREE.Mesh(BOXG, m); b.position.set(x, y, z); b.scale.set(w, h, d);
+  const b = new THREE.Mesh(SKIN_BOXG, m); b.position.set(x, y, z); b.scale.set(w, h, d);
   b.castShadow = true; b.receiveShadow = true; parent.add(b); return b;
 }
 function limb(g, m, x, y, w, h, d) { const pv = new THREE.Group(); pv.position.set(x, y, 0); g.add(pv); boxPart(pv, m, 0, -h / 2, 0, w, h, d); return pv; }
@@ -1635,12 +1673,15 @@ const POSES = {
 };
 const POSE_ORDER = ['stand', 'sit', 'lie'];
 const poseOf = c => POSES[c.pose] || POSES.stand;
-function setColor(c, col) { for (const k of PARTS) { c.cols[k].copy(col); c.mats[k].color.copy(col); } }
+function setColor(c, col) { for (const k of PARTS) setPartColor(c, k, col); }
 function setPartColor(c, part, col) {
   if (!PARTS.includes(part)) { setColor(c, col); return; }
-  c.cols[part].copy(col); c.mats[part].color.copy(col);
+  c.cols[part].copy(col); for (const sk of c.skins[part]) fillSkin(sk, col);
+  if (part === 'head') c.hatMat.color.copy(col);
+  skinDirty(c, part);
 }
-const eachMat = (c, f) => { for (const k of PARTS) f(c.mats[k]); };
+const eachMat = (c, f) => { for (const k of PARTS) for (const sk of c.skins[k]) f(sk.mat); f(c.hatMat); };
+const disposeChar = c => eachMat(c, m => { if (m.map) m.map.dispose(); m.dispose(); });
 function setPose(c, pose) {
   if (!POSES[pose] || c.pose === pose) return;
   c.pose = pose;
@@ -1649,6 +1690,207 @@ function setPose(c, pose) {
     updatePartsUi();
   }
 }
+
+/* ---------- 5b. skins, brushes and paint mode (0.3.2) ----------
+   A skin is a 144 × 96 picture: 6 squares of 48 px, one per side of a body part's box (SKIN_BOXG maps each side to
+   its own square, so paint on your front stays on your front). The PAINT button and the palette paint a whole part
+   with the chosen brush; paint mode (🖌️ Brush) lets you draw on yourself. Friends get a picture of a skin when it
+   changes (only PNG pictures inside the message are accepted, never a link). */
+const SKIN_CELL = 48, SKIN_W = SKIN_CELL * 3, SKIN_H = SKIN_CELL * 2;
+const SKIN_BOXG = (() => {
+  const geo = BOXG.clone(), uv = geo.attributes.uv;
+  for (let f = 0; f < 6; f++) { const cx = f % 3, cy = Math.floor(f / 3); for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, (cx + 0.04 + uv.getX(i) * 0.92) / 3, (cy + 0.04 + uv.getY(i) * 0.92) / 2); } }
+  return geo;
+})();
+SHARED_GEO.add(SKIN_BOXG);
+function makeSkin(hex) {
+  const cv = document.createElement('canvas'); cv.width = SKIN_W; cv.height = SKIN_H;
+  const sk = { cv, g: cv.getContext('2d', { willReadFrequently: true }), tex: new THREE.CanvasTexture(cv) };   // read back after each stroke (skinStats)
+  sk.mat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: sk.tex, roughness: 0.5, metalness: 0 }); sk.mat.userData.skin = sk;
+  fillSkin(sk, new THREE.Color(hex)); return sk;
+}
+function fillSkin(sk, col) { sk.g.globalAlpha = 1; sk.g.globalCompositeOperation = 'source-over'; sk.g.fillStyle = '#' + col.getHexString(); sk.g.fillRect(0, 0, SKIN_W, SKIN_H); sk.tex.needsUpdate = true; sk.faces = [0, 1, 2, 3, 4, 5].map(() => col.clone()); sk.avg = col.clone(); }
+/* the average color of each side of a skin (sides in BoxGeometry order: +x, -x, top, bottom, front, back).
+   Seekers judge the side that faces them (seenCol), so painting your front to match the wall behind you counts. */
+/* every pixel counts (a shrunk copy would drop small brush strokes): the 6 sides and the whole skin */
+function skinStats(sk) {
+  const d = sk.g.getImageData(0, 0, SKIN_W, SKIN_H).data, C = SKIN_CELL, n = C * C;
+  let R = 0, G2 = 0, B = 0;
+  sk.faces = [0, 1, 2, 3, 4, 5].map(f => {
+    const x0 = (f % 3) * C, y0 = (1 - Math.floor(f / 3)) * C;   // the picture is upside down from the texture's v
+    let r = 0, g = 0, b = 0;
+    for (let y = y0; y < y0 + C; y++) for (let x = x0, i = (y * SKIN_W + x0) * 4; x < x0 + C; x++, i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+    R += r; G2 += g; B += b;
+    return new THREE.Color(r / n / 255, g / n / 255, b / n / 255);
+  });
+  sk.avg = new THREE.Color(R / (6 * n) / 255, G2 / (6 * n) / 255, B / (6 * n) / 255);
+}
+const seenTmp = new THREE.Color();
+function seenCol(h, part, s) {
+  const sks = h.skins && h.skins[part];
+  if (!sks || !sks[0].faces || h.pose === 'lie') return h.cols[part];   // lying flat: the whole part counts
+  const a = angDiff(Math.atan2(s.x - h.x, s.z - h.z), h.yaw), f = Math.abs(a) < 0.785 ? 4 : Math.abs(a) > 2.356 ? 5 : a > 0 ? 0 : 1;
+  seenTmp.setRGB(0, 0, 0); for (const sk of sks) seenTmp.r += sk.faces[f].r / sks.length, seenTmp.g += sk.faces[f].g / sks.length, seenTmp.b += sk.faces[f].b / sks.length;
+  return seenTmp;
+}
+const SKIN_KEYS = [['head', 0], ['body', 0], ['arms', 0], ['arms', 1], ['legs', 0], ['legs', 1]];   // names on the network and in saved designs: head0, arms1…
+/* the average color of a part (both arms or both legs together): what the meter shows and friends get */
+function partAvg(c, k) {
+  const a = new THREE.Color(0, 0, 0), sks = c.skins[k];
+  for (const sk of sks) { a.r += sk.avg.r / sks.length; a.g += sk.avg.g / sks.length; a.b += sk.avg.b / sks.length; }
+  return a;
+}
+function refreshPart(c, k) { for (const sk of c.skins[k]) skinStats(sk); c.cols[k].copy(partAvg(c, k)); if (k === 'head') c.hatMat.color.copy(c.cols.head); skinDirty(c, k); }
+/* your skin changed: friends get it (at most twice a second; see netSkinTick) */
+function skinDirty(c, k) { if (c === G.player) (G.skinDirty || (G.skinDirty = new Set())).add(k); }
+/* a saved design or a friend's skin: {head0: 'data:image/png;base64,…', …} */
+const okSkinUrl = u => typeof u === 'string' && u.length < 200000 && u.startsWith('data:image/png;base64,');
+function applyLook(c, look, fromNet) {
+  if (!look || typeof look !== 'object') return;
+  for (const [k, i] of SKIN_KEYS) {
+    const u = look[k + i], sk = c.skins[k] && c.skins[k][i]; if (!sk || !okSkinUrl(u)) continue;
+    const img = new Image();
+    img.onload = () => { if (!c.skins) return; sk.g.globalAlpha = 1; sk.g.clearRect(0, 0, SKIN_W, SKIN_H); sk.g.drawImage(img, 0, 0, SKIN_W, SKIN_H); sk.tex.needsUpdate = true; skinStats(sk); if (!fromNet) refreshPart(c, k); };
+    img.src = u;
+  }
+  if (fromNet) c.skinNet = true;   // from now on their colors come from the network, their pictures from these messages
+}
+function lookOf(c, only) { const o = {}; for (const [k, i] of SKIN_KEYS) if (!only || only.has(k)) o[k + i] = c.skins[k][i].cv.toDataURL('image/png'); return o; }
+function netSkinTick(dt) {
+  if (!G.skinDirty || !G.skinDirty.size || !G.player) return;
+  G.skinSendT = (G.skinSendT || 0) - dt; if (G.skinSendT > 0) return;
+  G.skinSendT = 0.5;
+  const data = lookOf(G.player, G.skinDirty); G.skinDirty.clear();
+  if (NETC()) netSend(['skin', data]); else if (NETH()) netEv(['skin', G.player.pkey, data]);
+}
+
+/* brushes: Brush is free; the others come from the shop (🖌️ Brushes tab). Size and strength (see-through) are free. */
+const BRUSHES = {
+  brush:   { name: 'Brush', emoji: '🖌️', price: 0 },
+  spray:   { name: 'Spray can', emoji: '💨', price: 120 },
+  stripes: { name: 'Stripes', emoji: '🦓', price: 120 },
+  spots:   { name: 'Spots', emoji: '🔴', price: 120 },
+  camo:    { name: 'Camo', emoji: '🪖', price: 180 },
+  plaid:   { name: 'Plaid', emoji: '🧣', price: 180 },
+  rainbow: { name: 'Rainbow', emoji: '🌈', price: 220 },
+  copy:    { name: 'Texture copy', emoji: '📋', price: 400 }
+};
+// the brush you use: its color (the last one you copied or picked) and, for Texture copy, the texture you copied
+const BR = { col: new THREE.Color(0xffffff), kind: 'noise' };
+const brushId = () => BRUSHES[SHOP.brush] && owns('brush', SHOP.brush) ? SHOP.brush : 'brush';
+const brushSize = () => clamp(+SET.brushSize || 4, 1, 10), brushOp = () => clamp(+SET.brushOp || 100, 10, 100) / 100;
+const shadeCss = (col, f) => '#' + (f < 1 ? col.clone().multiplyScalar(f) : col.clone().lerp(new THREE.Color(0xffffff), f - 1)).getHexString();
+const BPAT = {};
+function brushPattern(id, col, kind) {
+  const key = id + ':' + col.getHex() + ':' + (id === 'copy' ? kind : '');
+  if (BPAT[key]) return BPAT[key];
+  if (Object.keys(BPAT).length > 80) for (const k in BPAT) delete BPAT[k];
+  const S = id === 'copy' ? 64 : 24, cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d'), css = '#' + col.getHexString(), r = seeded(S + col.getHex() % 997);
+  const blob = (x, y, rad, c) => { g.fillStyle = c; for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { g.beginPath(); g.ellipse(x + ox, y + oy, rad, rad * 0.7, r() * 3, 0, 7); g.fill(); } };
+  switch (id) {
+    case 'stripes': g.fillStyle = css; for (let k = -S; k < S * 2; k += 12) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 5, 0); g.lineTo(k + 5 - S, S); g.lineTo(k - S, S); g.fill(); } break;   // gaps let the old paint show
+    case 'spots': g.fillStyle = css; for (const [x, y] of [[6, 6], [18, 18]]) { g.beginPath(); g.arc(x, y, 3.6, 0, 7); g.fill(); } break;
+    case 'camo': g.fillStyle = css; g.fillRect(0, 0, S, S); blob(5, 6, 6, shadeCss(col, 0.72)); blob(17, 15, 6, shadeCss(col, 1.25)); blob(10, 19, 4, shadeCss(col, 0.5)); blob(19, 4, 3.5, shadeCss(col, 0.85)); break;
+    case 'plaid': g.fillStyle = css; g.fillRect(0, 0, S, S); g.globalAlpha = 0.55; g.fillStyle = shadeCss(col, 0.6); g.fillRect(0, 0, 8, S); g.fillRect(0, 0, S, 8); g.globalAlpha = 0.8; g.fillStyle = shadeCss(col, 1.5); g.fillRect(14, 0, 2, S); g.fillRect(0, 14, S, 2); g.globalAlpha = 1; break;
+    case 'rainbow': ['#ff3b30', '#ff9500', '#ffcc00', '#34c759', '#007aff', '#af52de'].forEach((c, k) => { g.fillStyle = c; g.fillRect(0, k * 4, S, 4); }); break;
+    case 'copy': g.drawImage(texCanvas(kind || 'noise'), 0, 0, S, S); g.globalCompositeOperation = 'multiply'; g.fillStyle = css; g.fillRect(0, 0, S, S); break;   // the thing's texture, in its color
+    default: g.fillStyle = css; g.fillRect(0, 0, S, S);
+  }
+  return BPAT[key] = cv;
+}
+const brushStyle = (g, id, col) => id === 'brush' || id === 'spray' ? '#' + col.getHexString() : g.createPattern(brushPattern(id, col, BR.kind), 'repeat');
+function spray(g, col, cx, cy, rad, n) { g.fillStyle = '#' + col.getHexString(); for (let i = 0; i < n; i++) { const a = Math.random() * 6.3, d = Math.sqrt(Math.random()) * rad; g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 1.6, 1.6); } }
+/* the PAINT button and the palette: the chosen brush and strength over a whole part ('all' = every part) */
+function paintPartWith(c, part, col) {
+  const id = brushId(), op = brushOp();
+  if (id === 'brush' && op >= 0.99) { setPartColor(c, part, col); return; }   // a full plain coat, as before 0.3.2
+  for (const k of PARTS.includes(part) ? [part] : PARTS) {
+    for (const sk of c.skins[k]) {
+      const g = sk.g; g.save(); g.globalAlpha = op;
+      if (id === 'spray') spray(g, col, SKIN_W / 2, SKIN_H / 2, SKIN_W, 2600); else { g.fillStyle = brushStyle(g, id, col); g.fillRect(0, 0, SKIN_W, SKIN_H); }
+      g.restore(); sk.tex.needsUpdate = true;
+    }
+    refreshPart(c, k);
+  }
+}
+
+/* paint mode: you stand still, the camera turns to face you; drag on yourself to paint, drag beside you to turn.
+   The hiding timer keeps running. In the lobby paint booth, ✔ Done saves your design (SHOP.look) for every round. */
+const drawRay = new THREE.Raycaster();
+function enterDraw(booth) {
+  const p = G.player; if (!p || G.draw) return;
+  if (!booth && (p.role !== 'hider' || p.caught || !inRound())) return;
+  closePalette(); if (locked && document.exitPointerLock) document.exitPointerLock();
+  G.draw = { booth: !!booth, yaw: p.yaw, pitch: 0.15, dist: 2.3, undo: [], stroke: null, orbit: null };
+  p.vx = p.vz = 0; drawUi(); sfx.pop();
+}
+function exitDraw(quiet) {
+  if (!G.draw) return;
+  const d = G.draw; G.draw = null; $('drawUi').classList.remove('on');
+  if (d.booth && G.player) { SHOP.look = lookOf(G.player); saveShop(); if (!quiet) { toast('💾 Saved! Every round starts with this look.', 2.5); sfx.coin(); } }   // the booth always keeps your design
+  if (inRound()) updatePartsUi();
+  if (G.phase === 'lobby' && !G.lobbyCard) { drawEmotes(); $('emotes').classList.add('on'); }
+  $('tbtns').classList.toggle('on', TOUCH && (inRound() || G.phase === 'lobby'));
+}
+function drawUi() {
+  const ui = $('drawUi'); ui.classList.add('on'); $('parts').classList.remove('on'); $('tbtns').classList.remove('on'); $('emotes').classList.remove('on');
+  $('drawTitle').textContent = G.draw.booth ? '🎨 Paint booth: design your look' : '🖌️ Paint yourself';
+  $('drawDone').textContent = G.draw.booth ? '💾 Save my look' : '✔ Done';
+  $('drawClear').hidden = !G.draw.booth;
+  $('drawBrushes').innerHTML = Object.keys(BRUSHES).filter(id => owns('brush', id)).map(id => '<button data-b="' + id + '" class="' + (id === brushId() ? 'on' : '') + '">' + BRUSHES[id].emoji + '<span>' + BRUSHES[id].name.split(' ')[0] + '</span></button>').join('');
+  $('drawSize').value = brushSize(); $('drawOp').value = Math.round(brushOp() * 100);
+  $('drawCol').style.background = BRUSHES[brushId()] && brushId() === 'rainbow' ? inkCss('rainbow') : '#' + BR.col.getHexString();
+}
+function skinHit(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  drawRay.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -(e.clientY - r.top) / r.height * 2 + 1 }, camera);
+  const h = drawRay.intersectObjects(G.player.skinMeshes, false)[0];
+  return h && h.uv ? { sk: h.object.material.userData.skin, x: h.uv.x * SKIN_W, y: (1 - h.uv.y) * SKIN_H } : null;
+}
+function drawSeg(sk, x0, y0, x1, y1) {
+  const g = sk.g, id = brushId(), rad = brushSize() * 1.6 + 1, col = BR.col;
+  g.save(); g.globalAlpha = brushOp();
+  if (id === 'spray') { const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 3)); for (let i = 0; i <= n; i++) spray(g, col, x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, rad, 10); }
+  else { const st = brushStyle(g, id, col); g.strokeStyle = st; g.fillStyle = st; g.lineCap = 'round'; g.lineWidth = rad * 2;
+    if (x0 === x1 && y0 === y1) { g.beginPath(); g.arc(x1, y1, rad, 0, 7); g.fill(); } else { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); } }
+  g.restore(); sk.tex.needsUpdate = true; G.draw.changed = true;
+}
+function drawDown(e) {
+  const d = G.draw, h = skinHit(e);
+  if (h) { d.undo.push(SKIN_KEYS.map(([k, i]) => G.player.skins[k][i].g.getImageData(0, 0, SKIN_W, SKIN_H))); if (d.undo.length > 15) d.undo.shift(); d.stroke = { id: e.pointerId, last: h }; drawSeg(h.sk, h.x, h.y, h.x, h.y); }
+  else d.orbit = { id: e.pointerId, x: e.clientX, y: e.clientY };
+}
+function drawMove(e) {
+  const d = G.draw;
+  if (d.stroke && e.pointerId === d.stroke.id) {
+    const h = skinHit(e); if (!h) { d.stroke.last = null; return; }
+    const l = d.stroke.last;
+    if (l && l.sk === h.sk && Math.hypot(h.x - l.x, h.y - l.y) < SKIN_CELL * 0.6) drawSeg(h.sk, l.x, l.y, h.x, h.y); else drawSeg(h.sk, h.x, h.y, h.x, h.y);   // onto another side: start again there
+    d.stroke.last = h;
+  } else if (d.orbit && e.pointerId === d.orbit.id) {
+    d.yaw -= (e.clientX - d.orbit.x) * 0.01; d.pitch = clamp(d.pitch + (e.clientY - d.orbit.y) * 0.008, -0.9, 1.2); d.orbit.x = e.clientX; d.orbit.y = e.clientY;
+  }
+}
+function drawUp(e) {
+  const d = G.draw;
+  if (d.stroke && e.pointerId === d.stroke.id) { d.stroke = null; drawRefresh(); }
+  if (d.orbit && e.pointerId === d.orbit.id) d.orbit = null;
+}
+function drawRefresh() { if (!G.draw || !G.draw.changed) return; G.draw.changed = false; for (const k of PARTS) refreshPart(G.player, k); clearSplats(G.player); if (NETC()) netSend(['pt']); }
+function drawUndo() {
+  const d = G.draw, snap = d && d.undo.pop(); if (!snap) return;
+  SKIN_KEYS.forEach(([k, i], n) => { const sk = G.player.skins[k][i]; sk.g.putImageData(snap[n], 0, 0); sk.tex.needsUpdate = true; });
+  d.changed = true; drawRefresh(); sfx.pop();
+}
+$('drawBrushes').addEventListener('click', e => { const b = e.target.closest('button[data-b]'); if (!b) return; SHOP.brush = b.dataset.b; saveShop(); drawUi(); sfx.pop(); });
+$('drawSize').addEventListener('input', e => { SET.brushSize = +e.target.value; save('ps-set', SET); });
+$('drawOp').addEventListener('input', e => { SET.brushOp = +e.target.value; save('ps-set', SET); });
+$('drawCol').addEventListener('click', () => openPalette());
+$('drawUndo').addEventListener('click', drawUndo);
+$('drawClear').addEventListener('click', () => { if (!G.draw) return; G.draw.undo.push(SKIN_KEYS.map(([k, i]) => G.player.skins[k][i].g.getImageData(0, 0, SKIN_W, SKIN_H))); setColor(G.player, new THREE.Color(0xffffff)); sfx.pop(); });
+$('drawDone').addEventListener('click', () => { drawRefresh(); exitDraw(); });
+for (const ev of ['pointerdown', 'pointermove', 'pointerup']) $('drawUi').addEventListener(ev, e => e.stopPropagation());
 
 /* the color picker: every color you could want, plus the colors of things near you */
 const PALETTE = (() => {
@@ -1659,7 +1901,7 @@ const PALETTE = (() => {
 const swatch = hex => `<button data-hex="${hex}" style="background:${hexCss(hex)}" aria-label="color"></button>`;
 $('palGrid').innerHTML = PALETTE.map(swatch).join('');
 function openPalette() {
-  const p = G.player; if (!p || p.role !== 'hider' || p.caught || !inRound()) return;
+  const p = G.player; if (!p || (!G.draw && (p.role !== 'hider' || p.caught || !inRound()))) return;
   const near = [], seen = new Set();
   for (const s of solids) {
     const box = new THREE.Box3().setFromObject(s), d = box.distanceToPoint(new V3(p.x, p.y + 0.6, p.z)), hex = s.userData.c.getHex();
@@ -1676,7 +1918,9 @@ const palFresh = () => performance.now() - (G.palAt || 0) < 400;
 function closePalette() { $('palette').classList.remove('on'); G.palOpen = false; }
 function pickColor(hex) {
   const p = G.player; closePalette();
+  if (G.draw) { BR.col.setHex(hex); drawUi(); sfx.pop(); return; }   // paint mode: this is the brush's color now
   if (!p || p.role !== 'hider' || p.caught) return;
+  BR.col.setHex(hex);
   p.paintT = 0.35; p.paintCol = new THREE.Color(hex); p.paintPart = G.paintPart; sfx.paint();
 }
 for (const id of ['palGrid', 'palNear']) $(id).addEventListener('click', e => { if (palFresh()) return; const b = e.target.closest('button[data-hex]'); if (b) pickColor(+b.dataset.hex); });
@@ -1881,6 +2125,11 @@ const inRound = () => G.phase === 'hide' || G.phase === 'seek' || G.phase === 'c
 const inLobby = () => G.phase === 'lobby' && !G.lobbyCard && !G.shopOpen;
 addEventListener('keydown', e => {
   keys[e.code] = true; ac();
+  if (G.draw) {   // paint mode: Esc/Enter done, Z undo, Q colors
+    if (e.code === 'Escape' || e.code === 'Enter') { drawRefresh(); exitDraw(); }
+    else if (e.code === 'KeyZ') drawUndo(); else if (e.code === 'KeyQ' || e.code === 'KeyC') { if (G.palOpen) closePalette(); else openPalette(); }
+    return;
+  }
   if (inRound() || inLobby()) {
     if (e.code === 'KeyE' || e.code === 'KeyF' || e.code === 'Enter') input.act = true;
     if (e.code === 'Space') { input.jump = true; e.preventDefault(); }
@@ -1890,6 +2139,7 @@ addEventListener('keydown', e => {
     const en = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9'].indexOf(e.code);
     if (en >= 0 && inLobby()) { const ids = Object.keys(EMOTES).filter(id => owns('emote', id)); if (ids[en]) playEmote(G.player, ids[en]); }
     if (e.code === 'KeyX') input.pose = true;
+    if (e.code === 'KeyB' && G.player && G.player.role === 'hider' && inRound()) enterDraw(false);   // 🖌️ Brush
     if (e.code === 'KeyR' && inLobby()) lobbyReady();
     else if (e.code === 'KeyR' && G.phase === 'count') imHidden();
     if (e.code === 'KeyP' || e.code === 'Escape') { if (G.palOpen) closePalette(); else if (inLobby()) openLobbyCard(); else setPaused(NETC() ? !G.menuOpen : !G.paused); }
@@ -1904,13 +2154,14 @@ addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 document.addEventListener('visibilitychange', () => { if (document.hidden && (G.phase === 'hide' || G.phase === 'seek') && !G.skipping && !NET.on) setPaused(true); });
 document.addEventListener('pointerlockchange', () => { locked = document.pointerLockElement === $('tl'); });
 addEventListener('mousemove', e => { if (locked && !G.paused) look(e.movementX * 0.0024, e.movementY * 0.0024); });
-addEventListener('wheel', e => { input.dist = clamp(input.dist + Math.sign(e.deltaY) * 0.4, 2.4, 7); }, { passive: true });
+addEventListener('wheel', e => { if (G.draw) G.draw.dist = clamp(G.draw.dist + Math.sign(e.deltaY) * 0.25, 1.3, 4); else input.dist = clamp(input.dist + Math.sign(e.deltaY) * 0.4, 2.4, 7); }, { passive: true });
 function look(dx, dy) { input.yaw -= dx; input.pitch = clamp(input.pitch + dy, -0.35, 1.05); }
 
 const tl = $('tl'), stickBase = $('stickBase'), stickKnob = $('stickKnob');
 let stick = null, lookP = null, mouseDrag = null;
 tl.addEventListener('pointerdown', e => {
   ac();
+  if (G.draw) { e.preventDefault(); drawDown(e); return; }
   if (e.pointerType === 'mouse') {
     if (!playing()) return;
     if (locked) { input.act = true; return; }
@@ -1925,6 +2176,7 @@ tl.addEventListener('pointerdown', e => {
   } else if (!lookP) lookP = { id: e.pointerId, x: e.clientX, y: e.clientY };
 });
 tl.addEventListener('pointermove', e => {
+  if (G.draw) { drawMove(e); return; }
   if (e.pointerType === 'mouse') {
     if (mouseDrag && !locked && e.buttons) { const dx = e.clientX - mouseDrag.x, dy = e.clientY - mouseDrag.y; mouseDrag.moved += Math.abs(dx) + Math.abs(dy); mouseDrag.x = e.clientX; mouseDrag.y = e.clientY; look(dx * 0.005, dy * 0.005); }
     return;
@@ -1938,6 +2190,7 @@ tl.addEventListener('pointermove', e => {
   }
 });
 function endPointer(e) {
+  if (G.draw) { drawUp(e); return; }
   if (e.pointerType === 'mouse') { if (mouseDrag && mouseDrag.moved < 6 && !locked && playing()) input.act = true; mouseDrag = null; return; }
   if (stick && e.pointerId === stick.id) { stick = null; input.mx = input.my = 0; stickBase.style.display = 'none'; }
   if (lookP && e.pointerId === lookP.id) lookP = null;
@@ -1949,7 +2202,7 @@ $('bJump').addEventListener('pointerdown', e => { e.preventDefault(); e.stopProp
 /* body-part and pose buttons (hiders only) */
 const PART_LABEL = { all: 'everything', head: 'head', body: 'body', arms: 'arms', legs: 'legs' };
 function updatePartsUi() {
-  const p = G.player, show = !!p && p.role === 'hider' && !p.caught && inRound();
+  const p = G.player, show = !!p && p.role === 'hider' && !p.caught && inRound() && !G.draw;
   $('parts').classList.toggle('on', show);
   for (const b of $('parts').querySelectorAll('button[data-p]')) b.classList.toggle('on', b.dataset.p === G.paintPart);
   if (p) { const ps = poseOf(p); $('poseBtn').innerHTML = ps.icon + '<span>' + ps.name + '</span>'; }
@@ -1959,6 +2212,7 @@ $('parts').addEventListener('pointerdown', e => {
   e.stopPropagation(); e.preventDefault(); ac();
   const b = e.target.closest('button'); if (!b) return;
   if (b.id === 'poseBtn') input.pose = true;
+  else if (b.id === 'brushBtn') enterDraw(false);
   else if (b.id === 'palBtn2') { if (G.palOpen) closePalette(); else openPalette(); }   // the palette button for mouse players
   else { G.paintPart = b.dataset.p; sfx.pop(); updatePartsUi(); }
 });
@@ -1976,6 +2230,11 @@ function setGhost(c) {
 }
 function updateCamera() {
   let p = G.player; if (!p) return;
+  if (G.draw) {
+    const d = G.draw, cy = p.y + poseOf(p).mid + 0.05;
+    camera.position.set(p.x + Math.sin(d.yaw) * Math.cos(d.pitch) * d.dist, cy + Math.sin(d.pitch) * d.dist, p.z + Math.cos(d.yaw) * Math.cos(d.pitch) * d.dist);
+    camera.lookAt(p.x, cy, p.z); setGhost(null); aimHit.ok = false; aimHit.c = null; return;
+  }
   if (G.spectate) { const s = G.chars.find(c => c.role === 'seeker'); if (s) { p = s; input.yaw += angDiff(s.yaw, input.yaw) * 0.06; input.pitch += (0.35 - input.pitch) * 0.05; } }
   camD.set(Math.sin(input.yaw) * Math.cos(input.pitch), -Math.sin(input.pitch), Math.cos(input.yaw) * Math.cos(input.pitch));
   camR.set(-Math.cos(input.yaw), 0, Math.sin(input.yaw));
@@ -1989,7 +2248,7 @@ function updateCamera() {
   setGhost(d < 1.7 ? p : null);   // see-through body when the camera is squeezed up close
   const h = cast(camera.position, camD, 45);
   aimHit.ok = !!h; aimHit.c = null;
-  if (h) { aimHit.p.copy(h.point); if (!G.spectate && h.point.distanceTo(camT) < 3.4) aimHit.c = h.object.userData.c; }
+  if (h) { aimHit.p.copy(h.point); if (!G.spectate && h.point.distanceTo(camT) < 3.4) { aimHit.c = h.object.userData.c; aimHit.kind = h.object.material && h.object.material.userData.kind; } }
   else aimHit.p.copy(camera.position).addScaledVector(camD, 45);
 }
 function updatePlayer(dt) {
@@ -1998,7 +2257,7 @@ function updatePlayer(dt) {
   let mx = input.mx, my = input.my;
   if (keys.KeyW || keys.ArrowUp) my = 1; if (keys.KeyS || keys.ArrowDown) my = -1;
   if (keys.KeyA || keys.ArrowLeft) mx = -1; if (keys.KeyD || keys.ArrowRight) mx = 1;
-  const frozen = (G.phase === 'count' && p.role === 'seeker') || p.paintT > 0;   // the seeker counts with eyes shut; hiders can run off
+  const frozen = (G.phase === 'count' && p.role === 'seeker') || p.paintT > 0 || !!G.draw;   // paint mode: you stand still   // the seeker counts with eyes shut; hiders can run off
   if (frozen) mx = my = 0;
   const m = Math.min(1, Math.hypot(mx, my));
   const fx = Math.sin(input.yaw), fz = Math.cos(input.yaw), rx = -Math.cos(input.yaw), rz = Math.sin(input.yaw);
@@ -2016,9 +2275,10 @@ function updatePlayer(dt) {
   if (input.act && !frozen && (G.phase !== 'count' || p.role === 'hider')) {
     if (G.phase === 'lobby') {   // lobby: open the shop at the stand, otherwise throw paint for fun
       if (G.nearShop) openShop('lobby');
+      else if (G.nearBooth) enterDraw(true);
       else if (G.throwCd <= 0) { G.throwCd = 0.35; p.yaw = input.yaw; throwBall(p, p, aimHit.p); }
     } else if (p.role === 'hider') {
-      if (aimHit.c) { p.paintT = 0.35; p.paintCol = aimHit.c.clone(); p.paintPart = G.paintPart; sfx.paint(); }
+      if (aimHit.c) { p.paintT = 0.35; p.paintCol = aimHit.c.clone(); p.paintPart = G.paintPart; BR.col.copy(aimHit.c); BR.kind = aimHit.kind || 'noise'; sfx.paint(); }
       else toast('Point the dot at something close to you, then PAINT', 2);
     } else if (G.phase === 'seek') {
       if (G.ammo >= 1 && G.throwCd <= 0) { G.ammo--; G.throwCd = 0.45; p.yaw = input.yaw; throwBall(p, p, aimHit.p); }
@@ -2026,7 +2286,7 @@ function updatePlayer(dt) {
     }
   }
   input.act = false;
-  if (p.paintT > 0) { p.paintT -= dt; if (p.paintT <= 0) { setPartColor(p, p.paintPart || 'all', p.paintCol); clearSplats(p); burst(p.x, p.y + 1, p.z, [p.paintCol.getHex()], 12); if (NETC()) netSend(['pt']); } }
+  if (p.paintT > 0) { p.paintT -= dt; if (p.paintT <= 0) { paintPartWith(p, p.paintPart || 'all', p.paintCol); clearSplats(p); burst(p.x, p.y + 1, p.z, [p.paintCol.getHex()], 12); if (NETC()) netSend(['pt']); } }
 }
 
 /* ---------- 8. AI ---------- */
@@ -2196,7 +2456,7 @@ function noticeRate(s, h) {
     if (ang > 1.15 && dist > 1.6) return 0;
     if (cast(eyeP, dirV, dist - 0.45)) continue;   // something in the way
     const bd = cast(bdP.copy(tgtP).addScaledVector(dirV, 0.5), dirV, 40);
-    let m = matchOf(h.cols[smp.p], bd ? bd.object.userData.c : skyC);
+    let m = matchOf(seenCol(h, smp.p, s), bd ? bd.object.userData.c : skyC);   // 0.3.2: the side of that part facing the seeker
     if (h.splatN) m *= 0.4;
     // far away = very hard to notice (squared falloff); a still hider with closed eyes is much harder to spot
     const near = clamp(1 - dist / G.D.sight, 0, 1);
@@ -2417,7 +2677,7 @@ function drawBoard(table, showPlus) {
       `<td class="plus">${showPlus ? '+' + p.last : ''}</td><td class="num">⭐ ${p.total}</td></tr>`;
   }).join('');
 }
-function hideRoundUi() { closePalette(); toastT = 0; $('readyBtn').classList.remove('on'); $('hidBtn').classList.remove('on'); $('toast').classList.remove('on'); $('parts').classList.remove('on'); $('hud').classList.remove('on', 'lobby'); $('tbtns').classList.remove('on'); $('count').classList.remove('on'); $('skipBtn').classList.remove('on'); $('emotes').classList.remove('on'); clearCosFx(); }
+function hideRoundUi() { exitDraw(true); closePalette(); toastT = 0; $('readyBtn').classList.remove('on'); $('hidBtn').classList.remove('on'); $('toast').classList.remove('on'); $('parts').classList.remove('on'); $('hud').classList.remove('on', 'lobby'); $('tbtns').classList.remove('on'); $('count').classList.remove('on'); $('skipBtn').classList.remove('on'); $('emotes').classList.remove('on'); clearCosFx(); }
 /* The lobby is a real room: everyone runs around until the timer ends, or you tap Ready / stand on the green pad. */
 const LOBBY_TIME = 20, CARD_TIME = 6;
 function lobbyReady() {
@@ -2463,6 +2723,7 @@ function openLobbyCard() {
   showScreen('lobby');
 }
 function closeLobbyCard() {
+  if (G.draw) return;
   G.lobbyCard = false; showScreen(null);
   $('hud').classList.add('on', 'lobby'); $('tbtns').classList.toggle('on', TOUCH);
   $('bMain').style.background = hexCss(myPaintHex());
@@ -2529,10 +2790,11 @@ function lobbyTick(dt) {
   }
   updateBalls(dt); animChars(dt); updateCamera();
   G.nearShop = Math.hypot(p.x - LOBBY_SHOP.x, p.z - LOBBY_SHOP.z) < 2.3;
+  G.nearBooth = !G.nearShop && Math.hypot(p.x - LOBBY_BOOTH.x, p.z - LOBBY_BOOTH.z) < 1.4 && p.y < 0.3;
   if (!G.ready && Math.hypot(p.x - LOBBY_READY.x, p.z - LOBBY_READY.z) < 1.6 && p.y < 0.5) lobbyReady();
   if (NETC()) G.lobbyT = Math.max(0, G.lobbyT - dt);   // a friend's device: the host's timer decides (it comes with every update)
   // alone, the timer waits while you look at the card or the shop; with friends it keeps going, so nobody waits for one person
-  else if (inLobby() || NET.on) { G.lobbyT -= dt; if (G.lobbyT <= 0) { openVote(); return; } }
+  else if ((inLobby() && !G.draw) || NET.on) { G.lobbyT -= dt; if (G.lobbyT <= 0) { openVote(); return; } }
   G.hudT -= dt; if (G.hudT <= 0) { G.hudT = 0.1; lobbyHud(); }
 }
 function lobbyHud() {
@@ -2543,10 +2805,11 @@ function lobbyHud() {
   $('mapName').textContent = '🎲 Round ' + (M.round + 1) + ' of ' + M.rounds + ' · 🪙 ' + SHOP.coins;
   const w = $('warn'), people = M.players.filter(p => playsHuman(p)).length;
   if (G.nearShop) { w.textContent = TOUCH ? '🛒 Tap SHOP to open the shop' : '🛒 Click or press E to open the shop'; w.className = 'pill on'; }
+  else if (G.nearBooth) { w.textContent = TOUCH ? '🎨 Tap PAINT to design your look' : '🎨 Click or press E to design your look'; w.className = 'pill on'; }
   else if (G.ready) { w.textContent = '✅ Ready!' + (people > 1 ? ' (' + G.readyKeys.size + ' of ' + people + ' ready)' : ''); w.className = 'pill on'; }
   else { w.textContent = '🟢 Tap ✅ I\'m ready! or stand on the green pad'; w.className = 'pill on'; }
-  $('bMain').querySelector('.ico').textContent = G.nearShop ? '🛒' : '🎯';
-  $('bMainTxt').textContent = G.nearShop ? 'SHOP' : 'THROW';
+  $('bMain').querySelector('.ico').textContent = G.nearShop ? '🛒' : G.nearBooth ? '🎨' : '🎯';
+  $('bMainTxt').textContent = G.nearShop ? 'SHOP' : G.nearBooth ? 'PAINT' : 'THROW';
   $('cross').className = ''; $('bSw').style.display = 'none';
 }
 /* after buying or changing a hat in the lobby, swap in a player wearing it */
@@ -2554,7 +2817,7 @@ function refreshLobbyMe() {
   const old = G.player; if (!old || G.phase !== 'lobby') return;
   const c = makeChar({ role: 'lobby', bot: false, hex: old.base.getHex(), name: old.name, hat: SHOP.hat, pkey: ME(), paintHex: myPaintHex() });
   placeChar(c, old.x, old.z, old.yaw); c.y = old.y;
-  setGhost(null); scene.remove(old.g); eachMat(old, m => m.dispose());
+  setGhost(null); scene.remove(old.g); disposeChar(old);
   G.chars[G.chars.indexOf(old)] = c; G.player = c;
   netShareLook();   // friends see the new hat from the next round on
 }
@@ -2677,6 +2940,7 @@ const SHOP_KINDS = {
   hat:    { list: () => HATS, tab: '🎩 Hats', sub: 'Hats get painted too, so they never give you away!', using: 'hat' },
   paint:  { list: () => PAINTS, tab: '🎯 Paint balls', sub: 'For when you are the seeker. Plain colors are free; designs and real gold are in the shop.', using: 'paint' },
   launch: { list: () => LAUNCHERS, tab: '🔫 Launchers', sub: 'What you hold when you throw paint (seeking and in the lobby). Its tank shows your paint.', using: 'launcher' },
+  brush:  { list: () => BRUSHES, tab: '🖌️ Brushes', sub: 'For hiding: paint patterns on yourself (🖌️ Brush while you hide, or the paint booth in the lobby). Size and strength are free.', using: 'brush' },
   cel:    { list: () => CELS, tab: '🎉 Celebrations', sub: 'What happens when YOU find someone. Everyone sees it!', using: 'cel' },
   emote:  { list: () => EMOTES, tab: '💃 Emotes', sub: 'Moves for the lobby: tap 💃 there, or press 1–9.', using: null }
 };
@@ -2884,7 +3148,7 @@ $('emotes').addEventListener('pointerdown', e => { e.stopPropagation(); e.preven
 /* ---------- 12. round flow + HUD + main loop ---------- */
 function clearRound() {
   setGhost(null);
-  for (const c of G.chars) { scene.remove(c.g); eachMat(c, m => m.dispose()); }
+  for (const c of G.chars) { scene.remove(c.g); disposeChar(c); }
   for (const b of balls) scene.remove(b.m); balls.length = 0;
   for (const d of decals) scene.remove(d); decals.length = 0;
   for (const p of bits) scene.remove(p.m); bits.length = 0;
@@ -3059,6 +3323,7 @@ function foundFx(h, s, join, left) {
   clearSplats(h); setColor(h, h.base); h.eyesOpen = true;
   const who = s ? nameOf(P(s.pkey) || s) : G.seekName;
   if (h === G.player) {
+    exitDraw(true);
     h.wasFound = true;
     if (join) toast('😮 ' + who + ' found you! Now YOU are a seeker. Help find the rest! 🎯', 3.5);
     else { G.spectate = true; setGhost(null); toast('😮 ' + who + ' found you! Now you can watch them seek.', 3); if (left && !NET.on) $('skipBtn').classList.add('on'); }
@@ -3311,7 +3576,8 @@ function update(dt) {
   G.time += dt;
   if (clouds) for (const c of clouds.children) { c.position.x += dt * 0.6; if (c.position.x > 90) c.position.x = -90; }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) $('toast').classList.remove('on'); }
-  if (!G.paused) { updateSparkles(dt); goldTwinkle(dt); cosTick(dt); }   // gold twinkles, tag celebrations, emotes (section 11b)
+  if (!G.paused) { updateSparkles(dt); goldTwinkle(dt); cosTick(dt); }
+  if (NET.on) netSkinTick(dt);   // your skin to your friends   // gold twinkles, tag celebrations, emotes (section 11b)
   if (NET.on) netTick(dt);   // playing with friends: send and check the links (updates, timeouts, who is still here)
   if (G.phase === 'menu' || G.phase === 'final' || G.phase === 'wait') { menuCam(dt); return; }
   if (G.phase === 'lobby') { lobbyTick(dt); return; }
@@ -3471,7 +3737,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.3.1';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.3.2';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
@@ -3849,7 +4115,7 @@ function netHostInput(p) {
   c.nx = inp.x / 100; c.ny = inp.y / 100; c.nz = inp.z / 100; c.nyaw = inp.yaw / 100;
   const f = inp.f | 0;
   c.netMoving = !!(f & 1); c.onGround = !!(f & 2); c.eyesOpen = !!(f & 4); c.pose = POSE_ORDER[(f >> 3) & 3] || 'stand'; c.paintT = f & 128 ? 0.3 : 0;
-  if (Array.isArray(inp.k)) PARTS.forEach((k, i) => { const hx = inp.k[i] | 0; if (c.cols[k].getHex() !== hx) setPartColor(c, k, new THREE.Color(hx)); });
+  if (Array.isArray(inp.k)) PARTS.forEach((k, i) => { const hx = inp.k[i] | 0; if (c.cols[k].getHex() !== hx) { if (c.skinNet) { c.cols[k].setHex(hx); if (k === 'head') c.hatMat.color.setHex(hx); } else setPartColor(c, k, new THREE.Color(hx)); } });   // with a skin: just the average
 }
 function netOnIn(m) {
   if (m.isMe || NET.role !== 'host') return;
@@ -3867,6 +4133,7 @@ function netOnIn(m) {
       break;
     case 'pt': if (c) clearSplats(c); break;   // they painted over their splats
     case 'hid': if (G.phase === 'count' && c && c.role === 'hider') { G.hidKeys.add(key); hiddenCheck(); } break;   // ✅ I'm hidden!
+    case 'skin': if (c && e[1] && typeof e[1] === 'object') { applyLook(c, e[1], true); netEv(['skin', key, e[1]]); } break;   // a friend's skin: show it and pass it on
     case 'emo': if (c && EMOTES[e[1]]) { playEmote(c, e[1], true); netEv(['emo', key, e[1]]); } break;   // a friend's lobby emote: play it and pass it on
     case 'rdy': if (G.phase === 'lobby') { G.readyKeys.add(key); if (netHumansReady()) G.lobbyT = Math.min(G.lobbyT, 3.5); } break;
     case 'vote': if (G.phase === 'vote' && G.vote && !G.vote.win && G.vote.ids.includes(e[1])) { G.vote.picks.set(key, e[1]); sfx.vote(); drawVote(); } break;
@@ -4033,7 +4300,7 @@ function netApplyChar(c, a) {
   const ic = (f >> 9) & 7;
   if (ic === 2) setSprite(c.icon, '!', '#e63946'); else if (ic === 1) setSprite(c.icon, '?', '#f4a100'); else if (ic === 3) { const late = G.D.second === 'late' && G.seekKeys && G.seekKeys[1] === c.pkey ? SECOND_LATE : 0; setSprite(c.icon, String(Math.max(1, Math.ceil(G.phase === 'seek' ? late - (G.D.seekTime - G.t) : G.t + late))), '#3a3d8f'); } else if (G.phase !== 'end') setSprite(c.icon, '');
   if (!a[6] && c.splatN) clearSplats(c);
-  PARTS.forEach((k, i) => { const hx = a[7 + i]; if (hx !== undefined && c.cols[k].getHex() !== hx) setPartColor(c, k, new THREE.Color(hx)); });
+  PARTS.forEach((k, i) => { const hx = a[7 + i]; if (hx !== undefined && c.cols[k].getHex() !== hx) { if (c.skinNet) { c.cols[k].setHex(hx); if (k === 'head') c.hatMat.color.setHex(hx); } else setPartColor(c, k, new THREE.Color(hx)); } });
 }
 /* this device is on another screen than the host: ask for the host's current one (at most every 1.5 s) */
 function netWantScene() { const now = performance.now(); if (now - NET.wantT < 1500) return; NET.wantT = now; netSend(['sync']); }
@@ -4048,6 +4315,7 @@ function netOnEv(m) {
       if (e[1] === ME()) break;
       spawnBall(new V3(e[2], e[3], e[4]), new V3(e[5], e[6], e[7]), charOf(e[1]) || { role: '', pkey: e[1] }, inkOf(e[8])); break;
     }
+    case 'skin': if (e[1] !== ME()) { const c = charOf(e[1]); if (c && e[2] && typeof e[2] === 'object') applyLook(c, e[2], true); } break;
     case 'emo': if (e[1] !== ME()) playEmote(charOf(e[1]), e[2], true); break;
     case 'sp': { const c = charOf(e[1]); if (c) splatFx(c, charOf(e[2]), inkOf(e[3])); break; }
     case 'c': {   // someone was found
