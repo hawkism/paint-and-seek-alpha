@@ -71,6 +71,8 @@ h1.logo .p1{color:#ff2fa0}h1.logo .p2{color:#ffb703}h1.logo .p3{color:#3fa7ff}
 .sl input{flex:1;min-width:0;height:30px;accent-color:var(--paint);cursor:pointer}
 .sl b{min-width:112px;font-size:15px;white-space:nowrap}
 .gfxdesc{font-size:13px;opacity:.7;line-height:1.25;margin-top:3px}
+.vols{display:flex;flex-wrap:wrap;gap:4px 14px}.vols label{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}.vols input{width:110px}
+#credits .card{max-height:86vh;overflow:auto;text-align:left}#credits h3{margin:12px 0 4px}#credits li{margin:3px 0;font-size:15px}#credits a{color:#2f6fd6}
 .links{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .help{text-align:left;font-size:17px;line-height:1.35}
 .help h3{margin:12px 0 4px;font-size:22px}
@@ -358,8 +360,15 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
       <div class="gfxdesc"><button class="small" id="benchBtn">⚡ Check my device again</button> <span id="benchNote"></span></div></div>
     <div>Control type</div><div><div class="seg" id="optTouch"><button data-v="auto">Auto</button><button data-v="on">📱 Touch</button><button data-v="off">⌨️ Keyboard + mouse</button></div><div class="gfxdesc" id="touchDesc"></div></div>
     <div>Sound</div><div class="seg" id="optSound"><button data-v="1">On</button><button data-v="0">Off</button></div>
+    <div>Music</div><div><div class="seg" id="optMusic"><button data-v="live">🎹 Live</button><button data-v="recorded">💿 Recorded</button></div>
+      <div class="seg" id="optVibe" style="margin-top:6px"><button data-v="map">🗺️ Map's own</button><button data-v="silly">🤪 Silly</button><button data-v="spy">🕵️ Spy</button><button data-v="adventure">⚔️ Adventure</button></div>
+      <div class="gfxdesc">🎹 Live music follows the game: it tiptoes while you hide and speeds up when a seeker comes close. 💿 Recorded plays real songs (each map loads its own, about 1–2 MB).</div></div>
+    <div>Volume</div><div class="vols">
+      <label>🎵 Music <input type="range" id="volMusic" min="0" max="100" step="5"></label>
+      <label>💥 Effects <input type="range" id="volSfx" min="0" max="100" step="5"></label>
+      <label>🗣️ Voices <input type="range" id="volVoice" min="0" max="100" step="5"></label></div>
   </div>
-  <div class="links"><button class="small" id="goHelp">❓ How to play</button></div>
+  <div class="links"><button class="small" id="goHelp">❓ How to play</button> <button class="small" id="goCredits">🎵 Credits</button></div>
   <div id="bestLine" style="margin-top:10px;font-size:15px;opacity:.7"></div>
   <div id="verLine" style="margin-top:6px;font-size:13px;opacity:.55"></div>
 </div></div>
@@ -406,6 +415,26 @@ body.touch #parts .sep,body.touch #parts .mouseonly{display:none}
   <div class="links"><button class="small" id="finMenu">🏠 Menu</button></div>
 </div></div>
 
+<div class="screen" id="credits"><div class="card wide">
+  <div class="vtitle">🎵 Credits</div>
+  <p>Paint &amp; Seek is made by our family (with help from Claude). These people shared their work so games like this one can use it. Thank you!</p>
+  <h3>💿 Recorded music</h3>
+  <p>Songs by <b>Kevin MacLeod</b> (<a href="https://incompetech.com" target="_blank" rel="noopener">incompetech.com</a>), licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons: By Attribution 4.0</a>:</p>
+  <ul id="creditSongs"></ul>
+  <h3>👣 Footsteps</h3>
+  <ul>
+    <li>"Footsteps on different surfaces" by <b>avaster</b> (<a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener">OpenGameArt</a>), <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>, made from:
+      footstep-concrete, footstep-grass and footstep-wood by <b>swuing</b>; aluminum ladder steps by <b>Eelke</b>; Squeaky footstep by <b>ceberation</b>; Water Footsteps by <b>EminYILDIRIM</b> (all <a href="https://freesound.org" target="_blank" rel="noopener">Freesound</a>, CC-BY 3.0); Gravel Footsteps by <b>Ali_6868</b> (CC0).</li>
+  </ul>
+  <h3>🎹 Instruments, effects and pictures (free to use, CC0)</h3>
+  <ul>
+    <li>Instrument notes: <b>Versilian Community Sample Library</b> (VCSL) by Sam Gossner and friends</li>
+    <li>Jingles, clicks, coins and more: <b>Kenney</b> (<a href="https://kenney.nl" target="_blank" rel="noopener">kenney.nl</a>)</li>
+    <li>📷 Photo textures: <b>Poly Haven</b> (<a href="https://polyhaven.com" target="_blank" rel="noopener">polyhaven.com</a>)</li>
+    <li>3D: three.js · Font: Baloo 2</li>
+  </ul>
+  <div class="bigrow"><button class="big green" id="creditsBack">✔ Back</button></div>
+</div></div>
 <div class="screen" id="help"><div class="card help">
   <h3>🎲 Rounds</h3>
   <p>A match has several rounds. Each round one player is the <b>seeker</b>, and everyone else hides. Sometimes the seeker is you!</p>
@@ -514,7 +543,7 @@ function seeded(s) { return () => { s = (s * 16807) % 2147483647; return (s - 1)
    mode), turns on when you touch the screen and off when you move a mouse. The graphics follow it (applyGfx). */
 const isCoarse = () => { try { return matchMedia('(pointer: coarse)').matches; } catch (e) { return false; } };
 let TOUCH = false;
-const SET = Object.assign({ diff: 'normal', bots: 4, rounds: 5, sound: 1, gfx: 'auto', tex: 'auto', texStyle: 'drawn', found: 'join', hideIQ: 5, seekIQ: 5 }, load('ps-set', {}));
+const SET = Object.assign({ diff: 'normal', bots: 4, rounds: 5, sound: 1, gfx: 'auto', tex: 'auto', texStyle: 'drawn', musicStyle: 'live', vibe: 'map', volMusic: 60, volSfx: 85, volVoice: 75, found: 'join', hideIQ: 5, seekIQ: 5 }, load('ps-set', {}));
 // Graphics became Auto / Fast / Pretty (2026-11-22). Older saves always held 'high' (it was the default), so they move to
 // Auto; a 'low' someone picked stays Fast.
 if (!SET.gfxV) { if (SET.gfx !== 'low') SET.gfx = 'auto'; SET.gfxV = 2; }
@@ -528,7 +557,7 @@ const PS_TRACK = 'alpha';
 const trackKey = k => PS_TRACK === 'stable' ? k : k + '@' + PS_TRACK;
 const TRACK_NAME = { stable: '', beta: '🧪 Beta: the next version, almost ready', alpha: '🧪 Alpha: the newest features, still being tested' };
 const BEST = Object.assign({ seek: {}, hideWins: 0, matchWins: 0 }, load(trackKey('ps-best'), {}));
-const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti', brush: 'brush', look: null }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
+const SHOP = Object.assign({ coins: 100, owned: [], hat: 'none', paint: 'pink', paintHex: 0xff2fa0, launcher: 'hand', cel: 'confetti', brush: 'brush', look: null, voice: 'normal', jingle: 'pizza' }, load(trackKey('ps-shop'), {}));   // new players start with 100 coins
 const saveShop = () => save(trackKey('ps-shop'), SHOP);
 
 /* Smarts sliders (1-10) for the computer hiders and the computer seekers. Values are read off these points
@@ -874,7 +903,7 @@ const deco = (geo, hex, x, y, z, sx, sy, sz, o = {}) => mesh(geo, hex, x, y, z, 
 /* A box sitting at height y. ghost = no collider (you walk through it). */
 function addBox(x, z, w, d, h, hex, y = 0, ghost = false, t, rep) {
   const m = mesh(BOXG, hex, x, y + h / 2, z, w, h, d, { tex: t, rx: rep ? rep[0] : 1, ry: rep ? rep[1] : 1, cast: h > 0.06 });
-  if (!ghost) boxes.push({ x1: x - w / 2, x2: x + w / 2, z1: z - d / 2, z2: z + d / 2, y1: y, y2: y + h, c: m.userData.c });
+  if (!ghost) boxes.push({ x1: x - w / 2, x2: x + w / 2, z1: z - d / 2, z2: z + d / 2, y1: y, y2: y + h, c: m.userData.c, k: t === undefined ? 'noise' : t });   // k: the texture, for footsteps
   return m;
 }
 /* a flat walkable patch (floor, rug, pond) */
@@ -1205,7 +1234,7 @@ function signPlane(x, y, z, rotY, W, H, draw) {
   if (draw) s.draw(draw);
   return s;
 }
-const LOBBY_BOOTH = { x: 9.5, z: 2 }, LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
+const LOBBY_JUKE = { x: -11.4, z: -2.4 }, LOBBY_BOOTH = { x: 9.5, z: 2 }, LOBBY_SHOP = { x: 10, z: -6.4 }, LOBBY_READY = { x: 0, z: 7 }, LOBBY_PADS = [{ x: -9, z: 5 }, { x: -7, z: -7 }];
 let lobbyBoard = null;
 function buildLobby() {
   ground(0xe6dcff, 'check', 35);
@@ -1263,6 +1292,11 @@ function buildLobby() {
   for (const [x, z, c] of [[-11.5, -11.5, 0xff2fa0], [-12, -8.6, 0x2f8bff], [11.5, 11.5, 0xffc400], [-11.5, 11.5, 0x22c55e], [12, 8.6, 0x9b4dff]]) {
     addCyl(x, z, 1.1, 1.6, 0xdfe6ee); deco(CYLG, c, x, 1.62, z, 1.0, 0.04, 1.0, { tex: null }); deco(TORG, 0x9aa5b1, x, 1.8, z, 0.75, 0.75, 0.3);
   }
+  // the jukebox (0.3.3): walk up to it and press SONG for the next of your songs
+  addBox(LOBBY_JUKE.x - 1.2, LOBBY_JUKE.z, 0.9, 1.3, 1.7, 0xb5651d, 0, false, 'wood');
+  deco(CYLG, 0xffd166, LOBBY_JUKE.x - 1.2, 1.72, LOBBY_JUKE.z, 0.65, 0.12, 0.65, { tex: null, rot: [Math.PI / 2, 0, Math.PI / 2] });
+  for (const [dz, c] of [[-0.35, 0xff2fa0], [0, 0x3fa7ff], [0.35, 0x2ecc71]]) deco(BOXG, c, LOBBY_JUKE.x - 0.74, 0.9, LOBBY_JUKE.z + dz, 0.04, 0.9, 0.18, { tex: null });
+  signPlane(LOBBY_JUKE.x - 0.7, 2.25, LOBBY_JUKE.z, Math.PI / 2, 2.0, 0.6, (g, w, h) => { g.fillStyle = '#7b3fd6'; rrect(g, 0, 0, w, h, 30); g.fill(); g.fillStyle = '#fff'; g.font = `800 ${h * 0.55}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('📻 JUKEBOX', w / 2, h * 0.55); });
   // the paint booth (0.3.2): stand on the mat to design your look
   deco(CYLG, 0xffb3d9, LOBBY_BOOTH.x, 0.03, LOBBY_BOOTH.z, 1.3, 0.05, 1.3, { tex: null, cast: false });
   for (const [dx, dz, c] of [[-0.7, -0.5, 0xff2fa0], [0.5, -0.8, 0x2f8bff], [0.8, 0.4, 0xffc400], [-0.3, 0.8, 0x22c55e]]) deco(CIRG, c, LOBBY_BOOTH.x + dx, 0.07, LOBBY_BOOTH.z + dz, 0.22, 0.22, 1, { tex: null, rot: [-Math.PI / 2, 0, 0], cast: false });
@@ -2068,53 +2102,397 @@ function splatChar(c, by, hex) {
 }
 /* the spots, the sound and the message (every device shows these) */
 function splatFx(c, by, hex) {
+  if (G.phase !== 'lobby' || Math.random() < 0.5) speak(c, G.phase === 'lobby' ? 'giggle' : 'gasp', 0.8);
   addSplatsTo(c, 3, hex); sfx.splat(volAt(c.g.position) * 1.2);
   if (G.phase === 'lobby') { if (c.bot) sfx.giggle(volAt(c.g.position)); return; }
   if (c === G.player) toast('💥 Splat! Press PAINT to cover the spots!', 2.6);
   else if (c.role === 'hider' && by === G.player) toast('💥 Splat! ' + c.name + (c.bot ? ' is running. Catch them!' : ' got splatted. Catch them!'), 2);
 }
 
-/* sound: tiny synth, no files */
+/* ---------- 6b. sound and music (0.3.3) ----------
+   Buses: master → music (× duck) · effects · voices, each with its own volume (Settings). Sounds come from files in
+   sounds/ and music/ (made by tools/make-sounds.cjs; credits in sounds/CREDITS.md and the 🎵 Credits screen), loaded the
+   first time they're needed. If they can't load (a game opened from a folder, or no internet), the little synth sounds
+   below are used instead, so the game is never silent. 3D: sounds near you come from where they are (left / right,
+   quieter further away). The listener is the camera. */
 let AC = null;
+const AUD = { bufs: {}, loading: {}, fails: 0, bad: false };
 function ac() {
   if (!SET.sound) return null;
-  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (!AC) {
+    try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    const g = () => AC.createGain();
+    AUD.master = g(); AUD.music = g(); AUD.duck = g(); AUD.fx = g(); AUD.voice = g();
+    AUD.music.connect(AUD.duck).connect(AUD.master); AUD.fx.connect(AUD.master); AUD.voice.connect(AUD.master); AUD.master.connect(AC.destination);
+    audVolumes(); audPreload();
+  }
   if (AC.state === 'suspended') AC.resume();
   return AC;
 }
-function tone(f, dur, type, vol, f2, delay = 0) {
+const volOf = k => clamp(+SET[k], 0, 100) / 100;
+function audVolumes() {
+  if (!AUD.master) return;
+  AUD.master.gain.value = SET.sound ? 1 : 0;
+  AUD.music.gain.value = volOf('volMusic') * 0.55; AUD.fx.gain.value = volOf('volSfx'); AUD.voice.gain.value = volOf('volVoice') * 0.8;
+}
+/* music gets quieter for a moment so footsteps and the heartbeat stand out (hiders must hear the seeker coming) */
+function duck(amount, secs) {
+  if (!AC || !AUD.duck) return;
+  const t = AC.currentTime, p = AUD.duck.gain;
+  p.cancelScheduledValues(t); p.setValueAtTime(Math.min(p.value, 1), t); p.linearRampToValueAtTime(amount, t + 0.05); p.setValueAtTime(amount, t + secs); p.linearRampToValueAtTime(1, t + secs + 0.6);
+}
+/* a sound file (sounds/<name>.mp3 or music/<name>.mp3): the decoded sound when ready, else null (and it starts loading) */
+function sbuf(name) {
+  if (AUD.bufs[name]) return AUD.bufs[name];
+  if (!AC || AUD.bad || AUD.loading[name] || location.protocol === 'file:') return null;
+  AUD.loading[name] = true;
+  fetch((name.startsWith('music/') ? '' : 'sounds/') + name + '.mp3').then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error(r.status)))
+    .then(b => new Promise((res, rej) => AC.decodeAudioData(b, res, rej)))
+    .then(buf => { AUD.bufs[name] = trimStart(buf); AUD.fails = 0; })
+    .catch(() => { delete AUD.loading[name]; if (++AUD.fails > 8) AUD.bad = true; });
+  return null;
+}
+/* MP3s start with a few milliseconds of silence; cut it so notes land on the beat */
+function trimStart(buf) {
+  if (buf.duration > 20) return buf;
+  const d = buf.getChannelData(0); let i = 0; while (i < d.length && Math.abs(d[i]) < 0.003) i++;
+  if (i < 64) return buf;
+  const out = AC.createBuffer(buf.numberOfChannels, buf.length - i, buf.sampleRate);
+  for (let c = 0; c < buf.numberOfChannels; c++) out.getChannelData(c).set(buf.getChannelData(c).subarray(i));
+  return out;
+}
+const loaded = name => !!AUD.bufs[name];
+/* where the listener is (the camera), for 3D sound */
+function audListener() {
+  const L = AC.listener, p = camera.position, f = camD.lengthSq() > 0 ? camD : new V3(0, 0, -1), t = AC.currentTime;
+  if (L.positionX) { L.positionX.setValueAtTime(p.x, t); L.positionY.setValueAtTime(p.y, t); L.positionZ.setValueAtTime(p.z, t); L.forwardX.setValueAtTime(f.x, t); L.forwardY.setValueAtTime(f.y, t); L.forwardZ.setValueAtTime(f.z, t); L.upX.setValueAtTime(0, t); L.upY.setValueAtTime(1, t); L.upZ.setValueAtTime(0, t); }
+  else { L.setPosition(p.x, p.y, p.z); L.setOrientation(f.x, f.y, f.z, 0, 1, 0); }
+}
+/* the end of a sound's path: straight to a bus, or through a 3D panner at a spot in the world */
+function outAt(bus, at) {
+  if (!at) return bus;
+  const pn = AC.createPanner(); pn.panningModel = 'equalpower'; pn.distanceModel = 'linear'; pn.refDistance = 2; pn.maxDistance = 26; pn.rolloffFactor = 1;
+  if (pn.positionX) { pn.positionX.value = at.x; pn.positionY.value = (at.y || 0) + 1; pn.positionZ.value = at.z; } else pn.setPosition(at.x, (at.y || 0) + 1, at.z);
+  pn.connect(bus); return pn;
+}
+/* play a sound file: {vol, rate, at (3D spot), bus, when, dur (cut it short)}. false = not loaded (use a synth instead) */
+function play(name, o = {}) {
+  if (G.silent || !AC) return false;
+  const b = sbuf(name); if (!b) return false;
+  const src = AC.createBufferSource(), g = AC.createGain(), t = o.when || AC.currentTime;
+  src.buffer = b; src.playbackRate.value = o.rate || 1; g.gain.value = o.vol === undefined ? 1 : o.vol;
+  src.connect(g).connect(outAt(o.bus || AUD.fx, o.at));
+  if (o.dur) { g.gain.setValueAtTime(g.gain.value, t + o.dur); g.gain.linearRampToValueAtTime(0.0001, t + o.dur + 0.08); src.start(t); src.stop(t + o.dur + 0.1); }
+  else src.start(t);
+  return true;
+}
+const pickN = (name, n) => name + '-' + Math.floor(Math.random() * n);
+/* the first time sound starts: load the effects, footsteps and this map's instruments */
+function audPreload() {
+  for (const n of ['sfx/coins-0', 'sfx/click-0', 'sfx/select-0', 'sfx/pluck-0', 'sfx/confirm-0', 'sfx/error-0', 'sfx/cloth-0', 'sfx/drop-0', 'sfx/bong-0'])
+    sbuf(n);
+  for (const surf of ['grass', 'gravel', 'metal', 'tile', 'water', 'wood', 'boots']) for (let i = 0; i < 4; i++) sbuf('step/' + surf + '-' + i);
+  for (const k of ['kick-0', 'snare-0', 'hat-0', 'shaker-0', 'claps-0', 'wood-0', 'crash-0']) sbuf('inst/' + k);
+}
+
+/* the little synth sounds (before 0.3.3 these were the only sounds; now they fill in while files load) */
+function tone(f, dur, type, vol, f2, delay = 0, at) {
   if (G.silent) return;
   const a = ac(); if (!a || vol <= 0.01) return;
   const t0 = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
   o.type = type; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
   g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  o.connect(g).connect(a.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+  o.connect(g).connect(outAt(AUD.fx, at)); o.start(t0); o.stop(t0 + dur + 0.02);
 }
-function noise(dur, vol, lp) {
+let NOISE_BUF = null;
+function noise(dur, vol, lp, at) {
   if (G.silent) return;
   const a = ac(); if (!a || vol <= 0.01) return;
-  const n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
-  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
-  s.buffer = buf; f.type = 'lowpass'; f.frequency.value = lp; g.gain.value = vol;
-  s.connect(f).connect(g).connect(a.destination); s.start();
+  if (!NOISE_BUF) { NOISE_BUF = a.createBuffer(1, a.sampleRate, a.sampleRate); const d = NOISE_BUF.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), t = a.currentTime;
+  s.buffer = NOISE_BUF; f.type = 'lowpass'; f.frequency.value = lp;
+  g.gain.setValueAtTime(vol, t); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  s.connect(f).connect(g).connect(outAt(AUD.fx, at)); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+}
+/* jingles (Kenney, CC0): your 🎺 jingle style from the shop picks which ones play. Win/lose/found were picked by how
+   their pitch rises or falls (sounds/jingles.json). */
+const JINGLES = {
+  pizza: { name: 'Cartoon', emoji: '🎻', price: 0, win: 12, lose: 7, found: 16 },
+  nes:   { name: '8-bit', emoji: '👾', price: 100, win: 13, lose: 0, found: 2 },
+  sax:   { name: 'Jazzy Sax', emoji: '🎷', price: 120, win: 1, lose: 7, found: 8 },
+  steel: { name: 'Steel Drums', emoji: '🥁', price: 120, win: 13, lose: 7, found: 8 },
+  hit:   { name: 'Big Hits', emoji: '💥', price: 150, win: 15, lose: 9, found: 0 }
+};
+function jingle(kind, set) {
+  const id = JINGLES[set] ? set : JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza', J = JINGLES[id];
+  if (kind !== 'found') duck(0.15, 2.2);
+  if (play('jingle/' + id + '-' + J[kind], { vol: 0.8 })) return true;
+  if (kind === 'win') [523, 659, 784, 1047].forEach((f, k) => tone(f, 0.25, 'triangle', 0.16, 0, k * 0.13));
+  else if (kind === 'lose') [440, 370, 311].forEach((f, k) => tone(f, 0.3, 'triangle', 0.14, 0, k * 0.18));
+  else [784, 1047].forEach((f, k) => tone(f, 0.15, 'triangle', 0.13, 0, k * 0.09));
 }
 const sfx = {
-  splat: v => { noise(0.18, 0.5 * v, 900); tone(220, 0.12, 'sine', 0.2 * v, 90); },
-  whoosh: v => noise(0.12, 0.18 * v, 2500),
-  paint: () => { noise(0.25, 0.15, 1800); tone(500, 0.2, 'triangle', 0.08, 900); },
-  pop: () => { tone(500, 0.15, 'sine', 0.25, 1400); tone(1000, 0.25, 'triangle', 0.12, 1800, 0.08); },
-  vote: () => tone(700 + Math.random() * 300, 0.09, 'triangle', 0.12, 1200),
-  boing: () => tone(200, 0.35, 'sine', 0.2, 900),
-  coin: () => { tone(988, 0.08, 'square', 0.07); tone(1319, 0.2, 'square', 0.07, 0, 0.08); },
-  giggle: v => { for (let k = 0; k < 3; k++) tone(900 + k * 80, 0.07, 'triangle', 0.16 * v, 1200, k * 0.09); },
-  beep: hi => tone(hi ? 880 : 520, 0.14, 'square', 0.07),
-  heart: v => { tone(95, 0.11, 'triangle', 0.3 * v, 70); tone(82, 0.13, 'triangle', 0.24 * v, 60, 0.16); },   // lub-dub
-  step: v => noise(0.06, 0.22 * v, 650),
-  alert: () => { tone(600, 0.1, 'square', 0.09); tone(900, 0.14, 'square', 0.09, 0, 0.1); },
-  win: () => [523, 659, 784, 1047].forEach((f, k) => tone(f, 0.25, 'triangle', 0.16, 0, k * 0.13)),
-  lose: () => [440, 370, 311].forEach((f, k) => tone(f, 0.3, 'triangle', 0.14, 0, k * 0.18))
+  splat: (v, at) => { if (!play(pickN('step/water', 4), { vol: 1.1 * v, rate: rnd(0.6, 0.8), at })) noise(0.18, 0.5 * v, 900, at); tone(220, 0.12, 'sine', 0.2 * v, 90, 0, at); },
+  whoosh: (v, at) => { if (!play(pickN('sfx/cloth', 3), { vol: 0.7 * v, rate: rnd(1.3, 1.6), at })) noise(0.12, 0.18 * v, 2500, at); },
+  paint: () => { if (!play(pickN('sfx/cloth', 3), { vol: 0.7, rate: 0.8 })) noise(0.25, 0.15, 1800); tone(500, 0.2, 'triangle', 0.08, 900); },
+  pop: () => { if (!play(pickN('sfx/click', 3), { vol: 0.8 })) { tone(500, 0.15, 'sine', 0.25, 1400); tone(1000, 0.25, 'triangle', 0.12, 1800, 0.08); } },
+  vote: () => { if (!play(pickN('sfx/select', 3), { vol: 0.7, rate: rnd(0.9, 1.2) })) tone(700 + Math.random() * 300, 0.09, 'triangle', 0.12, 1200); },
+  boing: () => { if (!play('inst/flex-1', { vol: 0.6, rate: 1.4, dur: 0.6 })) tone(200, 0.35, 'sine', 0.2, 900); },
+  coin: () => { if (!play('sfx/coins-0', { vol: 0.9 })) { tone(988, 0.08, 'square', 0.07); tone(1319, 0.2, 'square', 0.07, 0, 0.08); } },
+  giggle: (v, at, c) => { if (c) speak(c, 'giggle', v); else for (let k = 0; k < 3; k++) tone(900 + k * 80, 0.07, 'triangle', 0.16 * v, 1200, k * 0.09, at); },
+  beep: hi => { if (!play('inst/wood-' + (hi ? 1 : 0), { vol: 0.9, rate: hi ? 1.5 : 1 })) tone(hi ? 880 : 520, 0.14, 'square', 0.07); },
+  heart: v => { duck(0.35, 0.5); tone(95, 0.11, 'triangle', 0.3 * v, 70); tone(82, 0.13, 'triangle', 0.24 * v, 60, 0.16); if (loaded('inst/kick-0')) { play('inst/kick-0', { vol: 0.5 * v, rate: 0.7 }); play('inst/kick-0', { vol: 0.4 * v, rate: 0.65, when: AC.currentTime + 0.16 }); } },
+  step: (v, c) => stepAt(c, v),
+  alert: () => { if (!play(pickN('sfx/bong', 1), { vol: 0.8, rate: 1.3 })) { tone(600, 0.1, 'square', 0.09); tone(900, 0.14, 'square', 0.09, 0, 0.1); } },
+  win: () => jingle('win'),
+  lose: () => jingle('lose'),
+  error: () => { if (!play(pickN('sfx/error', 3), { vol: 0.7 })) tone(300, 0.2, 'square', 0.06, 200); }
 };
+/* footsteps by floor: what's under someone's feet (the texture of the box they stand on) */
+const STEP_OF = { grass: 'grass', hay: 'grass', dirt: 'gravel', wood: 'wood', tile: 'tile', check: 'tile', frosting: 'tile', panel: 'metal', carpet: 'boots', noise: 'boots' };
+function surfOf(c) {
+  let k = null, top = -9;
+  for (const b of boxes) if (c.x >= b.x1 - 0.05 && c.x <= b.x2 + 0.05 && c.z >= b.z1 - 0.05 && c.z <= b.z2 + 0.05 && b.y2 <= c.y + 0.06 && b.y2 > top) { top = b.y2; k = b.k; }
+  return STEP_OF[k] || 'boots';
+}
+function stepAt(c, v) {
+  if (!c || G.silent || !AC) return;
+  const surf = surfOf(c), soft = c.pose !== 'stand' || surf === 'boots' && boxes.some(b => b.k === 'carpet' && Math.abs(b.y2 - c.y) < 0.06 && c.x >= b.x1 && c.x <= b.x2 && c.z >= b.z1 && c.z <= b.z2);
+  const at = c === G.player ? null : { x: c.x, y: c.y, z: c.z };
+  if (c !== G.player) duck(0.45, 0.35);
+  if (!play(pickN('step/' + surf, 4), { vol: v * (soft ? 0.45 : 1), rate: rnd(0.92, 1.08) * (surf === 'tile' && MAP === WORLDS.candy ? 1.25 : 1), at })) noise(0.06, 0.22 * v, 650, at);
+}
+
+/* voices: cartoon gibberish in a made-up language (no real words, so nothing to filter). Each character has its own
+   pitch; 🗣️ voice styles from the shop change how yours sounds (friends hear it too). */
+const VOICES = {
+  normal:   { name: 'Normal', emoji: '🙂', price: 0, k: 1, wave: 'sawtooth' },
+  squeaky:  { name: 'Squeaky', emoji: '🐭', price: 80, k: 1.7, wave: 'sawtooth' },
+  deep:     { name: 'Deep', emoji: '🐻', price: 80, k: 0.55, wave: 'sawtooth' },
+  chipmunk: { name: 'Chipmunk', emoji: '🐿️', price: 100, k: 2.1, wave: 'triangle', fast: 1.6 },
+  robot:    { name: 'Robot', emoji: '🤖', price: 120, k: 1, wave: 'square', robot: true },
+  wobbly:   { name: 'Wobbly', emoji: '🫠', price: 100, k: 1.1, wave: 'sawtooth', wobble: true }
+};
+const VOWELS = [[730, 1090], [530, 1840], [270, 2290], [570, 840], [300, 870], [660, 1700]];
+/* each line: [syllables, start pitch, end pitch, length of a syllable, loudness] */
+const LINES = { giggle: [4, 1.6, 1.25, 0.075, 0.8], found: [3, 1.3, 1.6, 0.11, 1], aww: [2, 1.1, 0.75, 0.16, 0.8], gasp: [1, 1.0, 1.5, 0.18, 0.8],
+  cheer: [3, 1.2, 1.9, 0.12, 1], wheee: [1, 1.2, 2.2, 0.55, 0.9], hey: [1, 1.4, 1.1, 0.16, 1], hi: [2, 1.2, 1.4, 0.1, 0.8], hmm: [2, 0.8, 0.75, 0.18, 0.6] };
+const hashOf = s => { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+function speak(c, line, v = 1) {
+  if (!c || G.silent || !ac() || !AUD.voice) return;
+  const L = LINES[line]; if (!L) return;
+  const V = VOICES[c.cos && c.cos.v] || VOICES.normal, r = seeded(hashOf(c.pkey || c.name) + line.length);
+  const base = (150 + (hashOf(c.pkey || c.name) % 90)) * V.k, syl = L[3] / (V.fast || 1), at = c === G.player ? null : { x: c.x, y: c.y, z: c.z };
+  const out = outAt(AUD.voice, at); let t = AC.currentTime + 0.02;
+  for (let i = 0; i < L[0]; i++) {
+    const f0 = base * (L[1] + (L[2] - L[1]) * i / Math.max(1, L[0] - 1)), f1 = base * (L[1] + (L[2] - L[1]) * (i + 1) / L[0]), vw = VOWELS[Math.floor(r() * VOWELS.length)];
+    const o = AC.createOscillator(), g = AC.createGain(), b1 = AC.createBiquadFilter(), b2 = AC.createBiquadFilter(), mix = AC.createGain();
+    o.type = V.wave; o.frequency.setValueAtTime(f0, t); o.frequency.linearRampToValueAtTime(V.robot ? f0 : f1, t + syl);
+    if (V.wobble) { const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = 9; lg.gain.value = f0 * 0.08; lfo.connect(lg).connect(o.frequency); lfo.start(t); lfo.stop(t + syl + 0.05); }
+    b1.type = b2.type = 'bandpass'; b1.frequency.value = vw[0]; b2.frequency.value = vw[1]; b1.Q.value = b2.Q.value = V.robot ? 3 : 6;
+    o.connect(b1).connect(mix); o.connect(b2).connect(mix); mix.gain.value = 1.6;
+    const vol = 0.55 * L[4] * v;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.setValueAtTime(vol, t + syl * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + syl);
+    mix.connect(g).connect(out); o.start(t); o.stop(t + syl + 0.03);
+    if (line === 'giggle' || line === 'gasp') noise(0.04, 0.05 * v, 4000, at);   // a breathy edge
+    t += syl * (line === 'giggle' ? 1.15 : 1.05);
+  }
+}
+
+/* ---- music ----
+   🎹 Live: the game plays the music itself from real instrument notes (sounds/inst), so it can follow the game:
+   level 0 = tiptoe (hiding), 1 = normal, 2 = full band, 3 = chase. A seeker coming closer speeds it up.
+   💿 Recorded: Kevin MacLeod's songs (music/), with a chase song when you're spotted. Each map loads only its own.
+   🗺️ Vibe: each map's own style, or 🤪 Silly / 🕵️ Spy / ⚔️ Adventure for every map. */
+const INSTS = { marimba: [36, 43, 53, 60, 67, 77], xylo: [55, 67, 79, 91], glock: [67, 79, 92], vibes: [41, 48, 55, 62, 69, 76], kalimba: [37, 43, 49, 55, 61, 67],
+  piano: [48, 55, 67, 79], harmonica: [48, 55, 64, 72, 79], strum: [38, 45, 52, 59, 66] };
+const STYLES = {
+  menu:      { bpm: 100, root: 62, scale: 'major', lead: 'kalimba', comp: 'vibes', bass: 'round', kit: 'soft' },
+  lobby:     { bpm: 116, root: 60, scale: 'major', lead: 'marimba', comp: 'piano', bass: 'round', kit: 'pop' },
+  house:     { bpm: 104, root: 64, scale: 'major', lead: 'kalimba', comp: 'strum', bass: 'round', kit: 'brush' },
+  toys:      { bpm: 122, root: 67, scale: 'major', lead: 'glock', comp: 'xylo', bass: 'tuba', kit: 'toy' },
+  farm:      { bpm: 118, root: 62, scale: 'major', lead: 'harmonica', comp: 'strum', bass: 'tuba', kit: 'country' },
+  space:     { bpm: 90, root: 57, scale: 'dorian', lead: 'vibes', comp: 'vibes', bass: 'synth', kit: 'space' },
+  candy:     { bpm: 126, root: 65, scale: 'major', lead: 'marimba', comp: 'kalimba', bass: 'round', kit: 'shaker' },
+  silly:     { bpm: 128, root: 60, scale: 'major', lead: 'xylo', comp: 'piano', bass: 'tuba', kit: 'silly' },
+  spy:       { bpm: 96, root: 57, scale: 'minor', lead: 'vibes', comp: 'piano', bass: 'walk', kit: 'spy', swing: 0.5 },
+  adventure: { bpm: 140, root: 62, scale: 'major', lead: 'glock', comp: 'piano', bass: 'drive', kit: 'drive' }
+};
+const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10] };
+const PROGS = { major: [[0, 4, 5, 3], [0, 5, 3, 4], [5, 3, 0, 4], [0, 3, 4, 4], [0, 3, 1, 4]], minor: [[0, 5, 2, 6], [0, 3, 4, 0], [0, 6, 5, 4]], dorian: [[0, 3, 0, 3], [0, 6, 3, 0]] };
+// drum patterns: which of the 16 steps in a bar each drum plays on
+const KITS = {
+  soft: { shaker: [0, 4, 8, 12], kick: [0] }, pop: { kick: [0, 8], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14] },
+  brush: { kick: [0, 8], shaker: [2, 4, 6, 10, 12, 14], snare: [4, 12] }, toy: { wood: [0, 6, 8, 12], triangle: [0], kick: [0, 8], claps: [12] },
+  country: { kick: [0, 8], snare: [4, 12], cowbell: [2, 6, 10, 14], shaker: [0, 2, 4, 6, 8, 10, 12, 14] }, space: { kick: [0], triangle: [0, 8], hat: [6, 14] },
+  shaker: { shaker: [0, 2, 4, 6, 8, 10, 12, 14], kick: [0, 10], claps: [4, 12] }, silly: { kick: [0, 8], slap: [12], wood: [6, 14], claps: [4] },
+  spy: { hat: [0, 2, 4, 6, 8, 10, 12, 14], claps: [4, 12], kick: [0, 10] }, drive: { kick: [0, 4, 8, 12], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14] }
+};
+const DRUM_VOL = { kick: 0.9, snare: 0.55, hat: 0.3, shaker: 0.35, claps: 0.5, wood: 0.5, cowbell: 0.25, triangle: 0.3, slap: 0.5, crash: 0.45 };
+const SONGS = {
+  menu: ['carefree'], lobby: ['winner-winner', 'paradise-found'], house: ['cheery-monday', 'life-of-riley'], toys: ['teddy-bear-waltz', 'glitter-blast'],
+  farm: ['hillbilly-swing', 'corncob'], space: ['moon-lounge-omicron-prime', 'space-x-plorers'], candy: ['ave-marimba', 'rainbows'],
+  silly: ['monkeys-spinning-monkeys', 'fluffing-a-duck', 'le-grand-chase', 'march-of-the-spoons', 'mischief-maker'],
+  spy: ['sneaky-snitch', 'hidden-agenda', 'sneaky-adventure', 'spy-glass', 'surf-inspector'],
+  adventure: ['bit-quest', 'pixelland', 'salty-ditty', 'voxel-revolution'], chase: ['hot-pursuit', 'outfoxing-the-fox']
+};
+const SONG_TITLE = { 'carefree': 'Carefree', 'winner-winner': 'Winner Winner!', 'paradise-found': 'Paradise Found', 'cheery-monday': 'Cheery Monday', 'life-of-riley': 'Life of Riley',
+  'teddy-bear-waltz': 'Teddy Bear Waltz', 'glitter-blast': 'Glitter Blast', 'hillbilly-swing': 'Hillbilly Swing', 'corncob': 'Corncob', 'moon-lounge-omicron-prime': 'Moon Lounge Omicron Prime',
+  'space-x-plorers': 'Space X-plorers', 'ave-marimba': 'Ave Marimba', 'rainbows': 'Rainbows', 'monkeys-spinning-monkeys': 'Monkeys Spinning Monkeys', 'fluffing-a-duck': 'Fluffing a Duck',
+  'le-grand-chase': 'Le Grand Chase', 'march-of-the-spoons': 'March of the Spoons', 'mischief-maker': 'Mischief Maker', 'sneaky-snitch': 'Sneaky Snitch', 'hidden-agenda': 'Hidden Agenda',
+  'sneaky-adventure': 'Sneaky Adventure', 'spy-glass': 'Spy Glass', 'surf-inspector': 'Surf Inspector', 'bit-quest': 'Bit Quest', 'pixelland': 'Pixelland', 'salty-ditty': 'Salty Ditty',
+  'voxel-revolution': 'Voxel Revolution', 'hot-pursuit': 'Hot Pursuit', 'outfoxing-the-fox': 'Outfoxing the Fox' };
+const MUS = { style: null, song: null, step: 0, next: 0, loops: 0, rec: null };
+const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+const degMidi = (st, d) => { const sc = SCALES[st.scale], o = Math.floor(d / 7), i = ((d % 7) + 7) % 7; return st.root + 12 * o + sc[i]; };
+/* a made-up 8-bar tune for a style: chords, a melody that repeats (so it's catchy) with a different ending */
+function makeSong(id, variant) {
+  const st = STYLES[id], r = seeded(hashOf(id) + variant * 101), prog = PROGS[st.scale][Math.floor(r() * PROGS[st.scale].length)];
+  const RH = ['x...', 'x.x.', 'x.xx', 'xx.x', 'x..x', '..x.', 'x...', 'xxx.'];
+  const motif = []; let d = 4 + Math.floor(r() * 3);
+  for (let bar = 0; bar < 4; bar++) {
+    const row = new Array(16).fill(null), ch = prog[bar];
+    for (let beat = 0; beat < 4; beat++) {
+      const pat = bar === 3 && beat === 3 ? 'x...' : RH[Math.floor(r() * RH.length)];
+      for (let k = 0; k < 4; k++) if (pat[k] === 'x') {
+        if (k === 0 && beat % 2 === 0) { const tones = [ch, ch + 2, ch + 4].map(x => x + 7 * Math.round((d - x) / 7)); d = tones.reduce((a, b) => Math.abs(b - d) < Math.abs(a - d) ? b : a); }
+        else d += pick([-2, -1, -1, 1, 1, 2]);
+        d = clamp(d, 1, 11); if (d > 9 && r() < 0.5) d -= 2;
+        row[beat * 4 + k] = bar === 3 && beat === 3 ? 7 : d;
+      }
+    }
+    motif.push(row);
+  }
+  const ending = motif[3].map(x => x === null ? null : clamp(x + pick([-2, 0, 2]), 1, 9)); ending[12] = 0 + 7; for (let k = 13; k < 16; k++) ending[k] = null;
+  return { prog: prog.concat(prog), mel: [motif[0], motif[1], motif[2], motif[3], motif[0], motif[1], motif[2], ending] };
+}
+/* one note on a sampled instrument (the nearest recorded note, sped up or slowed down), or a synth stand-in */
+function note(inst, midi, when, vol, dur, bus = AUD.music) {
+  const list = INSTS[inst];
+  if (list) {
+    const s0 = list.reduce((a, b) => Math.abs(b - midi) < Math.abs(a - midi) ? b : a);
+    if (play('inst/' + inst + '-' + s0, { vol, rate: Math.pow(2, (midi - s0) / 12), when, bus, dur: dur ? dur + 0.1 : 0 })) return;
+  }
+  synthNote(midi, when, vol * 0.5, dur || 0.25, inst === 'piano' || inst === 'strum' ? 'triangle' : 'sine', bus);
+}
+function synthNote(midi, when, vol, dur, type, bus = AUD.music, lp) {
+  const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = midiHz(midi);
+  g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(Math.max(0.001, vol), when + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+  if (lp) { const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp; o.connect(f).connect(g); } else o.connect(g);
+  g.connect(bus); o.start(when); o.stop(when + dur + 0.02);
+}
+function drum(name, when, vol) {
+  if (play('inst/' + name + '-0', { vol, when, bus: AUD.music, rate: name === 'claps' || name === 'hat' ? rnd(0.97, 1.03) : 1 })) return;
+  if (name === 'kick') synthNote(36, when, vol * 0.9, 0.15, 'sine'); else if (name === 'snare' || name === 'claps') { /* noise needs "now": skip in the stand-in */ }
+}
+/* what the music should be doing right now: {style, level 0–3, tempo, slot (recorded songs), chase} */
+function musicWant() {
+  const ph = G.phase, own = MAP && WORLDS.lobby === MAP ? 'lobby' : mapId, vibe = SET.vibe !== 'map' && STYLES[SET.vibe] ? SET.vibe : null;
+  if (ph === 'menu' || ph === 'wait' || ph === 'final') return { style: 'menu', level: 1, tempo: 1, slot: 'menu' };
+  if (ph === 'lobby' || ph === 'vote') return { style: 'lobby', level: ph === 'vote' ? 1 : 2, tempo: 1, slot: G.juke ? 'juke' : 'lobby' };
+  if (ph === 'end') return { style: vibe || own, level: -1, tempo: 1, slot: null };   // quiet: the jingle plays
+  const style = vibe || own, slot = vibe || own, p = G.player;
+  if (!p) return { style, level: 1, tempo: 1, slot };
+  if (p.role === 'hider' && !p.caught) {
+    if (ph !== 'seek') return { style, level: 0, tempo: 0.92, slot };
+    const al = NETC() ? G.myAlert || 0 : alertOf(p), t = clamp(1 - (G.nearSeek || 99) / 12, 0, 1);
+    if (al === 2) return { style, level: 3, tempo: 1.2, slot, chase: true };
+    return { style, level: t > 0.55 ? 1 : 0, tempo: 1 + t * 0.22, slot };
+  }
+  if (p.role === 'seeker' && ph === 'seek') { const left = G.chars.filter(c => c.role === 'hider' && !c.caught).length; return { style, level: left === 1 ? 3 : 2, tempo: left === 1 ? 1.12 : 1, slot, chase: left === 1 }; }
+  return { style, level: ph === 'count' ? 0 : 1, tempo: 1, slot };
+}
+function liveStep(st, song, step, when, spb, w) {
+  const bar = Math.floor(step / 16) % 8, k = step % 16, lv = w.level, ch = song.prog[bar];
+  // drums
+  const kit = KITS[st.kit] || {};
+  for (const [dname, steps] of Object.entries(kit)) {
+    if (!steps.includes(k)) continue;
+    if (lv === 0 && !['shaker', 'triangle', 'hat'].includes(dname)) continue;
+    if (lv === 1 && dname === 'kick' && k !== 0) continue;
+    drum(dname, when, DRUM_VOL[dname] * (lv === 0 ? 0.5 : 1));
+  }
+  if (lv >= 3 && k % 2 === 1) drum('hat', when, 0.18);
+  if (lv >= 3 && k === 0 && bar % 4 === 0) drum('crash', when, 0.3);
+  // bass
+  const root = degMidi(st, ch) - 24;
+  const bassOn = st.bass === 'drive' ? k % 2 === 0 : st.bass === 'walk' ? k % 4 === 0 : lv === 0 ? k === 0 || k === 8 : k === 0 || k === 8 || (k === 14 && bar % 2 === 1);
+  if (bassOn) {
+    const m = st.bass === 'walk' ? degMidi(st, ch + [0, 2, 4, 5][k / 4]) - 24 : k === 14 ? root + 7 : root;
+    const type = st.bass === 'tuba' ? 'square' : st.bass === 'synth' ? 'sawtooth' : 'triangle';
+    synthNote(m, when, (lv === 0 ? 0.22 : 0.32) * (st.bass === 'tuba' ? 0.7 : 1), lv === 0 || st.bass === 'walk' ? spb * 3 : spb * 6, type, AUD.music, st.bass === 'tuba' ? 500 : st.bass === 'synth' ? 900 : 0);
+  }
+  // chords (comp)
+  if (lv >= 1 && (st.kit === 'spy' || st.kit === 'pop' || st.kit === 'country' ? k === 4 || k === 12 : k === 0 || k === 8)) {
+    for (const dd of [0, 2, 4]) note(st.comp, degMidi(st, ch + dd) - 12, when + dd * 0.006, 0.16, spb * 6);
+  }
+  // melody
+  const d = song.mel[bar][k];
+  if (d !== null && d !== undefined && (lv >= 1 || k % 4 === 0)) {
+    const m = degMidi(st, d) + (lv >= 3 ? 12 : 0) + (st.lead === 'glock' || st.lead === 'xylo' ? 12 : 0);
+    note(st.lead, m, when, lv === 0 ? 0.25 : 0.42, spb * 2);
+    if (lv === 0 && Math.random() < 0.25) note(st.lead, m + 1, when + spb * 0.5, 0.12, spb);   // tiptoe: a sneaky little extra note
+  }
+}
+/* 💿 recorded songs: decoded once (at most two kept, the song and the chase song), looped, faded */
+function recPlay(name) {
+  const R = MUS.rec || (MUS.rec = { cur: null, src: null, g: null, cache: [] });
+  if (R.cur === name) return;
+  const b = sbuf('music/' + name); if (!b) return;   // still loading: keep what's playing
+  if (R.src) { const og = R.g, os = R.src; og.gain.setTargetAtTime(0, AC.currentTime, 0.25); setTimeout(() => { try { os.stop(); } catch (e) { /* stopped */ } }, 1500); }
+  R.cur = name; R.src = AC.createBufferSource(); R.g = AC.createGain(); R.src.buffer = b; R.src.loop = true;
+  R.g.gain.setValueAtTime(0, AC.currentTime); R.g.gain.linearRampToValueAtTime(1, AC.currentTime + 1.2);
+  R.src.connect(R.g).connect(AUD.music); R.src.start();
+  R.cache = R.cache.filter(n => n !== name).concat(name);
+  while (R.cache.length > 2) { const old = R.cache.shift(); if (old !== R.cur) delete AUD.bufs['music/' + old]; }   // keep memory small on iPads
+}
+function recStop() { const R = MUS.rec; if (!R || !R.src) return; const og = R.g, os = R.src; og.gain.setTargetAtTime(0, AC.currentTime, 0.3); setTimeout(() => { try { os.stop(); } catch (e) { /* stopped */ } }, 1500); R.src = null; R.cur = null; }
+function songFor(w) {
+  if (w.slot === 'juke') return G.juke;
+  const list = w.chase ? SONGS.chase : SONGS[w.slot] || SONGS.lobby;
+  if (!MUS.pickFor || MUS.pickFor !== (w.chase ? 'chase' : w.slot) + ':' + (G.match ? G.match.round : 0)) { MUS.pickFor = (w.chase ? 'chase' : w.slot) + ':' + (G.match ? G.match.round : 0); MUS.pick = pick(list); }
+  return MUS.pick;
+}
+/* stings: little musical moments when things happen (round start, last hider, spotted) */
+let MUS_LAST = { phase: null, al: 0, left: 99 };
+function stings() {
+  const ph = G.phase, p = G.player;
+  if (ph !== MUS_LAST.phase) {
+    if (ph === 'hide' || (ph === 'count' && MUS_LAST.phase !== 'hide')) play('jingle/hit-0', { vol: 0.6 });
+    if (ph === 'final' && G.match) { const ranked = G.match.players.slice().sort((a, b) => b.total - a.total), me = P(ME()); jingle(me && placeOf(ranked, me) === 0 ? 'win' : 'lose'); }
+    MUS_LAST.phase = ph;
+  }
+  if (ph === 'seek' && p) {
+    const al = p.role === 'hider' ? (NETC() ? G.myAlert || 0 : alertOf(p)) : 0;
+    if (al === 2 && MUS_LAST.al !== 2) { const t = AC.currentTime; drum('crash', t, 0.5); drum('kick', t, 1); synthNote(degMidi(STYLES.spy, 0) - 24, t, 0.4, 0.5, 'sawtooth', AUD.music, 700); }
+    MUS_LAST.al = al;
+    const left = G.chars.filter(c => c.role === 'hider' && !c.caught).length;
+    if (left === 1 && MUS_LAST.left > 1) play('jingle/hit-8', { vol: 0.6 });
+    MUS_LAST.left = left;
+  } else { MUS_LAST.al = 0; MUS_LAST.left = 99; }
+}
+/* every frame: listener, stings, and the music (Live notes are scheduled a little ahead, on the audio clock) */
+function audTick() {
+  if (!AC || !AUD.master || AC.state !== 'running' || !SET.sound) return;
+  audListener(); stings();
+  const w = musicWant(), live = SET.musicStyle !== 'recorded' && w.slot !== 'juke';
+  if (G.silent || w.level < 0 || !SET.volMusic) { recStop(); MUS.style = null; return; }
+  if (!live) { MUS.style = null; const n = songFor(w); if (n) recPlay(n); return; }
+  recStop();
+  const now = AC.currentTime;
+  if (MUS.style !== w.style) { MUS.style = w.style; MUS.variant = Math.floor(Math.random() * 1000); MUS.song = makeSong(w.style, MUS.variant); MUS.step = 0; MUS.next = now + 0.1; MUS.loops = 0;
+    for (const i of [STYLES[w.style].lead, STYLES[w.style].comp]) for (const n of INSTS[i] || []) sbuf('inst/' + i + '-' + n); }
+  const st = STYLES[w.style];
+  MUS.tempo = (MUS.tempo || 1) + (w.tempo - (MUS.tempo || 1)) * 0.05;
+  const spb = 60 / (st.bpm * MUS.tempo) / 4;
+  if (MUS.next < now - 0.5) MUS.next = now + 0.05;   // after a pause or a hidden tab: start again from now
+  while (MUS.next < now + 0.15) {
+    const k = MUS.step % 16, sw = st.swing && k % 4 === 2 ? spb * st.swing * 0.66 : 0;
+    liveStep(st, MUS.song, MUS.step, MUS.next + sw, spb, w);
+    MUS.step++; MUS.next += spb;
+    if (MUS.step % 128 === 0 && ++MUS.loops % 3 === 0) MUS.song = makeSong(w.style, ++MUS.variant);   // a new tune every 3 times through
+  }
+}
 function volAt(p) { if (!G.player) return 0.5; return clamp(1.2 - Math.hypot(p.x - G.player.x, p.z - G.player.z) / 18, 0, 1); }
 
 /* ---------- 7. player input ---------- */
@@ -2276,6 +2654,7 @@ function updatePlayer(dt) {
     if (G.phase === 'lobby') {   // lobby: open the shop at the stand, otherwise throw paint for fun
       if (G.nearShop) openShop('lobby');
       else if (G.nearBooth) enterDraw(true);
+      else if (G.nearJuke) jukeNext();
       else if (G.throwCd <= 0) { G.throwCd = 0.35; p.yaw = input.yaw; throwBall(p, p, aimHit.p); }
     } else if (p.role === 'hider') {
       if (aimHit.c) { p.paintT = 0.35; p.paintCol = aimHit.c.clone(); p.paintPart = G.paintPart; BR.col.copy(aimHit.c); BR.kind = aimHit.kind || 'noise'; sfx.paint(); }
@@ -2433,8 +2812,15 @@ function startFlee(c, th) {
 }
 /* a hider giggles: seekers hear it (you, and friends who are seeking) */
 function giggleAt(c, min) {
-  if (G.player && G.player.role === 'seeker') { const v = volAt(c.g.position); if (v > min) sfx.giggle(v); }
-  if (NETH()) netEv(['g', r2(c.x), r2(c.z), min]);
+  if (G.player && (G.player.role === 'seeker' || c === G.player)) { const v = c === G.player ? 0.6 : volAt(c.g.position); if (v > min) sfx.giggle(v, null, c); }
+  // 0.3.3: computer seekers hear it too and come to look
+  if (!NETC()) for (const s of G.chars) {
+    if (s.role !== 'seeker' || !s.bot || s.state === 'count') continue;
+    const d = Math.hypot(s.x - c.x, s.z - c.z); if (d > 11) continue;
+    s.susp.set(c, Math.min(1.6, (s.susp.get(c) || 0) + 0.3 * (1 - d / 11)));
+    if (s.state === 'patrol' || s.state === 'look') { setGoal(s, c.x + rnd(-1.5, 1.5), c.z + rnd(-1.5, 1.5)); s.state = 'search'; speak(s, 'hmm'); }
+  }
+  if (NETH()) netEv(['g', r2(c.x), r2(c.z), min, c.pkey]);
 }
 /* a message for one person: on your screen if it's you, or sent to a friend's device */
 function tellChar(c, msg, sec) {
@@ -2495,6 +2881,7 @@ function seekerAI(s, dt) {
       let v = noticeRate(s, h);
       const d = Math.hypot(h.x - s.x, h.z - s.z);
       if (h.moving && d < 4.5) v += 0.35;    // footsteps
+      else if (h.moving && Math.hypot(h.vx, h.vz) > 2.5 && d < 9) v += 0.2 * (1 - d / 9);   // 0.3.3: running is loud
       let su = s.susp.get(h) || 0;
       su = v > 0 ? su + v * 0.1 : Math.max(0, su - 0.03);   // forgets faster when it can't see you
       su = Math.min(su, 1.6); s.susp.set(h, su);
@@ -2507,7 +2894,7 @@ function seekerAI(s, dt) {
       }
     }
     if (top && topS >= 1 && (s.state !== 'chase' || s.target !== top)) {
-      s.state = 'chase'; s.target = top; s.lostT = 0; sfx.alert(); s.repathT = 0;
+      s.state = 'chase'; s.target = top; s.lostT = 0; sfx.alert(); speak(s, 'hey'); s.repathT = 0;
       tellChar(top, '🏃 RUN! ' + s.name + ' spotted you!', 2);
     }
     if (s.state === 'chase' && s.target) {
@@ -2786,11 +3173,12 @@ function lobbyTick(dt) {
     if (c.puppet) { netPuppetStep(c, dt); continue; }   // other people (and, on a friend's device, everyone else) move from the network
     if (NETC() && c !== p) continue;
     moveChar(c, dt);
-    for (const b of LOBBY_PADS) if (c.onGround && c.y < 0.3 && Math.hypot(c.x - b.x, c.z - b.z) < 1.0) { c.vy = 13; c.onGround = false; if (c === p) sfx.boing(); }
+    for (const b of LOBBY_PADS) if (c.onGround && c.y < 0.3 && Math.hypot(c.x - b.x, c.z - b.z) < 1.0) { c.vy = 13; c.onGround = false; if (c === p) sfx.boing(); speak(c, 'wheee', c === p ? 0.8 : 0.6); }
   }
   updateBalls(dt); animChars(dt); updateCamera();
   G.nearShop = Math.hypot(p.x - LOBBY_SHOP.x, p.z - LOBBY_SHOP.z) < 2.3;
   G.nearBooth = !G.nearShop && Math.hypot(p.x - LOBBY_BOOTH.x, p.z - LOBBY_BOOTH.z) < 1.4 && p.y < 0.3;
+  G.nearJuke = !G.nearShop && !G.nearBooth && Math.hypot(p.x - LOBBY_JUKE.x, p.z - LOBBY_JUKE.z) < 1.8;
   if (!G.ready && Math.hypot(p.x - LOBBY_READY.x, p.z - LOBBY_READY.z) < 1.6 && p.y < 0.5) lobbyReady();
   if (NETC()) G.lobbyT = Math.max(0, G.lobbyT - dt);   // a friend's device: the host's timer decides (it comes with every update)
   // alone, the timer waits while you look at the card or the shop; with friends it keeps going, so nobody waits for one person
@@ -2806,10 +3194,11 @@ function lobbyHud() {
   const w = $('warn'), people = M.players.filter(p => playsHuman(p)).length;
   if (G.nearShop) { w.textContent = TOUCH ? '🛒 Tap SHOP to open the shop' : '🛒 Click or press E to open the shop'; w.className = 'pill on'; }
   else if (G.nearBooth) { w.textContent = TOUCH ? '🎨 Tap PAINT to design your look' : '🎨 Click or press E to design your look'; w.className = 'pill on'; }
+  else if (G.nearJuke) { w.textContent = (G.juke ? '📻 ' + SONG_TITLE[G.juke] + ' · ' : '📻 ') + (TOUCH ? 'Tap SONG for the next song' : 'Click or press E for the next song'); w.className = 'pill on'; }
   else if (G.ready) { w.textContent = '✅ Ready!' + (people > 1 ? ' (' + G.readyKeys.size + ' of ' + people + ' ready)' : ''); w.className = 'pill on'; }
   else { w.textContent = '🟢 Tap ✅ I\'m ready! or stand on the green pad'; w.className = 'pill on'; }
-  $('bMain').querySelector('.ico').textContent = G.nearShop ? '🛒' : G.nearBooth ? '🎨' : '🎯';
-  $('bMainTxt').textContent = G.nearShop ? 'SHOP' : G.nearBooth ? 'PAINT' : 'THROW';
+  $('bMain').querySelector('.ico').textContent = G.nearShop ? '🛒' : G.nearBooth ? '🎨' : G.nearJuke ? '📻' : '🎯';
+  $('bMainTxt').textContent = G.nearShop ? 'SHOP' : G.nearBooth ? 'PAINT' : G.nearJuke ? 'SONG' : 'THROW';
   $('cross').className = ''; $('bSw').style.display = 'none';
 }
 /* after buying or changing a hat in the lobby, swap in a player wearing it */
@@ -2941,16 +3330,28 @@ const SHOP_KINDS = {
   paint:  { list: () => PAINTS, tab: '🎯 Paint balls', sub: 'For when you are the seeker. Plain colors are free; designs and real gold are in the shop.', using: 'paint' },
   launch: { list: () => LAUNCHERS, tab: '🔫 Launchers', sub: 'What you hold when you throw paint (seeking and in the lobby). Its tank shows your paint.', using: 'launcher' },
   brush:  { list: () => BRUSHES, tab: '🖌️ Brushes', sub: 'For hiding: paint patterns on yourself (🖌️ Brush while you hide, or the paint booth in the lobby). Size and strength are free.', using: 'brush' },
+  jingle: { list: () => JINGLES, tab: '🎺 Jingles', sub: 'The tune when you win, lose or find someone.', using: 'jingle' },
+  voice:  { list: () => VOICES, tab: '🗣️ Voices', sub: 'How your character sounds (giggles, cheers, "found you!"). Friends hear it too.', using: 'voice' },
+  song:   { list: () => JUKEBOX, tab: '📻 Jukebox', sub: 'Songs for the jukebox in the lobby: walk up to it and press SONG.', using: null },
   cel:    { list: () => CELS, tab: '🎉 Celebrations', sub: 'What happens when YOU find someone. Everyone sees it!', using: 'cel' },
   emote:  { list: () => EMOTES, tab: '💃 Emotes', sub: 'Moves for the lobby: tap 💃 there, or press 1–9.', using: null }
 };
 const owns = (kind, id) => { const it = SHOP_KINDS[kind].list()[id]; return !!it && (it.price === 0 || SHOP.owned.includes(kind + ':' + id)); };
 function openShop(from) { G.shopFrom = from; G.shopOpen = true; $('shopMsg').textContent = ''; G.shopTab = G.shopTab || 'hat'; drawShop(); showScreen('shop'); }
 function closeShop() {
-  G.shopOpen = false; refreshMenu(); drawEmotes();   // emotes you just bought show in the lobby bar
+  G.shopOpen = false; refreshMenu(); drawEmotes(); shopPreviewStop();   // emotes you just bought show in the lobby bar
   if (G.shopFrom === 'lobby' && G.phase === 'lobby') { refreshLobbyMe(); if (G.lobbyCard) openLobbyCard(); else { showScreen(null); lobbyHud(); } }
   else if (G.shopFrom === 'final' && G.phase === 'final') { $('finCoins').textContent = '🪙 You have ' + SHOP.coins + ' coins.'; showScreen('final'); }
   else showScreen('menu');
+}
+let PREV = null;
+function shopPreviewStop() { if (PREV) { try { PREV.stop(); } catch (e) { /* done */ } PREV = null; } G.shopPreview = null; }
+function shopPreviewTick() {
+  if (!G.shopPreview || !AC) return;
+  const b = sbuf('music/' + G.shopPreview); if (!b) return;
+  shopPreviewStop();
+  const src = AC.createBufferSource(), g = AC.createGain(), t = AC.currentTime; src.buffer = b; g.gain.setValueAtTime(0.9, t); g.gain.setValueAtTime(0.9, t + 7); g.gain.linearRampToValueAtTime(0, t + 8);
+  src.connect(g).connect(AUD.fx); src.start(t, Math.min(20, b.duration * 0.2)); src.stop(t + 8.1); PREV = src;
 }
 function drawShop() {
   $('shopCoins').textContent = '🪙 ' + SHOP.coins;
@@ -2961,7 +3362,7 @@ function drawShop() {
     const own = owns(kind, id), on = K.using && SHOP[K.using] === id;
     const cls = on ? 'on' : own ? '' : SHOP.coins >= it.price ? 'buy' : 'poor';
     const icon = kind === 'paint' ? `<span class="sw${id === 'gold' ? ' gold' : ''}" style="background:${id === 'custom' ? hexCss(+SHOP.paintHex || PAINT_HEX) : it.design ? inkCss(id) : hexCss(it.hex)}"></span>` : it.emoji;
-    const label = kind === 'emote' && own ? '✓ Yours' : on ? (kind === 'hat' ? '✓ Wearing' : '✓ Using') : own ? (id === 'custom' ? '🎨 Pick' : 'Use it') : '🪙 ' + it.price;
+    const label = (kind === 'emote' || kind === 'song') && own ? '✓ Yours' : on ? (kind === 'hat' ? '✓ Wearing' : '✓ Using') : own ? (id === 'custom' ? '🎨 Pick' : 'Use it') : '🪙 ' + it.price;
     return `<button class="item ${cls}" data-kind="${kind}" data-id="${id}"><div class="ie">${icon}</div><div class="in">${it.name}</div><div class="ip">${label}</div></button>`;
   };
   // owned and free things first, then the rest from cheapest up, so the next thing to save for is easy to find
@@ -2978,6 +3379,9 @@ function shopClick(kind, id) {
   } else { $('shopMsg').textContent = ''; sfx.pop(); }
   G.shopPick = kind === 'paint' && id === 'custom';   // "Any color" opens the color grid below
   if (kind === 'emote') { $('shopMsg').textContent = it.price ? $('shopMsg').textContent : '💃 ' + it.name + ' is free. Use it in the lobby!'; }
+  else if (kind === 'song') { ac(); G.shopPreview = id; sbuf('music/' + id); }   // a song: a taste of it (see shopTick)
+  else if (kind === 'jingle') { ac(); jingle('win', id); }
+  else if (kind === 'voice') { ac(); if (G.player) { const old = G.player.cos; G.player.cos = Object.assign({}, old || {}, { v: id }); speak(G.player, 'hi'); G.player.cos = old; } }
   else if (SHOP_KINDS[kind].using) SHOP[SHOP_KINDS[kind].using] = id;
   saveShop(); drawShop();
 }
@@ -2986,6 +3390,15 @@ $('shopTabs').addEventListener('click', e => { const b = e.target.closest('butto
 $('shopCustom').innerHTML = PALETTE.map(swatch).join('');
 $('shopCustom').addEventListener('click', e => { const b = e.target.closest('button[data-hex]'); if (!b) return; SHOP.paintHex = +b.dataset.hex; SHOP.paint = 'custom'; G.shopPick = false; $('shopMsg').textContent = '🎨 Your paint balls are this color now!'; sfx.pop(); saveShop(); drawShop(); });
 
+/* the lobby jukebox: the next song you own (only you hear it; it plays until the round starts) */
+function jukeNext() {
+  const mine = Object.keys(JUKEBOX).filter(id => owns('song', id)); if (!mine.length) return;
+  G.juke = mine[(mine.indexOf(G.juke) + 1) % mine.length]; ac(); sfx.pop();
+  toast('📻 ' + SONG_TITLE[G.juke] + (mine.length < 4 ? ' · more songs in the shop (📻 Jukebox)' : ''), 2.5);
+}
+/* jukebox songs (0.3.3): every recorded song; the menu and lobby songs are free */
+const JUKEBOX = {};
+for (const [slug, title] of Object.entries(typeof SONG_TITLE === 'object' ? SONG_TITLE : {})) JUKEBOX[slug] = { name: title, emoji: '🎵', price: ['carefree', 'winner-winner', 'paradise-found'].includes(slug) ? 0 : 60 + (hashOf(slug) % 5) * 15 };
 /* ---------- 11b. launchers, tag celebrations, lobby emotes (0.3.1) ---------- */
 const LAUNCHERS = {
   hand:    { name: 'Just throw', emoji: '✋', price: 0 },
@@ -3016,11 +3429,12 @@ const EMOTES = {
   dance: { name: 'Dance', emoji: '💃', price: 120, dur: 2.6 },
   wheel: { name: 'Cartwheel', emoji: '🤸', price: 150, dur: 1.1 }
 };
-const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti' });
+const myCos = () => ({ l: LAUNCHERS[SHOP.launcher] ? SHOP.launcher : 'hand', t: CELS[SHOP.cel] ? SHOP.cel : 'confetti', v: VOICES[SHOP.voice] && owns('voice', SHOP.voice) ? SHOP.voice : 'normal', j: JINGLES[SHOP.jingle] && owns('jingle', SHOP.jingle) ? SHOP.jingle : 'pizza' });
 /* a player's cosmetics from the match list or the network, made safe */
-const cosOf = pl => { const c = (pl && pl.cos) || {}; return { l: Object.prototype.hasOwnProperty.call(LAUNCHERS, c.l) ? c.l : 'hand', t: Object.prototype.hasOwnProperty.call(CELS, c.t) ? c.t : 'confetti' }; };
+const cosOf = pl => { const c = (pl && pl.cos) || {}; const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  return { l: has(LAUNCHERS, c.l) ? c.l : 'hand', t: has(CELS, c.t) ? c.t : 'confetti', v: has(VOICES, c.v) ? c.v : 'normal', j: has(JINGLES, c.j) ? c.j : 'pizza' }; };
 /* computer players show off the shop now and then */
-const botCos = () => ({ l: Math.random() < 0.5 ? pick(Object.keys(LAUNCHERS)) : 'hand', t: Math.random() < 0.6 ? pick(Object.keys(CELS)) : 'confetti' });
+const botCos = () => ({ l: Math.random() < 0.5 ? pick(Object.keys(LAUNCHERS)) : 'hand', t: Math.random() < 0.6 ? pick(Object.keys(CELS)) : 'confetti', v: Math.random() < 0.4 ? pick(Object.keys(VOICES)) : 'normal', j: 'pizza' });
 
 /* the launcher sits in the right hand (it swings with the arm). Its tank shows the paint ball ink. */
 const LMATS = {};
@@ -3118,6 +3532,7 @@ function playEmote(c, id, fromNet) {
   if (c === G.player && !fromNet && !owns('emote', id)) return;
   c.emote = { id, t: 0 };
   if (EMOTES[id] && id === 'jump' && c.onGround && !c.puppet) c.vy = JUMP_V;
+  if (id === 'wave') speak(c, 'hi', 0.7); else if (id === 'jump' || id === 'dance') speak(c, 'cheer', 0.6);
   if (c === G.player && !fromNet && NET.on) { if (NETC()) netSend(['emo', id]); else netEv(['emo', c.pkey, id]); }
   if (c === G.player) sfx.pop();
 }
@@ -3319,6 +3734,8 @@ function catchHider(h, s) {
 }
 /* what this device shows when someone is found: the pop, the colors, the message */
 function foundFx(h, s, join, left) {
+  if (s) speak(s, 'found'); speak(h, 'aww', 0.8);
+  if (s === G.player) jingle('found');
   celebrate(h, s);   // the seeker's tag celebration (confetti unless they bought another)
   clearSplats(h); setColor(h, h.base); h.eyesOpen = true;
   const who = s ? nameOf(P(s.pkey) || s) : G.seekName;
@@ -3356,7 +3773,7 @@ function endLocal(left) {
   M.round++;
   let msg;
   if (G.mode === 'hide') {
-    if (!G.player.wasFound) { BEST.hideWins++; msg = '🎉 You stayed hidden! +' + me.last + ' ⭐'; sfx.win(); }
+    if (!G.player.wasFound) { BEST.hideWins++; msg = '🎉 You stayed hidden! +' + me.last + ' ⭐'; sfx.win(); speak(G.player, 'cheer'); }
     else { msg = '⏰ Round over! You got +' + me.last + ' ⭐'; sfx.lose(); }
   } else {
     // with a helper seeker, say who found how many (the team total isn't all yours)
@@ -3377,6 +3794,23 @@ function endLocal(left) {
 function timeUp() { endRound(); }
 /* close calls while you hide: you hear the seekers' footsteps, and your heart beats faster as one comes near */
 const STEP_HEAR = 14, HEART_NEAR = 9;
+function footsteps(dt) {
+  const p = G.player; if (!p || !AC || G.silent || !(inRound() || G.phase === 'lobby')) return;
+  for (const c of G.chars) {
+    if (c.caught || !c.onGround || !c.moving) { c.fstT = 0; continue; }
+    const sp = Math.hypot(c.vx, c.vz), d = Math.hypot(c.x - p.x, c.z - p.z);
+    if (sp < 1 || d > STEP_HEAR) continue;
+    c.fstT = (c.fstT || 0) - dt; if (c.fstT > 0) continue;
+    c.fstT = clamp(1.5 / sp, 0.22, 0.6);
+    if (c === p) stepAt(c, 0.35);
+    else if (c.role === 'seeker' && p.role === 'hider' && G.phase === 'seek') continue;   // closeCalls plays these (louder, with the heartbeat)
+    else if (c.role !== 'hider' || sp > 2.5 || G.phase === 'lobby') stepAt(c, clamp(1.1 - d / STEP_HEAR, 0.1, 1) * (c.role === 'hider' ? 0.9 : 0.7));
+  }
+  // you're hiding and you move while a seeker is very close: you might giggle (seekers hear it)
+  if (p.role === 'hider' && !p.caught && G.phase === 'seek' && p.moving && (G.nearSeek || 99) < 4 && Math.random() < dt * 0.6) {
+    if (NETC()) { netSend(['gig']); speak(p, 'giggle', 0.6); } else giggleAt(p, 0);
+  }
+}
 function closeCalls(dt) {
   const p = G.player; G.nearSeek = 99;
   if (G.phase !== 'seek' || !p || p.role !== 'hider' || p.caught) return;
@@ -3384,7 +3818,7 @@ function closeCalls(dt) {
     if (s.role !== 'seeker' || s === G.player) continue;   // computer seekers, and friends who seek
     const d = Math.hypot(s.x - p.x, s.z - p.z); G.nearSeek = Math.min(G.nearSeek, d);
     s.stepT = (s.stepT || 0) - dt;
-    if (s.moving && s.onGround && d < STEP_HEAR && s.stepT <= 0) { s.stepT = 0.3; sfx.step(clamp(1.15 - d / STEP_HEAR, 0.15, 1)); }
+    if (s.moving && s.onGround && d < STEP_HEAR && s.stepT <= 0) { s.stepT = 0.3; sfx.step(clamp(1.15 - d / STEP_HEAR, 0.15, 1), s); }
   }
   G.beatT = (G.beatT || 0) - dt;
   if (G.nearSeek < HEART_NEAR && G.beatT <= 0) {
@@ -3425,7 +3859,7 @@ function askRestart() {
 }
 function toMenu(msg) {
   if (NET.on) netLeave();
-  clearRound(); G.phase = 'menu'; G.paused = false; G.vote = null; G.match = null; G.shopOpen = false; G.myKey = 'you'; G.menuOpen = false;
+  G.juke = null; clearRound(); G.phase = 'menu'; G.paused = false; G.vote = null; G.match = null; G.shopOpen = false; G.myKey = 'you'; G.menuOpen = false;
   hideRoundUi();
   if (document.exitPointerLock && locked) document.exitPointerLock();
   showScreen('menu'); refreshMenu();
@@ -3577,7 +4011,8 @@ function update(dt) {
   if (clouds) for (const c of clouds.children) { c.position.x += dt * 0.6; if (c.position.x > 90) c.position.x = -90; }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) $('toast').classList.remove('on'); }
   if (!G.paused) { updateSparkles(dt); goldTwinkle(dt); cosTick(dt); }
-  if (NET.on) netSkinTick(dt);   // your skin to your friends   // gold twinkles, tag celebrations, emotes (section 11b)
+  if (NET.on) netSkinTick(dt);   // your skin to your friends
+  audTick(); shopPreviewTick(); if (!G.paused) footsteps(dt);   // music, stings and footsteps (section 6b)   // gold twinkles, tag celebrations, emotes (section 11b)
   if (NET.on) netTick(dt);   // playing with friends: send and check the links (updates, timeouts, who is still here)
   if (G.phase === 'menu' || G.phase === 'final' || G.phase === 'wait') { menuCam(dt); return; }
   if (G.phase === 'lobby') { lobbyTick(dt); return; }
@@ -3737,7 +4172,7 @@ addEventListener('resize', resize);
      for 10 s, the match ends.
    Transports (the same small "room" interface as Bonk Royale): PeerJS WebRTC links (the website; the relay
    PS_RELAY carries the game when two devices can't link directly), and ?mplocal (tabs on one computer, for tests). */
-const PS_VERSION = '0.3.2';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
+const PS_VERSION = '0.3.3';   // docs/RELEASING.md: Stable 0.1, Beta 0.2, Alpha 0.3 at the start; a bug fix adds 0.0.1
 // Relay (TURN) for when two devices can't link directly (cellular data, strict school or office Wi-Fi). For now this is the
 // family's Metered.ca relay from Bonk Royale (free plan, no card on file: the worst case of misuse is running out of the
 // free monthly allowance, never a bill). It is public inside the page. To give Paint & Seek its own, change it here.
@@ -4134,6 +4569,7 @@ function netOnIn(m) {
     case 'pt': if (c) clearSplats(c); break;   // they painted over their splats
     case 'hid': if (G.phase === 'count' && c && c.role === 'hider') { G.hidKeys.add(key); hiddenCheck(); } break;   // ✅ I'm hidden!
     case 'skin': if (c && e[1] && typeof e[1] === 'object') { applyLook(c, e[1], true); netEv(['skin', key, e[1]]); } break;   // a friend's skin: show it and pass it on
+    case 'gig': if (c && c.role === 'hider' && G.phase === 'seek') giggleAt(c, 0); break;   // a friend hiding giggled
     case 'emo': if (c && EMOTES[e[1]]) { playEmote(c, e[1], true); netEv(['emo', key, e[1]]); } break;   // a friend's lobby emote: play it and pass it on
     case 'rdy': if (G.phase === 'lobby') { G.readyKeys.add(key); if (netHumansReady()) G.lobbyT = Math.min(G.lobbyT, 3.5); } break;
     case 'vote': if (G.phase === 'vote' && G.vote && !G.vote.win && G.vote.ids.includes(e[1])) { G.vote.picks.set(key, e[1]); sfx.vote(); drawVote(); } break;
@@ -4333,7 +4769,7 @@ function netOnEv(m) {
       G.found = D.f; G.total = D.n; endLocal(D.left); break;
     }
     case 't': if (e[1] === '*' || e[1] === ME()) toast(e[2], e[3] || 2); break;
-    case 'g': if (G.player && G.player.role === 'seeker') { const v = volAt({ x: e[1], z: e[2] }); if (v > (e[3] || 0)) sfx.giggle(v); } break;
+    case 'g': if (G.player && G.player.role === 'seeker') { const v = volAt({ x: e[1], z: e[2] }); if (v > (e[3] || 0)) sfx.giggle(v, { x: e[1], y: 0, z: e[2] }, e[4] ? charOf(e[4]) : null); } break;
   }
 }
 function netApplyScene(S) {
@@ -4454,7 +4890,7 @@ for (const b of $('optRestart').children) b.addEventListener('click', () => {
 /* menu wiring */
 const LEVEL_SEGS = [['optHideTime', 'hideTime'], ['optSeekTime', 'seekTime'], ['optHiddenTime', 'hiddenTime'], ['optHotcold', 'hotcold'], ['optSecond', 'second'], ['optAmmo', 'ammo']];
 function refreshMenu() {
-  for (const [id, key] of [['optBots', 'bots'], ['optFound', 'found'], ['optRounds', 'rounds'], ['optSound', 'sound'], ['optGfx', 'gfx'], ['optTex', 'tex'], ['optTexStyle', 'texStyle'], ['optTouch', 'touch'], ...LEVEL_SEGS])
+  for (const [id, key] of [['optBots', 'bots'], ['optFound', 'found'], ['optRounds', 'rounds'], ['optSound', 'sound'], ['optGfx', 'gfx'], ['optTex', 'tex'], ['optTexStyle', 'texStyle'], ['optMusic', 'musicStyle'], ['optVibe', 'vibe'], ['optTouch', 'touch'], ...LEVEL_SEGS])
     for (const b of $(id).children) b.classList.toggle('on', String(SET[key]) === b.dataset.v);
   for (const [id, key, lab] of [['optHideIQ', 'hideIQ', 'hideIQv'], ['optSeekIQ', 'seekIQ', 'seekIQv']]) { $(id).value = SET[key]; $(lab).textContent = SET[key] + ' · ' + IQ_WORD(SET[key]); }
   // Difficulty: the master slider, what its stop sets, and the Custom panel
@@ -4466,6 +4902,7 @@ function refreshMenu() {
     ' · 2nd seeker ' + { start: 'right away', late: 'after ' + SECOND_LATE + ' s', never: 'never' }[SET.second] + ' · ' + SET.ammo + ' paint balls. Slide to ⚙️ Custom to change them one by one.';
   $('menuCoins').textContent = '🪙 ' + SHOP.coins + ' coins';
   syncTouchDesc(); refreshTexNote();
+  for (const k of ['volMusic', 'volSfx', 'volVoice']) $(k).value = SET[k];
   const bits2 = [];
   if (BEST.matchWins) bits2.push('🏆 Matches won: ' + BEST.matchWins);
   if (BEST.seek[SET.diff]) bits2.push('Best seek time (' + levelName(SET.diff) + '): ' + fmt(BEST.seek[SET.diff]));
@@ -4473,11 +4910,12 @@ function refreshMenu() {
   $('bestLine').textContent = bits2.join('  ·  ');
   $('verLine').textContent = 'Version ' + PS_VERSION + (TRACK_NAME[PS_TRACK] ? '  ·  ' + TRACK_NAME[PS_TRACK] : '');
 }
-for (const [id, key, num] of [['optBots', 'bots', true], ['optFound', 'found', false], ['optRounds', 'rounds', true], ['optSound', 'sound', true], ['optGfx', 'gfx', false], ['optTex', 'tex', false], ['optTexStyle', 'texStyle', false], ['optTouch', 'touch', false]])
+for (const [id, key, num] of [['optBots', 'bots', true], ['optFound', 'found', false], ['optRounds', 'rounds', true], ['optSound', 'sound', true], ['optGfx', 'gfx', false], ['optTex', 'tex', false], ['optTexStyle', 'texStyle', false], ['optMusic', 'musicStyle', false], ['optVibe', 'vibe', false], ['optTouch', 'touch', false]])
   for (const b of $(id).children) b.addEventListener('click', () => {
     SET[key] = num ? +b.dataset.v : b.dataset.v;
     save('ps-set', SET); refreshMenu();
-    if (key === 'sound' && SET.sound) { ac(); sfx.pop(); }
+    if (key === 'sound') { audVolumes(); if (SET.sound) { ac(); sfx.pop(); } }
+    if (key === 'musicStyle' || key === 'vibe') { MUS.style = null; MUS.pickFor = null; }
     if (key === 'gfx') { GFX_DROP = 0; save('ps-gfx', { drop: 0 }); applyGfx(); }   // any Graphics choice starts Auto over
     if (key === 'tex') { TEX_DROP = 0; save('ps-texdrop', { drop: 0 }); }   // the same for Textures
     if (key === 'tex' || key === 'texStyle') { applyTex(); refreshMenu(); }
@@ -4489,11 +4927,16 @@ for (const [id, key] of [['optHideIQ', 'hideIQ'], ['optSeekIQ', 'seekIQ']])
   $(id).addEventListener('input', e => { setOption(key, +e.target.value); save('ps-set', SET); refreshMenu(); });
 for (const [id, key] of LEVEL_SEGS)
   for (const b of $(id).children) b.addEventListener('click', () => { setOption(key, key === 'second' ? b.dataset.v : +b.dataset.v); save('ps-set', SET); refreshMenu(); });
+for (const k of ['volMusic', 'volSfx', 'volVoice']) $(k).addEventListener('input', e => { SET[k] = +e.target.value; save('ps-set', SET); audVolumes(); });
+$('volVoice').addEventListener('change', () => { ac(); if (G.player) speak(G.player, 'hi'); });
+$('volSfx').addEventListener('change', () => { ac(); sfx.pop(); });
 $('benchBtn').onclick = () => { ac(); runBench(); refreshMenu(); };
 $('goPlay').onclick = () => { $('menuMsg').textContent = ''; startMatch(); };
 $('goTogether').onclick = () => { ac(); netOpenScreen(); };
 $('goShop').onclick = () => openShop('menu');
 $('goHelp').onclick = () => showScreen('help');
+$('goCredits').onclick = () => { $('creditSongs').innerHTML = Object.values(SONG_TITLE).map(t => '<li>"' + t + '"</li>').join(''); showScreen('credits'); };
+$('creditsBack').onclick = () => showScreen('menu');
 $('helpBack').onclick = () => showScreen('menu');
 $('lobGo').onclick = () => closeLobbyCard();
 $('lobShop').onclick = () => openShop('lobby');
